@@ -51,6 +51,7 @@ from .llm import PROVIDER, call_model, provider_available, clear_cache
 from .sources import MockSource, GoogleSource, DEMO_BANNER
 from .policy import AutopilotPolicy
 from .autopilot import send_reply, run_cycle, triage_and_split, dedup_by_id
+from .sentiment import classify as classify_sentiment
 from . import ui
 from .ui import esc, inject_css, header, sidebar_intro, demo_banner, title, label, text_block, result_header, summary, row_head, notice, checklist, empty_state, status_bar, lane_header, countdown, footer
 
@@ -129,6 +130,13 @@ def analyze_one(review, profile, language, tone, owner_language):
     except Exception as err:  # noqa: BLE001
         return None, None, str(err)
     result = safe_parse(raw)
+    if classify_sentiment is not None:
+        try:
+            sentiment_signal = classify_sentiment(review.get("text", ""))
+            if sentiment_signal:
+                result["_sentiment_signal"] = sentiment_signal
+        except Exception as err:  # noqa: BLE001 - preserve primary triage result
+            result["_sentiment_error"] = str(err)
     # Carry through source fields for display / comparison.
     result["_stars"] = review.get("stars", 0)
     result["_text"] = review.get("text", "")
@@ -354,6 +362,17 @@ with tab_single:
         empty_state("single")
 
     if result:
+        if result.get("_sentiment_error"):
+            st.warning(
+                "Optional Qwen sentiment signal unavailable: "
+                + str(result["_sentiment_error"])
+            )
+        elif result.get("_sentiment_signal"):
+            st.info(
+                "Advisory Qwen sentiment: "
+                + str(result["_sentiment_signal"]["sentiment"]).title()
+                + ". ReviewDesk's triage decision remains authoritative."
+            )
         action = result.get("action", "reply")
         draft = st.session_state.single_draft
         draft_translation = result.get("draft_translation")

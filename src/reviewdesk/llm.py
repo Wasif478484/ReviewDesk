@@ -19,6 +19,7 @@ import hashlib
 import json
 import os
 import time
+import streamlit as st
 
 try:
     from dotenv import load_dotenv
@@ -31,16 +32,26 @@ from pathlib import Path
 # Configuration
 # ---------------------------------------------------------------------------
 
-PROVIDER = os.getenv("REVIEWDESK_PROVIDER", "anthropic").lower()
-ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-3-haiku-20240307")
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+def _setting(name, default=""):
+    value = os.getenv(name)
+    if value:
+        return value
+    try:
+        return st.secrets.get(name, default)
+    except (FileNotFoundError, KeyError, AttributeError):
+        return default
+
+
+PROVIDER = _setting("REVIEWDESK_PROVIDER", "anthropic").lower()
+ANTHROPIC_MODEL = _setting("ANTHROPIC_MODEL", "claude-3-haiku-20240307")
+OPENAI_MODEL = _setting("OPENAI_MODEL", "gpt-4o-mini")
 
 MAX_BATCH = 30  # cap on reviews per batch to control API cost
 
 
 def _env_int(name, default, minimum):
     try:
-        return max(minimum, int(os.getenv(name, str(default))))
+        return max(minimum, int(_setting(name, str(default))))
     except (TypeError, ValueError):
         return default
 
@@ -113,9 +124,9 @@ def provider_available():
     if PROVIDER == "mock":
         return True, "mock"
     if PROVIDER == "anthropic":
-        return bool(os.getenv("ANTHROPIC_API_KEY")), "anthropic"
+        return bool(_setting("ANTHROPIC_API_KEY")), "anthropic"
     if PROVIDER == "openai":
-        return bool(os.getenv("OPENAI_API_KEY")), "openai"
+        return bool(_setting("OPENAI_API_KEY")), "openai"
     return False, PROVIDER
 
 
@@ -159,7 +170,7 @@ def _call_once(system, user):
             raise RuntimeError(
                 "anthropic package is not installed. Run: pip install anthropic"
             ) from err
-        api_key = os.getenv("ANTHROPIC_API_KEY")
+        api_key = _setting("ANTHROPIC_API_KEY")
         if not api_key:
             raise RuntimeError(
                 "ANTHROPIC_API_KEY is not set. Add it to your environment or .env file, "
@@ -181,7 +192,7 @@ def _call_once(system, user):
             raise RuntimeError(
                 "openai package is not installed. Run: pip install openai"
             ) from err
-        api_key = os.getenv("OPENAI_API_KEY")
+        api_key = _setting("OPENAI_API_KEY")
         if not api_key:
             raise RuntimeError(
                 "OPENAI_API_KEY is not set. Add it to your environment or .env file, "

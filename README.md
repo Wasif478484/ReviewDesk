@@ -62,6 +62,27 @@ python -m streamlit run app.py
 
 Open <http://localhost:8501>.
 
+## Deploy to Streamlit Community Cloud
+
+The repository is ready to deploy as a Streamlit Community Cloud app:
+
+1. Sign in at <https://share.streamlit.io/> with GitHub.
+2. Select `Wasif478484/ReviewDesk`, branch `master`, and entrypoint `app.py`.
+3. In **Advanced settings**, add these secrets:
+
+   ```toml
+   REVIEWDESK_PROVIDER = "openai"
+   OPENAI_API_KEY = "replace-with-your-openai-key"
+   OPENAI_MODEL = "gpt-4o-mini"
+   ```
+
+4. Deploy the app and open the generated public URL.
+
+Secrets are read from Streamlit's encrypted secrets store or environment
+variables. Never put the API key in Git, `.env` files committed to the
+repository, screenshots, or logs. Live calls use OpenAI and may incur costs;
+the app remains owner-in-the-loop and never posts replies automatically.
+
 ## Using a live model provider
 
 Copy [`.env.example`](./.env.example) to `.env`, then configure one provider.
@@ -81,6 +102,24 @@ Supported providers:
 
 Set the provider with `REVIEWDESK_PROVIDER`. Live model calls cost money and
 review text is sent to the selected provider. Use mock mode for demos and tests.
+
+### Optional Qwen sentiment signal
+
+The cloned Hugging Face Space can be used as an advisory sentiment signal; it
+does not replace ReviewDesk triage or safety policy. Enable it only when the
+Space is running and reachable:
+
+```toml
+REVIEWDESK_SENTIMENT_PROVIDER = "qwen"
+REVIEWDESK_SENTIMENT_SPACE = "Hariharasudhan07/qwen3-0.6b-sentiment-classification"
+HF_TOKEN = "only-if-the-model-repository-is-private"
+```
+
+The integration uses `gradio_client` and calls the Space's
+`/classify_review` endpoint. If it is unavailable, the primary ReviewDesk
+analysis remains visible and the app shows an explicit warning. The Qwen
+signal is advisory; ReviewDesk's action decision and owner approval remain
+authoritative.
 
 ## How the workflow works
 
