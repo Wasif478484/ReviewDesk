@@ -1,0 +1,17 @@
+# Personal learning context - kept out of commits by default.
+# This does NOT keep it out of your AI provider's conversation.
+/devpost/learner-profile.md
+
+# Local credentials. Allow a secret-free template.
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# ReviewDesk sample-result cache
+.sample_cache/
