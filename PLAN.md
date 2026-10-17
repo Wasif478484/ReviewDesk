@@ -1,45 +1,57 @@
 # ReviewDesk — PLAN.md
 
-Goal: Replace the generic Streamlit styling with a distinctive, production-grade review-desk interface while keeping all existing functionality and the demo path intact.
+Goal: Add a simulated review source and an opt-in demo workflow that records only reviews passing the frozen safety rules in `policy.py`; the owner copies any public reply by hand.
 
-Step being planned: interface redesign (part of 5-build implementation). No AGENTS.md existed; contract created above.
+Step being planned: 4 of 5 (sources.py + autopilot.py + Autopilot tab).
 
-Files:
+Files
+- `src/reviewdesk/sources.py` — `ReviewSource` ABC, `MockSource`, and the Google stub.
+- `src/reviewdesk/autopilot.py` — Plain Python workflow orchestration and tests.
+- `src/reviewdesk/app.py` — Streamlit UI implementation; root `app.py` is the stable launcher.
+- `src/reviewdesk/policy.py` — frozen. `decide()` and `should_send()` only.
+- `src/reviewdesk/prompts.py` — frozen.
+- `scripts/cache_samples.py` — maintainer utility. Writes `sample_results.json`.
 
-- `app.py` — Restyle with custom CSS (distinctive typography via Google Fonts, dark-slate + sharp-accent color system, motion/micro-interactions, intentional card layout), redesigned single-review result card, redesigned batch results table with urgency sorting and per-row design. No logic changes; only styling and layout.
-- `PLAN.md` — this file.
-- `prompts.py` — FROZEN (no changes).
+Tasks
 
-Tasks (each ends runnable, ~45 min or less):
+1. `src/reviewdesk/sources.py`: `ReviewSource` ABC (`fetch_reviews` / `post_reply` / `delete_reply`), `MockSource`, and `GoogleSource` stub.
+2. `src/reviewdesk/autopilot.py`: `send_reply()` — for the autopilot path it calls `should_send` itself and refuses if False; checks authoritative reply state immediately before the source call; records approver (autopilot/owner); failed source operations become approval-queue items. Plus cycle logic, dedup, cap counting, and tests with a fake source.
+3. `scripts/cache_samples.py`: triages `samples.csv` rows (mock or live), writes `sample_results.json`, prints expected vs actual action per row.
+4. Autopilot tab in `app.py`: settings (autopilot off, dry_run on, min_stars 4, trusted languages English-only, veto 0–60 min default 30, daily cap 10) + source selector (Google disabled). Empty state until Fetch.
+5. Fetch (5-at-a-time + Fetch all) → triage via cached results → `policy.decide()` → Automatic draft lane / Approval queue / Skipped. Dedup by id. Cancelled/vetoed/undone remembered as handled. Run cycle records only past-due demo rows via `send_reply()`. Veto countdown recalculated on rerun. Cancel / Pause / owner Approve-and-record (not blocked by dry run). Audit log + CSV.
+6. Verify: `python -m reviewdesk.policy` (19/19), `python -m reviewdesk.autopilot` (all pass), compile, app starts, flows work in mock mode.
 
-1. Audit current CSS; strip generic Streamlit defaults; implement design-system CSS (typography, color variables, layout, motion) and verify app still starts.
-2. Redesign single-review result card: badge prominence, action color blocking, draft editor emphasis, translation/checklist grouping.
-3. Redesign batch results table: urgency-sorted rows with per-row action color, expanded draft view, override dropdown styling, summary-line emphasis.
-4. Verify: compile, app starts, Roman Urdu complaint + tone switch, CSV export, copy-by-hand all work.
-5. Commit (user to push).
+Acceptance criteria
+1. [auto] `python -m reviewdesk.policy` prints 19/19 passed.
+2. [auto] `python -m reviewdesk.autopilot` prints all tests passed (dry run never posts, duplicate id refused, not-yet-due not posted, cancelled not posted, failed post → approval queue).
+3. [auto] `python -m compileall -q app.py src/reviewdesk` passes.
+4. [auto] `send_reply()` refuses a review id that was already posted; a failed post lands in the approval queue.
+5. [auto] Hold / report / check-facts never enter Auto-post.
+6. [auto] Daily cap counts actual autopilot posts only; after a post the source marks the review replied.
+7. [auto] Cancelled / vetoed / undone ids are remembered as handled and never re-queued.
+8. [auto] Demo-mode audit log reads "recorded in demo; not sent to Google", never "Posted".
+9. [human] Three lists render distinctly; veto countdown visible on Auto-post rows.
+10. [human] Audit log shows timezone-aware timestamp, review ID, action, status, reasons, actor, and error.
 
-Acceptance criteria:
+Reliability additions:
+- Daily autopilot counts reset at the local calendar date boundary.
+- Failed automatic records include their error, move to the approval queue, and offer an explicit retry.
+- Model output is type-checked and length-bounded before rendering.
+- The owner can clear the local model cache from the sidebar.
+- CI runs policy, workflow, unit, compilation, and whitespace checks.
 
-1. [auto] `python -m py_compile app.py` passes with no errors.
-2. [auto] `streamlit run app.py` starts and serves on localhost without traceback.
-3. [human] Interface does not look like default Streamlit (custom fonts, dark slate, sharp accents).
-4. [human] Badge colors match ACTION_STYLE dict keyed by prompts.ACTIONS.
-5. [human] Paste Roman Urdu complaint, switch tone, see draft change; translations visible beside draft.
-6. [human] CSV export downloads and opens with Urdu/Arabic intact.
-7. [human] Phone-width (390px) layout is usable; no horizontal scroll.
+Traps
+- `send_reply()` in `autopilot.py` is the only caller of `source.post_reply` — never call it elsewhere.
+- Autopilot path goes through `send_reply()` which calls `should_send` itself; owner Approve-and-record is the only other path and is not blocked by dry run.
+- Autopilot off by default, dry_run on by default; hold/report/check-facts never enter the automatic lane.
+- No background worker; "automatic" means Run cycle button + optional auto-refresh while page is open.
+- All autopilot state in `st.session_state`; a refresh resets it.
+- Never claim something was posted in dry run or demo mode.
+- `prompts.py` and `policy.py` rules are frozen — raise as Question, never as a task.
 
-Traps:
+Questions (with defaults)
+1. Auto-refresh while page open, or manual Run cycle only? Default: manual only.
+2. Veto window default: brief says 30 (set to 1 by hand for demo). Default: 30.
+3. Commit at end of step? Default: yes.
 
-- Do not touch prompts.py (frozen). Any needed prompt rule/schema change → raise as Question, not a task.
-- Do not add logins, database, payments, scraping, Google API, auto-posting, or app-interface translation.
-- Protect demo path: urgency sort, Roman Urdu + tone switch, CSV export, copy-by-hand must all keep working.
-- html.escape all untrusted content (review text, draft, translations, reason, flags, checklist, report note) before unsafe_allow_html.
-- Do not claim anything was posted/sent/reported.
-
-Questions (max 3, with defaults so user can say "yes"):
-
-1. Aesthetic direction: I propose "industrial review desk" — dark slate background, paper-white cards, sharp action-color accents, monospace + display font pairing. Default: yes.
-2. Which Google Fonts to pair? Default: "IBM Plex Mono" (monospace, data/terminal feel) + "Plus Jakarta Sans" (display/headings). Default: yes.
-3. Keep the two-tab structure (Single review / Batch) or merge into one page? Default: keep two tabs. Default: yes.
-
-Stop point: App runs with the new interface; user can paste a Roman Urdu complaint, switch tone, see the draft change with translation visible, export CSV, and copy the draft by hand. Nothing is committed until the user asks.
+Stop point: Autopilot tab works end to end in demo mode — Fetch populates the three lists, Run cycle records only past-due rows via `send_reply()`, dry run logs "would record", owner can Approve-and-record regardless of dry run, cancelled/vetoed/undone are remembered, audit log exports as CSV. Nothing is committed until you ask.

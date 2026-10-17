@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReviewDesk. Know when not to reply.</title>
+<meta name="description" content="ReviewDesk triages your customer reviews before you write. Reply, check facts first, hold, or report. Then copy the draft by hand.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Naskh+Arabic:wght@400;600&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='2' width='13' height='13' rx='3' fill='%231F4DD8'/><rect x='17' y='2' width='13' height='13' rx='3' fill='%23111318'/><rect x='2' y='17' width='13' height='13' rx='3' fill='%23111318'/><rect x='17' y='17' width='13' height='13' rx='3' fill='%231F4DD8'/></svg>">
+<link rel="stylesheet" href="styles.css">
+<noscript>
+<style>
+.hero-preview { animation: none; opacity: 1; transform: none; }
+</style>
+</noscript>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">ReviewDesk</a>
+    <button class="nav-menu-btn" id="menuBtn" aria-expanded="false" aria-label="Toggle menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="#how">How it works</a>
+      <a href="#decisions">Decisions</a>
+      <a href="#demo">Demo</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://github.com/Wasif478484/ReviewDesk" target="_blank" rel="noopener">GitHub</a>
+      <a href="#demo" class="nav-cta">Try it</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-label">Review triage for local businesses</div>
+      <h1 class="hero-headline">Not every review needs a reply.</h1>
+      <p class="hero-sub">ReviewDesk decides which reviews to answer, which to check first, and which to hold or report. Before it writes a single word, you stay in control. Nothing gets posted without you.</p>
+      <div class="hero-actions">
+        <a href="#demo" class="btn-primary">Try the demo</a>
+        <a href="https://github.com/Wasif478484/ReviewDesk" target="_blank" rel="noopener" class="btn-ghost">View on GitHub</a>
+      </div>
+      <p class="hero-reassurance">Runs in your browser. Nothing is sent to Google.</p>
+    </div>
+    <div class="hero-preview">
+      <div class="preview-bar">
+        <span class="preview-dot r"></span>
+        <span class="preview-dot y"></span>
+        <span class="preview-dot g"></span>
+        <span class="preview-title">ReviewDesk: result card</span>
+      </div>
+      <div class="preview-card">
+        <span class="preview-badge hold">Hold</span>
+        <div class="preview-stars">&#9733;&#9734;&#9734;&#9734;&#9734;</div>
+        <div class="preview-review" dir="auto" style="unicode-bidi:plaintext;">Khana khane ke baad meri tabiyat kharab hui, doctor ko dikhana para. Legal action loon ga.</div>
+        <div class="preview-reason">Health claim + legal threat. Do not reply publicly yet.</div>
+        <div class="preview-draft" dir="auto" style="unicode-bidi:plaintext;">(No draft: this review is on hold.)</div>
+        <div class="preview-trans">Review translation: "I fell ill after eating here and had to see a doctor. I will take legal action."</div>
+        <div class="preview-actions">
+          <span class="preview-btn ghost">Find the order</span>
+          <span class="preview-btn ghost">Contact privately</span>
+          <span class="preview-btn ghost">Get advice first</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Trust strip -->
+<div class="trust-strip">
+  <div class="trust-grid">
+    <div class="trust-item">
+      <div class="trust-fact">Four decisions, not one</div>
+      <div class="trust-sub">Reply, check facts, hold, or report</div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-fact">Autopilot is opt-in</div>
+      <div class="trust-sub">Off by default, dry-run first</div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-fact">You post by hand</div>
+      <div class="trust-sub">Nothing leaves without you</div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-fact">Reviews in any language, with a translation you can check</div>
+      <div class="trust-sub">Urdu, Roman Urdu, Arabic, French, more</div>
+    </div>
+  </div>
+</div>
+
+<!-- Problem -->
+<section class="section" id="problem">
+  <div class="problem-grid">
+    <div>
+      <div class="section-label">The problem</div>
+      <h2 class="section-title">Unanswered reviews cost you customers.</h2>
+      <p class="section-sub">Replying to everything with the same cheerful paragraph can make a bad situation worse. The value is in deciding whether a public reply should exist at all.</p>
+    </div>
+    <div class="problem-list">
+      <div class="problem-item">
+        <span class="problem-num">01</span>
+        <p class="problem-text">A health claim or legal threat answered with "We're sorry for any inconvenience" makes it worse.</p>
+      </div>
+      <div class="problem-item">
+        <span class="problem-num">02</span>
+        <p class="problem-text">A review naming a staff member needs facts verified before anything is posted.</p>
+      </div>
+      <div class="problem-item">
+        <span class="problem-num">03</span>
+        <p class="problem-text">A spam review is not a customer complaint. Reporting it is the right call, not replying.</p>
+      </div>
+      <div class="problem-item">
+        <span class="problem-num">04</span>
+        <p class="problem-text">The owner may not read the language the review is written in. They need a translation before posting.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section class="section" id="how" style="background: var(--surface); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);">
+  <div class="container">
+    <div class="section-label">How it works</div>
+    <h2 class="section-title">Three steps. You stay in control.</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-title">Paste a review</div>
+        <p class="step-text">Star rating, review text, your business profile. One review or a batch of thirty.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-title">Get the decision</div>
+        <p class="step-text">Reply, check facts first, hold, or report. With a reason and, when safe, an editable draft.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-title">Copy by hand</div>
+        <p class="step-text">Edit, translate, verify. Then paste into your platform yourself.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Decisions -->
+<section class="section" id="decisions">
+  <div class="container">
+    <div class="section-label">The four decisions</div>
+    <h2 class="section-title">Reply. Check facts. Hold. Report.</h2>
+    <p class="section-sub">Every review gets exactly one. A genuine complaint is never labeled as a report, even when it's harsh or unfair.</p>
+    <div class="decisions">
+      <div class="decision-row">
+        <div class="decision-bar" style="background: var(--reply);"></div>
+        <div>
+          <div class="decision-name">Reply</div>
+          <div class="decision-desc">Praise, mild feedback, ordinary complaints about service, food, price, wait, cleanliness.</div>
+        </div>
+        <div class="decision-meta">Safe to reply</div>
+      </div>
+      <div class="decision-row">
+        <div class="decision-bar" style="background: var(--check);"></div>
+        <div>
+          <div class="decision-name">Check facts</div>
+          <div class="decision-desc">Named staff, specific incident, unverifiable claim. Draft includes [OWNER: ...] placeholders.</div>
+        </div>
+        <div class="decision-meta">Reply after verifying</div>
+      </div>
+      <div class="decision-row">
+        <div class="decision-bar" style="background: var(--hold);"></div>
+        <div>
+          <div class="decision-name">Hold</div>
+          <div class="decision-desc">Health claims, legal threats, harassment, safety incidents. No draft. Checklist only.</div>
+        </div>
+        <div class="decision-meta">Do not reply yet</div>
+      </div>
+      <div class="decision-row">
+        <div class="decision-bar" style="background: var(--report);"></div>
+        <div>
+          <div class="decision-name">Report</div>
+          <div class="decision-desc">Spam, ads, off-topic, abusive language, text not about this business.</div>
+        </div>
+        <div class="decision-meta">Report to platform</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Demo -->
+<section class="section" id="demo" style="background: var(--surface); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);">
+  <div class="container" style="margin-bottom: var(--space-4);">
+    <div class="section-label">Live demo</div>
+    <h2 class="section-title">Try it yourself.</h2>
+    <p class="section-sub">Paste a review or load the samples. Every result is triaged before any draft is written.</p>
+  </div>
+  <div class="demo-grid">
+    <div class="demo-panel">
+      <div class="demo-label">Input</div>
+      <div class="demo-input-row">
+        <span class="demo-stars">&#9733;&#9733;&#9733;&#9733;&#9734;</span>
+        <span style="font-size:0.75rem; color:var(--muted);">4 stars</span>
+      </div>
+      <textarea class="demo-textarea" readonly>Khana accha tha lekin service bahut slow thi.</textarea>
+      <div class="rd-label" style="margin-bottom:.3rem;">Reply language</div>
+      <div class="demo-sample-row">
+        <span class="demo-chip active">Roman Urdu</span>
+        <span class="demo-chip">Urdu</span>
+        <span class="demo-chip">English</span>
+        <span class="demo-chip">Spanish</span>
+      </div>
+      <div style="display:flex; gap:var(--space-1); margin-top:var(--space-2);">
+        <button class="demo-btn primary">Analyze</button>
+        <button class="demo-btn">Load samples</button>
+      </div>
+    </div>
+    <div class="demo-panel">
+      <div class="demo-label">Result</div>
+      <div class="rd-banner" style="--c: var(--reply);">
+        <span class="rd-badge" style="background:var(--reply);">Reply</span>
+        <div>
+          <div class="rd-headline">Safe to reply</div>
+        </div>
+      </div>
+      <div class="rd-reason" dir="auto">Mixed feedback: good food, slow service. Reply written in Roman Urdu.</div>
+      <div class="rd-chips">
+        <span class="rd-chip">Mixed</span>
+        <span class="rd-chip">Roman Urdu</span>
+      </div>
+      <div class="rd-text" dir="auto" style="margin-top:var(--space-2);">Assalam o Alaikum, khana accha tha lekin service slow thi. Uska hamein afsos hai. Hum apni team ke saath is par baat kar rahe hain. WhatsApp par rabta karein. Shukriya. Imran, Spice Corner</div>
+      <div class="rd-text rd-muted" dir="auto" style="margin-top:var(--space-1);">Translation: "Assalam o Alaikum. We're sorry the service was slow despite the good food. We're discussing it with our team. Contact us directly. Thank you. Imran, Spice Corner"</div>
+      <div class="rd-note rd-ok" style="margin-top:var(--space-2);">&#10003; Draft passes the checks</div>
+    </div>
+  </div>
+</section>
+
+<!-- Autopilot -->
+<section class="section" id="autopilot">
+  <div class="autopilot-grid">
+    <div>
+      <div class="section-label">Autopilot</div>
+      <h2 class="section-title">Low-risk replies can post on their own.</h2>
+      <p class="section-sub">Autopilot is optional, off by default, and starts in dry-run mode. Every automatic post must pass the safety checks in policy.py. Hold, report, and check-facts reviews never post automatically.</p>
+      <table class="spec-table">
+        <tr><td>Veto window</td><td>30 minutes by default. Each auto-post row shows a countdown. You can cancel before it goes out.</td></tr>
+        <tr><td>Trusted languages</td><td>English only by default. Add a language only after a native reader has checked its output.</td></tr>
+        <tr><td>Daily cap</td><td>Limits autopilot posts only. Counts actual posts, not dry runs.</td></tr>
+        <tr><td>Dry run</td><td>Logs what would be posted. Sends nothing.</td></tr>
+        <tr><td>Pause / Undo</td><td>Pause stops all posting. Undo calls delete on a posted reply.</td></tr>
+      </table>
+      <p style="font-size:0.8125rem; color:var(--muted); margin-top:var(--space-3);">Streamlit cannot run in the background when nobody has the page open. "Automatic" means the Run cycle button plus an optional auto-refresh while the page is open.</p>
+    </div>
+    <div class="lanes">
+      <div class="lane" style="--c: var(--reply);">
+        <div class="lane-top">
+          <span class="lane-title">Auto-post</span>
+          <span class="lane-count" style="background:var(--reply);">2</span>
+        </div>
+        <div class="lane-desc">Posts after the veto window unless you cancel</div>
+        <div class="lane-item"><span class="badge" style="background:var(--reply);">Reply</span> Great biryani and quick service. Will come again!</div>
+        <div class="lane-item"><span class="badge" style="background:var(--reply);">Reply</span> Lovely staff, clean place.</div>
+      </div>
+      <div class="lane" style="--c: var(--check);">
+        <div class="lane-top">
+          <span class="lane-title">Approval queue</span>
+          <span class="lane-count" style="background:var(--check);">1</span>
+        </div>
+        <div class="lane-desc">You edit, then approve and post</div>
+        <div class="lane-item"><span class="badge" style="background:var(--check);">Check facts</span> Waited an hour for a table. Manager just shrugged.</div>
+      </div>
+      <div class="lane" style="--c: var(--report);">
+        <div class="lane-top">
+          <span class="lane-title">Skipped</span>
+          <span class="lane-count" style="background:var(--report);">2</span>
+        </div>
+        <div class="lane-desc">Held back by the safety rules</div>
+        <div class="lane-item"><span class="badge" style="background:var(--hold);">Hold</span> My child was sick all night after dinner.</div>
+        <div class="lane-item"><span class="badge" style="background:var(--report);">Report</span> Best SEO services in Pakistan, visit www.example.com</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Safety -->
+<section class="section" id="safety" style="background: var(--surface); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);">
+  <div class="container" style="margin-bottom: var(--space-4);">
+    <div class="section-label">Safety</div>
+    <h2 class="section-title">The rules the autopilot cannot break.</h2>
+  </div>
+  <div class="safety-grid">
+    <div class="safety-item">
+      <div class="safety-title">Autopilot off by default</div>
+      <div class="safety-text">Starts in dry-run mode. Nothing leaves without you turning it on.</div>
+    </div>
+    <div class="safety-item">
+      <div class="safety-title">Hold and report never auto-post</div>
+      <div class="safety-text">Health claims, legal threats, spam. These always wait for you.</div>
+    </div>
+    <div class="safety-item">
+      <div class="safety-title">You can read everything</div>
+      <div class="safety-text">Translations shown beside every draft. You check before anything posts.</div>
+    </div>
+    <div class="safety-item">
+      <div class="safety-title">Pause and undo</div>
+      <div class="safety-text">Pause stops all posting. Undo calls delete on a posted reply.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section" id="faq">
+  <div class="container">
+    <div class="section-label">FAQ</div>
+    <h2 class="section-title">Questions.</h2>
+    <div class="faq">
+      <details>
+        <summary>Does ReviewDesk post replies for me?</summary>
+        <p>No. You copy the draft and paste it into your review platform by hand. Autopilot can post automatically, but only for low-risk reviews that pass all safety checks, and it starts off with dry run on.</p>
+      </details>
+      <details>
+        <summary>What languages does it support?</summary>
+        <p>Reviews can arrive in any language. Drafts are written in the reviewer's language, with a translation into the language you read. Urdu, Roman Urdu, Arabic, French, and Spanish have been checked by native readers. Other languages need verification before you claim support.</p>
+      </details>
+      <details>
+        <summary>Is my review data safe?</summary>
+        <p>There are no accounts and no database. Reviews live only in your browser session. Review text is sent to the model provider you choose (Anthropic or OpenAI). The README states this plainly.</p>
+      </details>
+      <details>
+        <summary>Can I use it for multiple businesses?</summary>
+        <p>Yes. Set up a profile per client in the sidebar. The app keeps no server-side state.</p>
+      </details>
+      <details>
+        <summary>What about Google's own reply tools?</summary>
+        <p>ReviewDesk's value is the triage: deciding whether to reply at all. Google's rules on automated replies have not been checked and should be reviewed before real use.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:var(--space-2); padding:0;">
+    <span>ReviewDesk. Know when not to reply.</span>
+    <span><a href="https://github.com/Wasif478484/ReviewDesk" target="_blank" rel="noopener">GitHub</a> &middot; <a href="#demo">Try it</a></span>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

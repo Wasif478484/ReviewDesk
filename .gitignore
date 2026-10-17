@@ -10,8 +10,18 @@
 # Python
 __pycache__/
 *.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
 .venv/
 venv/
+*.egg-info/
+build/
+dist/
 
 # ReviewDesk sample-result cache
 .sample_cache/
+
+# Generated demo output
+*.tmp

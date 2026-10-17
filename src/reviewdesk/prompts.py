@@ -117,7 +117,7 @@ SYSTEM_PROMPT = """You are a review desk assistant for small local businesses. A
 - reply: a public reply is safe. Use for praise, mild or mixed feedback, and ordinary complaints about service, food, price, wait time, or cleanliness.
 - reply_needs_owner: a reply is worth posting, but only after the owner checks facts you cannot know. Use when the review names a staff member, describes a specific incident (a booking, an order, a bill), or makes a claim you cannot confirm. Write the draft with [OWNER: ...] placeholders where a fact is needed.
 - hold: do not reply publicly yet. Use for health or injury claims, legal threats, harassment or discrimination allegations, and safety incidents. A public reply can make these worse. Give a checklist and no draft.
-- report: the review looks like it breaks {platform}'s content rules. Use for spam, advertisements, off-topic text, abusive or hateful language, or text that is clearly not about a customer experience at this business. Give a short note and no draft.
+- report: the review looks like it breaks Google's content rules. Use for spam, advertisements, off-topic text, abusive or hateful language, or text that is clearly not about a customer experience at this business. Give a short note and no draft.
 
 A real complaint is never a report. A negative review from a genuine customer gets reply or reply_needs_owner, even when it is harsh or unfair. When unsure whether to choose report, choose another action.
 
@@ -167,7 +167,6 @@ owner_name: {owner_name}
 sign_off: {sign_off}
 contact_line: {contact_line}
 allowed_offers: {allowed_offers}
-platform: {platform}
 </business>
 
 <settings>
@@ -186,7 +185,7 @@ text: {text}
 Return the JSON object now."""
 
 
-def build_user_message(profile, review, language="auto", tone="warm", owner_language="English", platform="Google"):
+def build_user_message(profile, review, language="auto", tone="warm", owner_language="English"):
     if tone not in TONES:
         raise ValueError(f"tone must be one of {TONES}")
     lang_key = _norm_lang(language)
@@ -200,7 +199,6 @@ def build_user_message(profile, review, language="auto", tone="warm", owner_lang
         sign_off=_clean(sign_off),
         contact_line=_clean(p["contact_line"]) or "(none provided)",
         allowed_offers=_clean(p["allowed_offers"]) or "none",
-        platform=_clean(platform)[:40],
         language="auto" if lang_key == "auto" else _clean(language)[:40],
         owner_language=_clean(owner_language)[:40],
         tone=tone,
@@ -355,19 +353,15 @@ EXAMPLES = [
 ]
 
 
-def build_system_prompt(platform="Google"):
-    # Use a targeted replace: the prompt contains literal JSON braces that
-    # would break str.format().
-    system = SYSTEM_PROMPT.replace("{platform}", _clean(platform)[:40])
+def build_system_prompt():
     blocks = []
     for ex in EXAMPLES:
         user = build_user_message(
             EXAMPLE_PROFILE, ex["review"], ex.get("language", "auto"), ex.get("tone", "warm"),
-            platform=ex.get("platform", platform),
         )
         out = json.dumps(ex["output"], ensure_ascii=False, indent=2)
         blocks.append(f"Input:\n{user}\n\nOutput:\n{out}")
-    return system + "\n\n# Examples\n\n" + "\n\n---\n\n".join(blocks)
+    return SYSTEM_PROMPT + "\n\n# Examples\n\n" + "\n\n---\n\n".join(blocks)
 
 
 # ---------------------------------------------------------------------------
@@ -441,6 +435,8 @@ def parse_triage_output(raw):
     if start == -1 or end == -1:
         raise ValueError("no JSON object found")
     data = json.loads(text[start : end + 1])
+    if not isinstance(data, dict):
+        raise ValueError("model output must be a JSON object")
     if data.get("action") not in ACTIONS:
         raise ValueError(f"bad action: {data.get('action')!r}")
     if data.get("sentiment") not in SENTIMENTS:
@@ -454,12 +450,37 @@ def parse_triage_output(raw):
     data.setdefault("review_translation", None)
     data.setdefault("draft_translation", None)
     data.setdefault("report_note", None)
+    _validate_triage_fields(data)
     if data["action"] in ("hold", "report"):
         data["draft_reply"] = None
         data["draft_translation"] = None
     if data["action"] != "report":
         data["report_note"] = None
     return data
+
+
+MAX_MODEL_FIELD_LENGTH = 4000
+
+
+def _validate_triage_fields(data):
+    """Reject malformed or oversized model output before it reaches the UI."""
+    list_fields = ("flags", "owner_checklist")
+    text_fields = (
+        "reason", "review_language", "language_used", "draft_reply",
+        "review_translation", "draft_translation", "report_note",
+    )
+    for field in list_fields:
+        value = data.get(field)
+        if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+            raise ValueError(f"{field} must be a list of strings")
+        if any(len(item) > 500 for item in value):
+            raise ValueError(f"{field} contains an oversized item")
+    for field in text_fields:
+        value = data.get(field)
+        if value is not None and not isinstance(value, str):
+            raise ValueError(f"{field} must be a string or null")
+        if isinstance(value, str) and len(value) > MAX_MODEL_FIELD_LENGTH:
+            raise ValueError(f"{field} is too long")
 
 
 def safe_parse(raw):

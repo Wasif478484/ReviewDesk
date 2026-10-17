@@ -19,6 +19,12 @@ import hashlib
 import json
 import os
 import time
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
@@ -30,13 +36,17 @@ ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-3-haiku-20240307")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
 MAX_BATCH = 30  # cap on reviews per batch to control API cost
+CACHE_TTL_SECONDS = int(os.getenv("REVIEWDESK_CACHE_TTL_SECONDS", "86400"))
+CACHE_MAX_ENTRIES = int(os.getenv("REVIEWDESK_CACHE_MAX_ENTRIES", "200"))
+CACHE_VERSION = "v2"
 
-CACHE_DIR = Path(__file__).with_name(".sample_cache")
+CACHE_DIR = Path(__file__).resolve().parents[2] / ".sample_cache"
 CACHE_DIR.mkdir(exist_ok=True)
 
 
 def _cache_key(system, user):
-    return hashlib.sha256((system + "\n---\n" + user).encode("utf-8")).hexdigest()[:16]
+    material = f"{CACHE_VERSION}|{PROVIDER}|{ANTHROPIC_MODEL}|{OPENAI_MODEL}|{system}\n---\n{user}"
+    return hashlib.sha256(material.encode("utf-8")).hexdigest()[:16]
 
 
 def _cache_path(key):
@@ -46,20 +56,39 @@ def _cache_path(key):
 def _cache_get(key):
     try:
         p = _cache_path(key)
-        if p.exists():
-            return json.loads(p.read_text(encoding="utf-8"))["text"]
-    except Exception:
+        if not p.exists() or time.time() - p.stat().st_mtime > CACHE_TTL_SECONDS:
+            return None
+        return json.loads(p.read_text(encoding="utf-8"))["text"]
+    except (OSError, KeyError, TypeError, ValueError):
         pass
     return None
 
 
 def _cache_put(key, text):
     try:
+        entries = sorted(
+            CACHE_DIR.glob("*.json"),
+            key=lambda path: path.stat().st_mtime,
+        )
+        while len(entries) >= CACHE_MAX_ENTRIES:
+            entries.pop(0).unlink(missing_ok=True)
         _cache_path(key).write_text(
             json.dumps({"text": text}, ensure_ascii=False), encoding="utf-8"
         )
-    except Exception:
+    except OSError:
         pass
+
+
+def clear_cache():
+    """Delete only ReviewDesk's local model-result cache entries."""
+    removed = 0
+    for path in CACHE_DIR.glob("*.json"):
+        try:
+            path.unlink()
+            removed += 1
+        except OSError as err:
+            print(f"Could not remove cache entry {path.name}: {err}")
+    return removed
 
 
 # ---------------------------------------------------------------------------
@@ -310,10 +339,6 @@ def _mock_response(system, user):
     text = m.group(2).strip()
     stars = m.group(1).strip()
 
-    # Platform comes from the business block, so mock output names the right one.
-    pm = re.search(r"^platform:\s*(.+)$", user, re.M)
-    platform = pm.group(1).strip() if pm else "Google"
-
     # Try to match a known review exactly
     for entry in _MOCK_OUTPUTS:
         if entry["review_text"].lower() == text.lower():
@@ -329,7 +354,7 @@ def _mock_response(system, user):
         reason = "The text tries to give the assistant instructions instead of describing a customer experience."
         report_note = ("This text is not a customer experience. It appears to be an "
                        "attempt to issue instructions rather than a review.")
-        checklist = ["Submit the report through the platform's own report option"]
+        checklist = ["Submit the report through Google's own report option"]
         draft = None
         review_tr = None
         draft_tr = None
@@ -339,12 +364,13 @@ def _mock_response(system, user):
         reason = "An advertisement, not a customer experience."
         report_note = ("This review appears to be an advertisement and does not "
                        "describe any experience with this business.")
-        checklist = [f"Submit the report through {platform}'s own report option"]
+        checklist = ["Submit the report through Google's own report option"]
         draft = None
         review_tr = None
         draft_tr = None
-    elif any(w in low for w in ["legal", "lawyer", "court", "sue", "ill", "sick", "hospital",
-                                 "food poisoning", "doctor", "injury", "health"]):
+    elif any(re.search(rf"\b{re.escape(w)}\b", low) for w in
+             ["legal", "lawyer", "court", "sue", "ill", "sick", "hospital",
+              "food poisoning", "doctor", "injury", "health"]):
         action, sentiment = "hold", "negative"
         flags = ["health", "legal"]
         reason = "The review raises a health or legal concern, so a public reply could make things worse."

@@ -9,23 +9,28 @@ It never posts or reports anything itself — the owner stays in control.
 - **Triage before writing:** decides whether a public reply is safe, whether facts need checking first, whether to hold, or whether to report.
 - **Multilingual:** reviews can arrive in any language. Drafts are written in the reviewer's language (or `auto` to match), with translations into the owner's language so the owner can verify before posting.
 - **Guardrails:** drafts mention one specific detail, make no promises beyond what the owner allowed, never name staff, and never use stock phrases. A draft checker flags unapproved offers, invented phone numbers, and stock phrases.
-- **Multi-platform:** works for reviews from Google, Yelp, Facebook, TripAdvisor, or Other. The platform is set per business (sidebar) or per review (samples/CSV) and is passed into the system prompt so triage language matches the platform.
 - **Single review & batch modes:** analyze one review at a time, or paste/upload many reviews and get an urgency-sorted table (holds first, then check-facts, then reports, then replies).
-- **Sample data:** one-click load of 15 demo reviews across Google, Yelp, Facebook, and TripAdvisor, in English, Urdu script, and Roman Urdu, including risky and spam cases.
+- **Sample data:** one-click load of 15 demo reviews in English, Urdu script, and Roman Urdu, including risky and spam cases.
 
 ## Files
 
 | File | Purpose |
 |------|---------|
-| `app.py` | Streamlit interface, session state, layout, styling |
-| `prompts.py` | System prompt, message builders, parser, draft checker, test cases |
-| `llm.py` | `call_model()` with one retry, batch cap of 30, sample-result cache |
-| `samples.csv` | The 15 demo reviews (columns: stars, language, text, platform, expected_action) |
+| `app.py` | Stable Streamlit entry point |
+| `src/reviewdesk/` | Packaged application code |
+| `src/reviewdesk/prompts.py` | System prompt, parser, draft checker, test cases |
+| `src/reviewdesk/llm.py` | Provider gateway and sample-result cache |
+| `src/reviewdesk/domain.py` | Typed review, triage, audit, and workflow records |
+| `tests/` | Regression tests for idempotency, dry-run, and failed-action handling |
+| `samples.csv` | The 15 demo reviews (columns: stars, language, text, expected_action) |
 | `requirements.txt` | Python dependencies |
 | `README.md` | This file |
 | `LEARNINGS.md` | Surprises found during the build; feeds "What we learned" below |
 | `devpost/` | Planning documents: `scope.md`, `prd.md`, `spec.md`, `checklist.md` |
 | `skills/` | Devpost Learn hackathon curriculum (not project code) |
+| `website/` | Static marketing page (`index.html`, `styles.css`, `app.js`) |
+| `docs/` | Architecture and contributor documentation |
+| `.github/workflows/` | Continuous integration checks |
 
 ## Setup
 
@@ -39,6 +44,7 @@ source .venv/bin/activate
 
 # 2. Install dependencies
 pip install -r requirements.txt
+pip install -e .
 
 # 3. Set your model API key (one of)
 # Copy .env.example to .env and fill it in, OR set the variable directly:
@@ -50,11 +56,10 @@ export ANTHROPIC_API_KEY="sk-ant-..."    # macOS/Linux
 # OpenAI (alternative):
 setx OPENAI_API_KEY "sk-..."
 
-# 3b. Optional: review platform (Google | Yelp | Facebook | TripAdvisor | Other)
-setx REVIEWDESK_PLATFORM "Google"
+# (No platform setting needed; ReviewDesk handles Google reviews)
 
 # 4. Run the app
-streamlit run app.py
+python -m streamlit run app.py
 ```
 
 ### Demo without an API key
@@ -85,11 +90,47 @@ Reviews live only in the browser session. There are no accounts and no database.
 ## Provider selection
 
 Set `REVIEWDESK_PROVIDER`:
-- `anthropic` (default): uses `ANTHROPIC_API_KEY`, model `claude-3-haiku-20240307` (override with `ANTHROPIC_MODEL`).
-- `openai`: uses `OPENAI_API_KEY`, model `gpt-4o-mini` (override with `OPENAI_MODEL`).
+- `anthropic` (default): uses `ANTHROPIC_API_KEY`, model from `ANTHROPIC_MODEL` (default `claude-3-haiku-20240307`).
+- `openai`: uses `OPENAI_API_KEY`, model from `OPENAI_MODEL` (default `gpt-4o-mini`).
 - `mock`: canned responses, no API key needed.
 
-Batch size is capped at 30 reviews (`MAX_BATCH` in `llm.py`) to control API cost. Sample results are cached so demo runs never depend on a live API call.
+Batch size is capped at 30 reviews (`MAX_BATCH` in `llm.py`) to control API cost. Sample results are cached in `sample_results.json` so the demo can run without a live API call.
+
+## Review source
+
+The demo uses a simulated review source (`sources.py` → `MockSource`) that serves reviews from `samples.csv` in small batches. Nothing is sent to Google; the owner copies public replies by hand. The real Google Business Profile API connection requires approved API access, OAuth consent from the owner, and the legacy v4 reviews endpoints for list, reply, and delete reply. `GoogleSource` is a stub that raises a clear error when invoked. Do not scrape Google Maps.
+
+The simulated source is persisted in Streamlit session state so a rerun does not lose its reply state. The workflow also performs an authoritative idempotency check immediately before recording a reply, and failed records are moved to the approval queue.
+
+## Validation
+
+```bash
+python -m reviewdesk.policy
+python -m reviewdesk.autopilot
+python -m unittest discover -s tests
+python -m compileall -q app.py src/reviewdesk
+```
+
+The local model-result cache is bounded by `REVIEWDESK_CACHE_MAX_ENTRIES` (default 200)
+and expires after `REVIEWDESK_CACHE_TTL_SECONDS` (default 86400 seconds). Review text
+may contain personal data; the sidebar includes a cache-clear control. Both settings
+are documented in [.env.example](./.env.example).
+
+The repository layout and module boundaries are documented in
+[docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md). The static landing page lives in
+[`website/`](./website/); the runnable product remains the Streamlit entry point
+[`app.py`](./app.py).
+
+## Reliability and CI
+
+Automatic workflow attempts use timezone-aware audit timestamps, stable review IDs,
+explicit statuses, and date-aware daily caps. Failed attempts are not silently
+retried: they move to the approval queue with an error and an owner-controlled retry.
+Model responses are validated for action values, field types, and maximum lengths
+before they reach the UI.
+
+GitHub Actions runs the policy and workflow checks, unit tests, Python compilation,
+and whitespace validation on pushes and pull requests.
 
 ## Privacy
 

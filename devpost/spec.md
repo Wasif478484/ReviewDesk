@@ -7,13 +7,14 @@ status: draft
 
 ## How This Works, In Plain Language
 
-Three Python files do the work.
+The packaged application under `src/reviewdesk/` separates the UI from the
+plain-Python workflow and provider boundaries.
 
-`prompts.py` is the thinking part. It holds the system prompt that tells the model how to triage a review, the templates that wrap a review together with the business details, the parser that reads the model's JSON reply, and the checker that inspects a draft for rule breaks. Nothing in it calls the network.
+`src/reviewdesk/prompts.py` is the thinking part. It holds the system prompt that tells the model how to triage a review, the templates that wrap a review together with the business details, the parser that reads the model's JSON reply, and the checker that inspects a draft for rule breaks. Nothing in it calls the network.
 
-`llm.py` is the talking part. One function, `call_model`, sends a system prompt and a user message to an AI provider and returns raw text. It retries once on failure, and it caches results on disk so the demo does not depend on the network.
+`src/reviewdesk/llm.py` is the talking part. One function, `call_model`, sends a system prompt and a user message to an AI provider and returns raw text. It retries once on failure, and it caches results on disk so the demo does not depend on the network.
 
-`app.py` is the showing part. It is a Streamlit app: a sidebar for business setup, one tab for a single review, one tab for batch.
+`src/reviewdesk/app.py` is the showing part. The root `app.py` is a stable launcher for Streamlit.
 
 So: `app.py` builds the message with `prompts.py`, hands it to `llm.py`, parses what comes back, runs the checker, and draws the card. The owner copies the text into Google, Yelp, Facebook, or TripAdvisor by hand.
 
@@ -103,10 +104,22 @@ A review dict is `{stars, text, language, platform, expected_action}`. Only `sta
 
 ```
 project/
-├── app.py                  # Streamlit interface, session state, styling
-├── prompts.py              # system prompt, builders, parser, checker, tests
-├── llm.py                  # call_model, retry, cache, providers
+├── app.py                  # stable Streamlit launcher
+├── src/reviewdesk/         # packaged application modules
+│   ├── app.py              # interface, session state, styling
+│   ├── prompts.py          # system prompt, builders, parser, checker
+│   ├── llm.py              # call_model, retry, cache, providers
+│   ├── policy.py           # frozen safety rules
+│   ├── autopilot.py        # workflow orchestration
+│   ├── sources.py          # source boundaries
+│   ├── domain.py           # typed workflow records
+│   └── ui.py               # escaped rendering helpers
 ├── samples.csv             # 15 demo reviews
+├── tests/                  # workflow and parser regression tests
+├── scripts/                # maintainer utilities
+├── docs/                   # architecture and contributor docs
+├── website/                # static marketing site
+├── pyproject.toml          # package metadata and build configuration
 ├── requirements.txt
 ├── README.md
 ├── LEARNINGS.md            # feeds README "What we learned"
