@@ -70,40 +70,54 @@ MAX_BATCH = 30
 st.markdown(
     """
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@600;800&display=swap');
+
     :root {
+        --slate-900: #0f172a;
+        --slate-800: #1e293b;
+        --slate-700: #334155;
+        --slate-500: #64748b;
+        --slate-100: #f1f5f9;
         --reply: #10b981;
         --check: #f59e0b;
         --hold: #ef4444;
         --report: #6b7280;
+        --ink: #0f172a;
+        --muted: #64748b;
+        --border: #e2e8f0;
     }
-    .block-container { padding-top: 1.2rem; }
-    .app-title { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; }
-    .app-subtitle { color: #6b7280; font-size: 0.95rem; margin-top: 0.15rem; }
-    .section-title { font-size: 1.15rem; font-weight: 700; margin: 1.1rem 0 0.5rem 0; }
+    .block-container { padding-top: 1rem; max-width: 1100px; }
+    .app-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.5rem; letter-spacing: -0.03em; color: var(--slate-900); margin: 0 0 0.25rem 0; }
+    .app-subtitle { color: var(--slate-500); font-size: 0.875rem; margin-top: 0; font-family: 'IBM Plex Mono', monospace; }
+    .section-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: 0.05em; color: var(--slate-900); margin: 1rem 0 0.5rem 0; text-transform: uppercase; }
     .badge {
-        display: inline-block; padding: 0.2rem 0.7rem; border-radius: 999px;
-        font-size: 0.8rem; font-weight: 700; color: #fff;
+        display: inline-block; padding: 0.18rem 0.7rem; border-radius: 6px;
+        font-size: 0.75rem; font-weight: 700; color: #fff; font-family: 'IBM Plex Mono', monospace;
     }
     .card {
-        border: 1px solid #e5e7eb; border-radius: 10px; padding: 1rem 1.25rem;
-        margin: 0.75rem 0; background: #fff;
+        border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem;
+        margin: 0.75rem 0; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
-    .card h3 { margin: 0 0 0.5rem 0; font-size: 1.05rem; }
-    .card p { margin: 0.25rem 0; color: #374151; }
+    .card h3 { margin: 0 0 0.5rem 0; font-size: 0.95rem; font-family: 'Plus Jakarta Sans', sans-serif; color: var(--slate-900); }
+    .card p { margin: 0.25rem 0; color: var(--slate-700); font-family: 'IBM Plex Mono', monospace; }
     .flag {
-        display: inline-block; background: #f3f4f6; color: #374151;
-        border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.12rem 0.5rem;
-        font-size: 0.78rem; margin: 0.15rem 0.35rem 0.15rem 0;
+        display: inline-block; background: #f8fafc; color: var(--slate-700);
+        border: 1px solid var(--border); border-radius: 6px; padding: 0.12rem 0.5rem;
+        font-size: 0.75rem; font-family: 'IBM Plex Mono', monospace; margin: 0.15rem 0.35rem 0.15rem 0;
     }
     .warn {
         background: #fef3c7; border: 1px solid #f59e0b; color: #92400e;
-        border-radius: 8px; padding: 0.7rem 1rem; margin: 0.6rem 0; font-size: 0.9rem;
+        border-radius: 8px; padding: 0.7rem 1rem; margin: 0.6rem 0; font-size: 0.875rem; font-family: 'IBM Plex Mono', monospace;
     }
     .warn b { color: #78350f; }
-    .muted { color: #6b7280; font-size: 0.85rem; }
-    .small { font-size: 0.85rem; }
-    .stTextArea textarea { font-size: 0.9rem; }
+    .muted { color: var(--slate-500); font-size: 0.85rem; font-family: 'IBM Plex Mono', monospace; }
+    .small { font-size: 0.85rem; font-family: 'IBM Plex Mono', monospace; }
+    .stTextArea textarea { font-family: 'IBM Plex Mono', monospace; font-size: 0.9rem; }
     div[data-testid="stHorizontalBlock"] { gap: 0.6rem; }
+    .stSelectbox > div > div { font-family: 'IBM Plex Mono', monospace; }
+    .stButton > button { font-family: 'IBM Plex Mono', monospace; font-weight: 700; border-radius: 6px; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .card { animation: fadeIn 0.35s ease-out both; }
     </style>
     """,
     unsafe_allow_html=True,
@@ -343,19 +357,32 @@ with tab_single:
         st.markdown("---")
         st.markdown('<div class="section-title">Result</div>', unsafe_allow_html=True)
 
-        # Top row: badge, sentiment, flags
-        r1c1, r1c2 = st.columns([2, 3])
-        with r1c1:
-            st.markdown(action_badge(action), unsafe_allow_html=True)
-        with r1c2:
-            st.markdown(f"**Sentiment:** {esc(result.get('sentiment','')).title()}")
+        # Result card with action-color left edge
+        style = ACTION_STYLE.get(action, {"label": action, "color": "#6b7280"})
+        st.markdown(
+            f'<div class="card" style="border-left: 4px solid {esc(style["color"])};">',
+            unsafe_allow_html=True,
+        )
+
+        # Header row: prominent badge + sentiment + flags
+        hc1, hc2 = st.columns([1, 2])
+        with hc1:
+            st.markdown(
+                f'<span class="badge" style="background:{esc(style["color"])}; font-size:0.85rem;">'
+                f'{esc(style["label"]).upper()}</span>',
+                unsafe_allow_html=True,
+            )
+        with hc2:
+            st.markdown(
+                f'**Sentiment:** {esc(result.get("sentiment","")).title()}'
+            )
             flags = result.get("flags", [])
             if flags:
                 flag_html = "".join(f'<span class="flag">{esc(f)}</span>' for f in flags)
-                st.markdown(f"**Flags:** {flag_html}", unsafe_allow_html=True)
+                st.markdown(f'**Flags:** {flag_html}', unsafe_allow_html=True)
             else:
-                st.markdown("**Flags:** —")
-        st.markdown(f"**Reason:** {esc(result.get('reason',''))}")
+                st.markdown('**Flags:** —')
+        st.markdown(f'**Reason:** {esc(result.get("reason",""))}')
 
         # Review translation
         if review_translation:
@@ -366,7 +393,8 @@ with tab_single:
 
         # Draft section (reply / reply_needs_owner only)
         if action in ("reply", "reply_needs_owner"):
-            st.markdown("**Draft reply** (edit before posting)")
+            st.markdown('<div class="card">', unsafe_allow_html=True)
+            st.markdown('**Draft reply** (edit before posting)')
             edited = st.text_area(
                 "Draft reply", value=draft, height=160, key="ss_draft_edit",
                 label_visibility="collapsed",
@@ -417,21 +445,29 @@ with tab_single:
             else:
                 st.markdown('<div class="warn">\u2705 Draft looks clean.</div>', unsafe_allow_html=True)
 
+            st.markdown('</div>', unsafe_allow_html=True)
+
         # Owner checklist
         checklist = result.get("owner_checklist", [])
         if checklist:
-            st.markdown("**Owner checklist**")
+            st.markdown('<div class="card">', unsafe_allow_html=True)
+            st.markdown('**Owner checklist**')
             for item in checklist:
                 st.markdown(f"- {esc(item)}")
+            st.markdown('</div>', unsafe_allow_html=True)
 
         # Report note
         if action == "report" and result.get("report_note"):
-            st.markdown("**Report note (for Google's report form)**")
+            st.markdown('<div class="card">', unsafe_allow_html=True)
+            st.markdown('**Report note** (paste into the platform’s own report form)')
             st.info(result["report_note"])
+            st.markdown('</div>', unsafe_allow_html=True)
 
         # Raw JSON (collapsed, for debugging)
         with st.expander("Raw model output (JSON)"):
             st.code(st.session_state.single_raw or "", language="json")
+
+        st.markdown('</div>', unsafe_allow_html=True)
 
 # ===========================================================================
 # BATCH TAB
@@ -612,7 +648,7 @@ with tab_batch:
         # Urgency sort: holds first, then check-facts, then reports, then replies.
         sorted_results = sorted(results, key=lambda r: URGENCY_ORDER.get(r.get("action", "reply"), 99))
 
-        # Summary line.
+        # Summary line (prominent).
         counts = {a: 0 for a in ACTIONS}
         for r in results:
             counts[r.get("action", "reply")] = counts.get(r.get("action", "reply"), 0) + 1
@@ -620,7 +656,14 @@ with tab_batch:
             f"{counts[a]} {ACTION_STYLE[a]['label'].lower()}"
             for a in ["hold", "reply_needs_owner", "report", "reply"] if counts[a]
         )
-        st.markdown(f"**{len(results)} reviews:** {summary}")
+        st.markdown(
+            f'<div class="card" style="background:var(--slate-100); border-left:4px solid var(--ink);">'
+            f'<span class="muted" style="font-weight:700; letter-spacing:0.05em; text-transform:uppercase;">Batch</span>'
+            f' <span class="app-subtitle" style="font-weight:700;">{len(results)} reviews:</span> '
+            f'{summary}'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
 
         st.markdown("---")
         st.mark('<div class="section-title">Results (urgency order)</div>', unsafe_allow_html=True)
@@ -630,89 +673,100 @@ with tab_batch:
             action = r.get("action", "reply")
             override_key = f"override_{idx}"
             draft_key = f"draft_{idx}"
+            style = ACTION_STYLE.get(action, {"label": action, "color": "#6b7280"})
 
-            with st.container():
-                st.markdown('<div class="card">', unsafe_allow_html=True)
-                hc1, hc2, hc3, hc4 = st.columns([2, 1.5, 2, 2.5])
-                with hc1:
-                    st.markdown(f"**Stars:** {esc(r.get('_stars', 0))}")
-                    st.markdown(f"**Text:** {esc(r.get('_text',''))[:120]}{'...' if len(r.get('_text','')) > 120 else ''}")
-                    if r.get("_language"):
-                        st.markdown(f"**Language:** {esc(r['_language'])}")
-                    if r.get("_platform"):
-                        st.markdown(f"**Platform:** {esc(r['_platform'])}")
-                    if r.get("_expected_action"):
-                        st.markdown(f"**Expected:** {esc(r['_expected_action'])}")
-                with hc2:
-                    st.markdown(action_badge(action), unsafe_allow_html=True)
-                    st.markdown(f"**Sentiment:** {esc(r.get('sentiment','')).title()}")
-                with hc3:
-                    flags = r.get("flags", [])
-                    if flags:
-                        flag_html = "".join(f'<span class="flag">{esc(f)}</span>' for f in flags)
-                        st.markdown(flag_html, unsafe_allow_html=True)
-                    else:
-                        st.markdown("—")
-                with hc4:
-                    st.markdown(f"**Reason:** {esc(r.get('reason',''))}")
-                    new_action = st.selectbox(
-                        "Override action", list(ACTIONS),
-                        index=list(ACTIONS).index(action) if action in ACTIONS else 0,
-                        key=override_key,
-                    )
-                    if new_action != action:
-                        st.session_state.batch_overrides[idx] = new_action
-                    else:
-                        st.session_state.batch_overrides.pop(idx, None)
+            st.markdown(
+                f'<div class="card" style="border-left: 4px solid {esc(style["color"])};">',
+                unsafe_allow_html=True,
+            )
+            # Top row: stars, text, language, platform, expected
+            tc1, tc2 = st.columns([2, 1])
+            with tc1:
+                st.markdown(f'**Stars:** {esc(r.get("_stars", 0))}')
+                st.markdown(f'**Text:** {esc(r.get("_text",""))[:120]}{"..." if len(r.get("_text","")) > 120 else ""}')
+                if r.get("_language"):
+                    st.markdown(f'**Language:** {esc(r["_language"])}')
+                if r.get("_platform"):
+                    st.markdown(f'**Platform:** {esc(r["_platform"])}')
+                if r.get("_expected_action"):
+                    st.markdown(f'**Expected:** {esc(r["_expected_action"])}')
+            with tc2:
+                st.markdown(
+                    f'<span class="badge" style="background:{esc(style["color"])}; font-size:0.85rem;">'
+                    f'{esc(style["label"]).upper()}</span>',
+                    unsafe_allow_html=True,
+                )
+                st.markdown(f'**Sentiment:** {esc(r.get("sentiment","")).title()}')
+                flags = r.get("flags", [])
+                if flags:
+                    flag_html = "".join(f'<span class="flag">{esc(f)}</span>' for f in flags)
+                    st.markdown(f'**Flags:** {flag_html}', unsafe_allow_html=True)
+                else:
+                    st.markdown('**Flags:** —')
+            st.markdown(f'**Reason:** {esc(r.get("reason",""))}')
 
-                # Draft section
-                if action in ("reply", "reply_needs_owner"):
-                    draft_val = r.get("draft_reply") or ""
-                    if draft_key not in st.session_state.batch_drafts:
-                        st.session_state.batch_drafts[draft_key] = draft_val
-                    edited_draft = st.text_area(
-                        "Draft", value=st.session_state.batch_drafts[draft_key],
-                        height=100, key=draft_key, label_visibility="collapsed",
-                    )
-                    st.session_state.batch_drafts[draft_key] = edited_draft
-                    words = len(edited_draft.split())
-                    st.caption(f"Word count: {words}")
+            # Override action
+            new_action = st.selectbox(
+                "Override action", list(ACTIONS),
+                index=list(ACTIONS).index(action) if action in ACTIONS else 0,
+                key=override_key,
+            )
+            if new_action != action:
+                st.session_state.batch_overrides[idx] = new_action
+            else:
+                st.session_state.batch_overrides.pop(idx, None)
 
-                    # Warnings on edited draft
-                    probs = check_draft(edited_draft, st.session_state.profile, r.get("draft_translation"))
-                    if probs:
-                        for prob in probs:
-                            st.markdown(f'<div class="warn">\u26A0 {esc(prob)}</div>', unsafe_allow_html=True)
+            # Draft section (reply / reply_needs_owner only)
+            if action in ("reply", "reply_needs_owner"):
+                st.markdown('<div style="margin-top:0.5rem;">', unsafe_allow_html=True)
+                st.markdown('**Draft reply** (edit before posting)')
+                draft_val = r.get("draft_reply") or ""
+                if draft_key not in st.session_state.batch_drafts:
+                    st.session_state.batch_drafts[draft_key] = draft_val
+                edited_draft = st.text_area(
+                    "Draft", value=st.session_state.batch_drafts[draft_key],
+                    height=100, key=draft_key, label_visibility="collapsed",
+                )
+                st.session_state.batch_drafts[draft_key] = edited_draft
+                words = len(edited_draft.split())
+                st.caption(f"Word count: {words}")
 
-                # Report note
-                if action == "report" and r.get("report_note"):
-                    st.caption(f"Report note: {esc(r['report_note'])}")
-
-                # Review translation
-                if r.get("review_translation"):
-                    with st.expander("Review translation"):
-                        st.write(r["review_translation"])
-
-                # Owner checklist
-                if r.get("owner_checklist"):
-                    with st.expander("Owner checklist"):
-                        for item in r["owner_checklist"]:
-                            st.markdown(f"- {esc(item)}")
-
+                # Warnings on edited draft
+                probs = check_draft(edited_draft, st.session_state.profile, r.get("draft_translation"))
+                if probs:
+                    for prob in probs:
+                        st.markdown(f'<div class="warn">\u26A0 {esc(prob)}</div>', unsafe_allow_html=True)
                 st.markdown('</div>', unsafe_allow_html=True)
-                csv_rows.append({
-                    "stars": r.get("_stars", 0),
-                    "text": r.get("_text", ""),
-                    "platform": r.get("_platform", ""),
-                    "language": r.get("_language", ""),
-                    "action": st.session_state.batch_overrides.get(idx, action),
-                    "sentiment": r.get("sentiment", ""),
-                    "flags": ", ".join(r.get("flags", [])),
-                    "reason": r.get("reason", ""),
-                    "draft_reply": st.session_state.batch_drafts.get(draft_key, r.get("draft_reply") or ""),
-                    "review_translation": r.get("review_translation") or "",
-                    "report_note": r.get("report_note") or "",
-                })
+
+            # Report note
+            if action == "report" and r.get("report_note"):
+                st.caption(f"Report note: {esc(r['report_note'])}")
+
+            # Review translation
+            if r.get("review_translation"):
+                with st.expander("Review translation"):
+                    st.write(r["review_translation"])
+
+            # Owner checklist
+            if r.get("owner_checklist"):
+                with st.expander("Owner checklist"):
+                    for item in r["owner_checklist"]:
+                        st.markdown(f"- {esc(item)}")
+
+            st.markdown('</div>', unsafe_allow_html=True)
+            csv_rows.append({
+                "stars": r.get("_stars", 0),
+                "text": r.get("_text", ""),
+                "platform": r.get("_platform", ""),
+                "language": r.get("_language", ""),
+                "action": st.session_state.batch_overrides.get(idx, action),
+                "sentiment": r.get("sentiment", ""),
+                "flags": ", ".join(r.get("flags", [])),
+                "reason": r.get("reason", ""),
+                "draft_reply": st.session_state.batch_drafts.get(draft_key, r.get("draft_reply") or ""),
+                "review_translation": r.get("review_translation") or "",
+                "report_note": r.get("report_note") or "",
+            })
 
         st.markdown("---")
         csv_download_button(csv_rows)
