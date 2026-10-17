@@ -18,6 +18,17 @@ ReviewDesk drafts text for the owner to edit and copy by hand. It does **not**
 log in to Google, post replies, report reviews, scrape websites, or send
 anything automatically.
 
+## Why ReviewDesk?
+
+ReviewDesk helps an owner decide **whether a review deserves a reply before
+writing one**. It is designed for businesses that need a calmer workflow for
+multilingual feedback, complaints, possible spam, and reviews that require
+fact-checking.
+
+```text
+Review → Analyze → Triage → Edit → Owner copies and posts
+```
+
 ## Features
 
 - Single-review and batch analysis.
@@ -31,6 +42,21 @@ anything automatically.
 - Session-persistent demo workflow with veto windows, approval queue, audit CSV,
   idempotency checks, and owner-controlled retry.
 - Mock provider mode for offline demos without an API key.
+- Optional Hugging Face sentiment signal through `gradio_client`; it is
+  advisory and never overrides ReviewDesk's safety decision.
+
+## Free local demo
+
+ReviewDesk can be run and tested without OpenAI, Anthropic, Google, or any paid
+service. The mock provider returns deterministic sample responses:
+
+```powershell
+$env:REVIEWDESK_PROVIDER = "mock"
+python -m streamlit run app.py
+```
+
+Open <http://localhost:8501>, click **Try a sample**, or paste your own review.
+This is the recommended setup for demos, development, and CI.
 
 ## Quick start
 
@@ -60,28 +86,25 @@ export REVIEWDESK_PROVIDER=mock
 python -m streamlit run app.py
 ```
 
-Open <http://localhost:8501>.
-
 ## Deploy to Streamlit Community Cloud
 
-The repository is ready to deploy as a Streamlit Community Cloud app:
+The app can be deployed to Streamlit Community Cloud. For a free deployment,
+use mock mode first:
 
 1. Sign in at <https://share.streamlit.io/> with GitHub.
 2. Select `Wasif478484/ReviewDesk`, branch `master`, and entrypoint `app.py`.
 3. In **Advanced settings**, add these secrets:
 
    ```toml
-   REVIEWDESK_PROVIDER = "openai"
-   OPENAI_API_KEY = "replace-with-your-openai-key"
-   OPENAI_MODEL = "gpt-4o-mini"
+   REVIEWDESK_PROVIDER = "mock"
    ```
 
 4. Deploy the app and open the generated public URL.
 
-Secrets are read from Streamlit's encrypted secrets store or environment
-variables. Never put the API key in Git, `.env` files committed to the
-repository, screenshots, or logs. Live calls use OpenAI and may incur costs;
-the app remains owner-in-the-loop and never posts replies automatically.
+If you later choose a paid provider, replace the mock settings with the
+provider configuration described below. Secrets are read from Streamlit's
+encrypted secrets store or environment variables. Never put an API key in Git,
+`.env` files committed to the repository, screenshots, or logs.
 
 ## Using a live model provider
 
@@ -149,6 +172,7 @@ reply to Google.
 │   ├── policy.py              # Frozen safety rules
 │   ├── prompts.py             # Frozen prompts, parser, and draft checks
 │   ├── sources.py             # Mock source and provider boundary
+│   ├── sentiment.py           # Optional Hugging Face sentiment signal
 │   └── ui.py                  # Escaped rendering helpers
 ├── tests/                    # Regression tests
 ├── scripts/                  # Maintainer utilities
@@ -179,7 +203,8 @@ Expected results:
 
 - Policy checks: **19/19 passed**
 - Autopilot checks: **9/9 passed**
-- Unit tests: **18 passed**
+- Unit and edge-case tests: **27 passed**
+- Sample workflow: **15/15 expected actions matched**
 
 GitHub Actions runs these checks on pushes and pull requests.
 
@@ -206,7 +231,8 @@ GitHub Actions runs these checks on pushes and pull requests.
 
 ### Deferred
 
-- Google Business Profile API integration.
+- Google Business Profile API integration; the current source is simulated and
+  does not scrape Google or access arbitrary companies.
 - Authentication and multi-user teams.
 - Durable database storage.
 - Background workers and scheduled processing.

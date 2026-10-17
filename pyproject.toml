@@ -9,8 +9,10 @@ description = "Owner-in-the-loop review triage assistant"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-  "streamlit>=1.30",
+  "streamlit>=1.40",
   "anthropic>=0.30",
+  "openai>=1.0",
+  "gradio_client>=1.0",
   "python-dotenv>=1.0",
 ]
 

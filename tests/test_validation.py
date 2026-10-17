@@ -31,6 +31,12 @@ class ModelValidationTests(unittest.TestCase):
         from reviewdesk.prompts import check_draft
         self.assertEqual(check_draft(123), ["draft must be text"])
 
+    def test_csv_cells_are_safe_for_spreadsheets(self):
+        from reviewdesk.app import _csv_safe
+        for prefix in "=+-@":
+            self.assertEqual(_csv_safe(prefix + "formula"), "'" + prefix + "formula")
+        self.assertEqual(_csv_safe("normal text"), "normal text")
+
 
 if __name__ == "__main__":
     unittest.main()

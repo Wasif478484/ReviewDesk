@@ -145,6 +145,13 @@ def analyze_one(review, profile, language, tone, owner_language):
     return result, raw, None
 
 
+def _csv_safe(value):
+    """Prevent spreadsheet formula execution for user/model-controlled cells."""
+    if isinstance(value, str) and value.startswith(("=", "+", "-", "@")):
+        return "'" + value
+    return value
+
+
 def draft_warnings(draft, profile, draft_translation=None):
     return check_draft(draft, profile, draft_translation)
 
@@ -159,16 +166,16 @@ def csv_download_button(rows, filename="reviewdesk_results.csv"):
     for r in rows:
         writer.writerow(
             [
-                r.get("stars", ""),
-                r.get("text", ""),
-                r.get("language", ""),
-                r.get("action", ""),
-                r.get("sentiment", ""),
-                ", ".join(r.get("flags", [])),
-                r.get("reason", ""),
-                r.get("draft_reply") or "",
-                r.get("review_translation") or "",
-                r.get("report_note") or "",
+                _csv_safe(r.get("stars", "")),
+                _csv_safe(r.get("text", "")),
+                _csv_safe(r.get("language", "")),
+                _csv_safe(r.get("action", "")),
+                _csv_safe(r.get("sentiment", "")),
+                _csv_safe(", ".join(r.get("flags", []))),
+                _csv_safe(r.get("reason", "")),
+                _csv_safe(r.get("draft_reply") or ""),
+                _csv_safe(r.get("review_translation") or ""),
+                _csv_safe(r.get("report_note") or ""),
             ]
         )
     st.download_button(
@@ -1002,13 +1009,14 @@ with tab_auto:
         audit_rows = []
         for a in st.session_state.ap_audit:
             audit_rows.append({
-                "timestamp": a.get("timestamp", a.get("time", "")),
-                "review_id": a.get("review_id", ""), "excerpt": a["excerpt"],
-                "action": a.get("action", a.get("decision", "")),
-                "status": a.get("status", ""),
-                "reasons": "; ".join(a["reasons"]),
-                "actor": a.get("actor", a.get("approver", "")),
-                "error": a.get("error", ""),
+                "timestamp": _csv_safe(a.get("timestamp", a.get("time", ""))),
+                "review_id": _csv_safe(a.get("review_id", "")),
+                "excerpt": _csv_safe(a["excerpt"]),
+                "action": _csv_safe(a.get("action", a.get("decision", ""))),
+                "status": _csv_safe(a.get("status", "")),
+                "reasons": _csv_safe("; ".join(a["reasons"])),
+                "actor": _csv_safe(a.get("actor", a.get("approver", ""))),
+                "error": _csv_safe(a.get("error", "")),
             })
         st.dataframe(audit_rows, use_container_width=True)
         csv_buf = io.StringIO()

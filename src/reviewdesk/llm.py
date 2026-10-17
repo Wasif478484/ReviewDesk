@@ -18,6 +18,7 @@ Review text is sent to the model provider - state this plainly to users (see REA
 import hashlib
 import json
 import os
+import re
 import time
 import streamlit as st
 
@@ -139,6 +140,9 @@ def call_model(system, user):
 
     Results are cached so demo runs never depend on a live API call.
     """
+    if PROVIDER == "mock":
+        return _call_once(system, user)
+
     key = _cache_key(system, user)
     cached = _cache_get(key)
     if cached is not None:
@@ -335,10 +339,21 @@ _MOCK_OUTPUTS = [
 ]
 
 
+def _mock_language(text):
+    if not text:
+        return "unknown"
+    if re.search(r"[\u0600-\u06ff]", text):
+        return "Urdu" if re.search(r"[\u0679\u0686\u0688\u0691\u0698\u06ba\u06be\u06d2]", text) else "Arabic"
+    low = text.lower()
+    if re.search(r"[àâçéèêëîïôùûüÿœ]", low):
+        return "French" if re.search(r"\b(le|la|les|mais|et|pour|avec)\b", low) else "Spanish"
+    if re.search(r"\b(khana|accha|acha|bahut|bohat|tha|thi|mila|meri|hamari)\b", low):
+        return "Roman Urdu"
+    return "English"
+
+
 def _mock_response(system, user):
     """Return a canned triage output based on the review text inside <review>."""
-    import re
-
     m = re.search(r"<review>\s*stars:\s*([^\n]+)\s*text:\s*(.*?)\s*</review>", user, re.S)
     if not m:
         # Fallback: generic reply
@@ -366,9 +381,16 @@ def _mock_response(system, user):
 
     # Heuristic fallback for unknown reviews
     low = text.lower()
-    if any(w in low for w in ["ignore your previous instructions", "ignore all previous",
-                              "ignore the above", "disregard your", "system prompt",
-                              "you are now", "act as", "jailbreak", "write a poem"]):
+    if any(re.search(pattern, low) for pattern in (
+        r"\bignore (your|all) previous instructions\b",
+        r"\bignore the above\b",
+        r"\bdisregard your\b",
+        r"\bsystem prompt\b",
+        r"\byou are now\b",
+        r"\bact as\b",
+        r"\bjailbreak\b",
+        r"\bwrite a poem\b",
+    )):
         action, sentiment = "report", "negative"
         flags = ["off_topic", "spam"]
         reason = "The text tries to give the assistant instructions instead of describing a customer experience."
@@ -378,7 +400,9 @@ def _mock_response(system, user):
         draft = None
         review_tr = None
         draft_tr = None
-    elif any(w in low for w in ["seo", "visit www", "rank guarantee", "advertisement"]):
+    elif any(re.search(pattern, low) for pattern in (
+        r"\bseo\b", r"\bvisit\s+www\.", r"\brank guarantee\b", r"\badvertisement\b"
+    )):
         action, sentiment = "report", "negative"
         flags = ["spam", "off_topic"]
         reason = "An advertisement, not a customer experience."
@@ -388,9 +412,12 @@ def _mock_response(system, user):
         draft = None
         review_tr = None
         draft_tr = None
-    elif any(re.search(rf"\b{re.escape(w)}\b", low) for w in
-             ["legal", "lawyer", "court", "sue", "ill", "sick", "hospital",
-              "food poisoning", "doctor", "injury", "health"]):
+    elif any(re.search(pattern, low) for pattern in (
+        r"\blegal\b", r"\blawyer\b", r"\bcourt\b", r"\bsue\b",
+        r"\b(?:ill|sick)\s+(?:after|from|following)\b",
+        r"\bhospital\b", r"\bfood poisoning\b", r"\bdoctor\b",
+        r"\binjur(?:y|ed)\b", r"\bhealth\b"
+    )):
         action, sentiment = "hold", "negative"
         flags = ["health", "legal"]
         reason = "The review raises a health or legal concern, so a public reply could make things worse."
@@ -404,7 +431,7 @@ def _mock_response(system, user):
         draft = None
         review_tr = f"Review summary (mock): {text[:200]}"
         draft_tr = None
-    elif any(w in low for w in ["kamran", "manager", "booking", "cancel", "bill",
+    elif any(w in low for w in ["kamran", "booking", "cancel", "bill",
                                  "charged", "cobrar", "rude", "waiter", "overcharged"]):
         action, sentiment = "reply_needs_owner", "negative"
         flags = ["staff_named", "specific_incident"]
@@ -431,11 +458,10 @@ def _mock_response(system, user):
         reason = "Straightforward feedback, safe to answer publicly."
         report_note = None
         checklist = []
-        detail = text[:60]
         draft = (
-            f"Thank you for your feedback about {detail}. We appreciate you letting us "
-            "know and we will share this with our team. You are welcome to contact the "
-            "business directly. The Owner, Your Business"
+            "Thank you for sharing your experience. We appreciate the feedback and will "
+            "share it with our team. You are welcome to contact the business directly. "
+            "The Owner, Your Business"
         )
         review_tr = None
         draft_tr = None
@@ -445,8 +471,8 @@ def _mock_response(system, user):
         "sentiment": sentiment,
         "flags": flags,
         "reason": reason,
-        "review_language": "English",
-        "language_used": "English" if draft else "none",
+        "review_language": _mock_language(text),
+        "language_used": _mock_language(text) if draft else "none",
         "draft_reply": draft,
         "review_translation": review_tr,
         "draft_translation": draft_tr,
