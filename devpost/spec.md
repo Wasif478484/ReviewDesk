@@ -50,6 +50,10 @@ Environment: either `ANTHROPIC_API_KEY` or `OPENAI_API_KEY`, or `REVIEWDESK_PROV
 
 Submission requires a short demo video and a public GitHub repository. Deployment is optional and does not replace either.
 
+Public repository: **https://github.com/Wasif478484/ReviewDesk**
+
+Demo video: not yet recorded.
+
 ## Look and Feel
 
 Carried forward from `prd.md > Look and Feel` and `scope.md > Inspiration & Identity`.

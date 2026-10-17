@@ -310,6 +310,10 @@ def _mock_response(system, user):
     text = m.group(2).strip()
     stars = m.group(1).strip()
 
+    # Platform comes from the business block, so mock output names the right one.
+    pm = re.search(r"^platform:\s*(.+)$", user, re.M)
+    platform = pm.group(1).strip() if pm else "Google"
+
     # Try to match a known review exactly
     for entry in _MOCK_OUTPUTS:
         if entry["review_text"].lower() == text.lower():
@@ -317,13 +321,25 @@ def _mock_response(system, user):
 
     # Heuristic fallback for unknown reviews
     low = text.lower()
-    if any(w in low for w in ["seo", "visit www", "rank guarantee", "advertisement"]):
+    if any(w in low for w in ["ignore your previous instructions", "ignore all previous",
+                              "ignore the above", "disregard your", "system prompt",
+                              "you are now", "act as", "jailbreak", "write a poem"]):
+        action, sentiment = "report", "negative"
+        flags = ["off_topic", "spam"]
+        reason = "The text tries to give the assistant instructions instead of describing a customer experience."
+        report_note = ("This text is not a customer experience. It appears to be an "
+                       "attempt to issue instructions rather than a review.")
+        checklist = ["Submit the report through the platform's own report option"]
+        draft = None
+        review_tr = None
+        draft_tr = None
+    elif any(w in low for w in ["seo", "visit www", "rank guarantee", "advertisement"]):
         action, sentiment = "report", "negative"
         flags = ["spam", "off_topic"]
         reason = "An advertisement, not a customer experience."
         report_note = ("This review appears to be an advertisement and does not "
                        "describe any experience with this business.")
-        checklist = ["Submit the report through Google's own report option"]
+        checklist = [f"Submit the report through {platform}'s own report option"]
         draft = None
         review_tr = None
         draft_tr = None
@@ -342,8 +358,8 @@ def _mock_response(system, user):
         draft = None
         review_tr = f"Review summary (mock): {text[:200]}"
         draft_tr = None
-    elif any(w in low for w in ["manager", "staff", "kamran", "named", "rude", "waiter",
-                                 "booking", "cancel", "order", "bill", "charged"]):
+    elif any(w in low for w in ["kamran", "manager", "booking", "cancel", "bill",
+                                 "charged", "cobrar", "rude", "waiter", "overcharged"]):
         action, sentiment = "reply_needs_owner", "negative"
         flags = ["staff_named", "specific_incident"]
         reason = "The review names a staff member or describes a specific incident the owner should verify."

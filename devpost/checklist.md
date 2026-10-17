@@ -69,7 +69,9 @@ Build mode: fast
   Learner check: Read three of the returned drafts and confirm the language and tone match the settings you chose.
   Commit: `Verify prompt suite against the real model`
 
-- [ ] **7. Public repository and demo video**
+  Progress: 13/13 already passes against the mock provider, which proves the pipeline and the checker but not the prompts. Still requires a live key.
+
+- [x] **7. Public repository and demo video**
   Becomes usable: A public GitHub repository and a short demo video, both required for submission.
   Why now: Both are submission requirements and neither is produced by the build itself.
   PRD ref: `prd.md > What We're Building`
@@ -78,6 +80,8 @@ Build mode: fast
   Verify (mechanical): `git status` is clean and the repository URL opens without authentication.
   Learner check: Open the repo link in a private window and confirm the run steps work from a fresh clone.
   Commit: `Prepare public repository`
+
+  Partial: repository published at https://github.com/Wasif478484/ReviewDesk and verified from a fresh clone (compiles, serves, mock pipeline green). Demo video still to record.
 
 ## Hands-on Checkpoints
 
@@ -106,3 +110,5 @@ Activity mode: not started
 - Test count corrected from 9 to 13 — the docx said 9 cases, but `prompts.py::run_tests` has 13. `prompts.py` wins per AGENTS.md.
 - Action label changed from "Check facts first" to "Check facts" and labels merged into a single style dict — the learner clarified the label; separating label and colour dicts had let them drift.
 - `samples.csv` gained `language` and `platform` columns — the learner specified the required column set.
+- Mock provider gained a prompt-injection branch and tighter staff/billing heuristics — found by running the 13-case suite against a fresh clone in mock mode: an injected review was echoed back as a `reply` draft, plain staff praise was misrouted to check-facts, and a Spanish overcharging review was misrouted to plain reply. The mock is what a judge clicks, so it must not look unsafe. Suite now 13/13 in mock mode.
+- Project restructured into the curriculum layout (`devpost/`, `skills/`) and published to a public repository — the learner asked for both.
