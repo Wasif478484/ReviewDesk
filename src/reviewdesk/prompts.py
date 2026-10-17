@@ -430,6 +430,8 @@ BASELINE_PROMPT = (
 
 def parse_triage_output(raw):
     """Return a validated dict or raise ValueError."""
+    if not isinstance(raw, str):
+        raise ValueError("model output must be text")
     text = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw.strip())
     start, end = text.find("{"), text.rfind("}")
     if start == -1 or end == -1:
@@ -487,7 +489,7 @@ def safe_parse(raw):
     """Like parse_triage_output, but never raises. Falls back to owner review."""
     try:
         return parse_triage_output(raw)
-    except ValueError as err:
+    except (TypeError, ValueError, AttributeError) as err:
         return {
             "action": "reply_needs_owner",
             "sentiment": "mixed",
@@ -524,8 +526,10 @@ def check_draft(draft, profile=None, draft_translation=None):
     (owner-language) version of drafts written in other languages.
     """
     problems = []
-    if not draft:
+    if draft is None or draft == "":
         return problems
+    if not isinstance(draft, str):
+        return ["draft must be text"]
     profile = profile or {}
     low = draft.lower()
     words = len(draft.split())

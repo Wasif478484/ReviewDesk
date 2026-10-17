@@ -51,6 +51,8 @@ class MockSource(ReviewSource):
     name = "mock"
 
     def __init__(self, batch_size=DEMO_BATCH_SIZE):
+        if not isinstance(batch_size, int) or batch_size < 1:
+            raise ValueError("batch_size must be a positive integer")
         self.batch_size = batch_size
         self._reviews = []
         self._replied = set()
@@ -84,12 +86,23 @@ class MockSource(ReviewSource):
 
     def post_reply(self, review_id, text):
         """Record a reply in memory. Always succeeds in the demo."""
+        if not any(r["id"] == review_id for r in self._reviews):
+            raise ValueError(f"unknown review id: {review_id}")
+        if self.is_replied(review_id):
+            return False
+        if not isinstance(text, str) or not text.strip():
+            raise ValueError("reply text must be non-empty")
         self._replied.add(review_id)
         return True
 
     def delete_reply(self, review_id):
         """Forget a recorded reply."""
+        if not any(r["id"] == review_id for r in self._reviews):
+            return False
         self._replied.discard(review_id)
+        for review in self._reviews:
+            if review["id"] == review_id:
+                review["has_reply"] = False
         return True
 
     def mark_replied(self, review_id):

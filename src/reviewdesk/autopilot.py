@@ -40,7 +40,21 @@ def send_reply(source, review, result, profile, policy, *, approver, audit_log):
     review_id = review["id"]
     draft = result.get("draft_reply")
 
-    if _is_replied(source, review):
+    if approver not in ("autopilot", "owner"):
+        return False, "unknown approver"
+    try:
+        already_replied = _is_replied(source, review)
+    except Exception as err:
+        print(f"Reply state check failed for {review_id}: {err}")
+        audit_log.append(AuditEvent(
+            timestamp=_timestamp(), review_id=review_id,
+            excerpt=(review.get("text") or "")[:60], action="reply",
+            status="failed", reasons=["could not verify existing reply state"],
+            actor=approver, error=str(err),
+        ).as_dict())
+        return False, "could not verify reply state; moved to approval queue"
+
+    if already_replied:
         return False, "review already has a reply"
     if not draft:
         return False, "reply draft is empty; moved to approval queue"
@@ -97,6 +111,22 @@ def run_cycle(rows, source, profile, policy, audit_log, now=None):
         if row.get("cancelled") or row.get("handled"):
             continue
         if row["due_at"] > now:
+            continue
+        if outcome.posted >= policy.daily_cap:
+            row["deferred_reason"] = "daily cap reached"
+            timestamp = _timestamp()
+            audit_log.append({
+                "timestamp": timestamp,
+                "time": timestamp,
+                "review_id": row["review"]["id"],
+                "excerpt": (row["review"].get("text") or "")[:60],
+                "action": "auto_post",
+                "decision": "auto_post",
+                "status": "deferred",
+                "reasons": ["daily cap reached"],
+                "actor": "autopilot",
+                "approver": "autopilot",
+            })
             continue
         if should_send("auto_post", policy):
             ok, _ = send_reply(source, row["review"], row["result"], profile,

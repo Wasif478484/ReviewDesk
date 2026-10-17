@@ -52,7 +52,7 @@ from .sources import MockSource, GoogleSource, DEMO_BANNER
 from .policy import AutopilotPolicy
 from .autopilot import send_reply, run_cycle, triage_and_split, dedup_by_id
 from . import ui
-from .ui import esc, inject_css, header, demo_banner, title, label, text_block, result_header, summary, row_head, notice, checklist, empty_state, status_bar, lane_header, countdown, footer
+from .ui import esc, inject_css, header, sidebar_intro, demo_banner, title, label, text_block, result_header, summary, row_head, notice, checklist, empty_state, status_bar, lane_header, countdown, footer
 
 # ---------------------------------------------------------------------------
 # Page config & CSS
@@ -191,6 +191,7 @@ elif PROVIDER == "mock":
 # ---------------------------------------------------------------------------
 
 with st.sidebar:
+    sidebar_intro()
     ui.label("Business setup")
     p = profile_from_state()
 

@@ -36,8 +36,17 @@ ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-3-haiku-20240307")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
 MAX_BATCH = 30  # cap on reviews per batch to control API cost
-CACHE_TTL_SECONDS = int(os.getenv("REVIEWDESK_CACHE_TTL_SECONDS", "86400"))
-CACHE_MAX_ENTRIES = int(os.getenv("REVIEWDESK_CACHE_MAX_ENTRIES", "200"))
+
+
+def _env_int(name, default, minimum):
+    try:
+        return max(minimum, int(os.getenv(name, str(default))))
+    except (TypeError, ValueError):
+        return default
+
+
+CACHE_TTL_SECONDS = _env_int("REVIEWDESK_CACHE_TTL_SECONDS", 86400, 0)
+CACHE_MAX_ENTRIES = _env_int("REVIEWDESK_CACHE_MAX_ENTRIES", 200, 1)
 CACHE_VERSION = "v2"
 
 CACHE_DIR = Path(__file__).resolve().parents[2] / ".sample_cache"

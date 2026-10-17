@@ -140,7 +140,7 @@ Expected results:
 
 - Policy checks: **19/19 passed**
 - Autopilot checks: **9/9 passed**
-- Unit tests: **6 passed**
+- Unit tests: **18 passed**
 
 GitHub Actions runs these checks on pushes and pull requests.
 
