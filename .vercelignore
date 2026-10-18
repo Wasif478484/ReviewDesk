@@ -1,0 +1,25 @@
+# Python files (legacy Streamlit app)
+*.py
+src/reviewdesk/
+tests/
+scripts/
+skills/
+devpost/
+docs/
+website/
+.streamlit/
+.sample_cache/
+__pycache__/
+*.pyc
+requirements.txt
+pyproject.toml
+policy.py
+prompts.py
+llm.py
+sources.py
+autopilot.py
+ui.py
+samples.csv
+sample_results.json
+.env.example
+.env
