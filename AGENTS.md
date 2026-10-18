@@ -16,9 +16,10 @@ This is the contract for the ReviewDesk build. All three roles (planner, builder
 - **prompts.py is frozen.** Call its functions as-is. Never change prompt rules, schema, or actions. If a plan needs a prompt change, raise it as a question, never as a task.
 - **Action values come from prompts.ACTIONS:** reply, reply_needs_owner, hold, report. Labels and colors live in one dict keyed by those values.
 - **Demo path must be protected:** triage table sorted by urgency (holds first), a Roman Urdu complaint with a tone switch, CSV export, owner copies reply by hand.
-- **No scope creep:** no logins, database, payments, scraping, Google API, auto-posting, translating the app's own interface.
+- **No scope creep:** no database, payments, scraping, auto-posting, translating the app's own interface.
+  - **EXCEPTION (user-approved 2026-10-18):** Login/signup is now allowed via Streamlit's native OIDC auth (`st.login`/`st.user`). No custom login page, no password storage. Business profile stored in session state (no database). Google Business Profile API integration is allowed as a stub only (raises clear error until access is approved). Do not claim Google integration works.
 - **HTML escaping:** review text and every model-produced field escaped with html.escape before entering any unsafe_allow_html string.
-- **No secrets printed, logged, or committed.** Keys only from environment. `.gitignore` must exclude `.env` before first commit.
+- **No secrets printed, logged, or committed.** Keys only from environment or Streamlit secrets. `.gitignore` must exclude `.env` before first commit.
 - **Users never see stack traces.** Plain message + console print.
 - **UI never claims anything was posted/sent/reported.** Owner copies by hand.
 - **Live model calls cost money.** Only when the plan calls for them; state how many.
@@ -28,3 +29,13 @@ This is the contract for the ReviewDesk build. All three roles (planner, builder
 ## Docs (devpost/)
 
 `learner-profile.md`, `scope.md`, `prd.md`, `spec.md`, `checklist.md` each carry `status: draft | approved` in frontmatter. Only project artifacts count — never conversation memory.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

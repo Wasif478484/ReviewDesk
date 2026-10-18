@@ -1,16 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
   <title id="title">ReviewDesk mark</title>
-  <desc id="desc">Four review decision tiles with a check mark</desc>
-  <defs>
-    <linearGradient id="blue" x1="18" y1="16" x2="108" y2="112" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#5E9BFF"/>
-      <stop offset="1" stop-color="#2C6BED"/>
-    </linearGradient>
-  </defs>
-  <rect width="128" height="128" rx="30" fill="#102D52"/>
-  <rect x="22" y="22" width="35" height="35" rx="10" fill="url(#blue)"/>
-  <rect x="71" y="22" width="35" height="35" rx="10" fill="#FFFFFF" fill-opacity=".18"/>
-  <rect x="22" y="71" width="35" height="35" rx="10" fill="#FFFFFF" fill-opacity=".18"/>
-  <rect x="71" y="71" width="35" height="35" rx="10" fill="url(#blue)"/>
-  <path d="m78 88 8 8 17-19" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="7"/>
+  <desc id="desc">A review speech bubble with a check mark</desc>
+  <rect width="128" height="128" rx="28" fill="#1E5B4F"/>
+  <rect x="26" y="28" width="76" height="52" rx="14" fill="rgba(246,243,235,.16)"/>
+  <path d="M46 78v18l20-18z" fill="rgba(246,243,235,.16)"/>
+  <path d="m48 54 11 11 22-24" fill="none" stroke="#F6F3EB" stroke-linecap="round" stroke-linejoin="round" stroke-width="9"/>
 </svg>

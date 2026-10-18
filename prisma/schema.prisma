@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  passwordHash    String
+  name            String
+  emailVerifiedAt DateTime?
+  onboardedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  business   Business?
+  credential Credential?
+  policy     Policy?
+  reviews    Review[]
+  triages    Triage[]
+  audits     AuditEvent[]
+  authTokens AuthToken[]
+}
+
+model Business {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String   @default("Your Business")
+  category      String   @default("restaurant")
+  ownerName     String   @default("The Owner")
+  signOff       String   @default("")
+  contactLine   String   @default("")
+  allowedOffers String   @default("none")
+  description   String   @default("")
+  platform      String   @default("Google")
+  replyTone     String   @default("warm") // warm | formal | apologetic
+  replyLanguage String   @default("auto") // auto | language name
+  ownerLanguage String   @default("English")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Credential {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider      String    @default("google_business")
+  mode          String    @default("none") // none | api_key | oauth_token | oauth
+  apiKeyEnc     String? // AES-256-GCM ciphertext (base64)
+  tokenEnc      String? // pasted access token (oauth_token mode)
+  refreshTokenEnc String? // OAuth refresh token (oauth mode)
+  accessTokenEnc  String? // cached OAuth access token (oauth mode)
+  tokenExpiresAt  DateTime? // access token expiry
+  grantedEmail    String  @default("") // Google account that consented
+  locationId    String    @default("")
+  keyHint       String    @default("")
+  status        String    @default("unverified") // unverified | connected | error
+  statusMessage String    @default("")
+  lastCheckedAt DateTime?
+  livePosting   Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  source     String   @default("demo") // demo | google | import
+  externalId String?
+  stars      Int?
+  text       String
+  author     String   @default("")
+  date       String   @default("")
+  hasReply   Boolean  @default(false)
+  replyText  String?
+  replyMode  String? // recorded | sent
+  repliedAt  DateTime?
+  createdAt  DateTime @default(now())
+
+  triages Triage[]
+
+  @@index([userId])
+  @@index([userId, createdAt])
+}
+
+model Triage {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviewId          String
+  review            Review    @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  action            String // reply | reply_needs_owner | hold | report
+  sentiment         String // positive | mixed | negative
+  flags             String    @default("[]")
+  reason            String    @default("")
+  reviewLanguage    String    @default("unknown")
+  languageUsed      String    @default("none")
+  draftReply        String?
+  reviewTranslation String?
+  draftTranslation  String?
+  reportNote        String?
+  ownerChecklist    String    @default("[]")
+  lane              String    @default("queue") // auto | queue | done | skipped
+  status            String    @default("pending") // pending | recorded | sent | dismissed
+  dueAt             DateTime? // veto countdown for auto lane
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([userId, lane])
+}
+
+model Policy {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enabled             Boolean  @default(false)
+  dryRun              Boolean  @default(true)
+  minStars            Int      @default(4)
+  trustedLanguages    String   @default("[\"english\"]")
+  delayMinutes        Int      @default(30)
+  dailyCap            Int      @default(10)
+  allowMixedSentiment Boolean  @default(false)
+  updatedAt           DateTime @updatedAt
+}
+
+model AuthToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String // verify_email | reset_password
+  tokenHash String @unique // sha256 hex of the one-time token
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, type])
+}
+
+model AuditEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  timestamp DateTime @default(now())
+  reviewRef String   @default("")
+  excerpt   String   @default("")
+  action    String   @default("")
+  status    String   @default("")
+  reasons   String   @default("[]")
+  actor     String   @default("owner")
+  error     String   @default("")
+
+  @@index([userId, timestamp])
+}

@@ -63,13 +63,15 @@ st.set_page_config(page_title="ReviewDesk", page_icon="\U0001F4CB", layout="wide
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
-# One dict holding label + color for each action (values come from prompts.ACTIONS).
+# One dict holding label + color + wash for each action (values come from prompts.ACTIONS).
+# Colors follow the "Owner's Desk" palette: forest / ochre / brick / stone.
 ACTION_STYLE = {
-    "reply": {"label": "Reply", "color": "#1B8A5A", "headline": "Safe to reply"},
-    "reply_needs_owner": {"label": "Check facts", "color": "#B7791F", "headline": "Check the facts, then reply"},
-    "hold": {"label": "Hold", "color": "#C0392B", "headline": "Don't reply publicly yet"},
-    "report": {"label": "Report", "color": "#5F6B7A", "headline": "Report this review"},
+    "reply": {"label": "Reply", "color": "#1F7A5C", "wash": "#EAF4EE", "headline": "Safe to reply"},
+    "reply_needs_owner": {"label": "Check facts", "color": "#9A6A12", "wash": "#F9F1DC", "headline": "Check the facts, then reply"},
+    "hold": {"label": "Hold", "color": "#B3402E", "wash": "#F9E9E3", "headline": "Don't reply publicly yet"},
+    "report": {"label": "Report", "color": "#66604D", "wash": "#EFEBDF", "headline": "Report this review"},
 }
+ACTION_FALLBACK = {"label": "review", "color": "#66604D", "wash": "#EFEBDF"}
 
 URGENCY_ORDER = {"hold": 0, "reply_needs_owner": 1, "report": 2, "reply": 3}
 
@@ -145,13 +147,6 @@ def analyze_one(review, profile, language, tone, owner_language):
     return result, raw, None
 
 
-def _csv_safe(value):
-    """Prevent spreadsheet formula execution for user/model-controlled cells."""
-    if isinstance(value, str) and value.startswith(("=", "+", "-", "@")):
-        return "'" + value
-    return value
-
-
 def draft_warnings(draft, profile, draft_translation=None):
     return check_draft(draft, profile, draft_translation)
 
@@ -166,16 +161,16 @@ def csv_download_button(rows, filename="reviewdesk_results.csv"):
     for r in rows:
         writer.writerow(
             [
-                _csv_safe(r.get("stars", "")),
-                _csv_safe(r.get("text", "")),
-                _csv_safe(r.get("language", "")),
-                _csv_safe(r.get("action", "")),
-                _csv_safe(r.get("sentiment", "")),
-                _csv_safe(", ".join(r.get("flags", []))),
-                _csv_safe(r.get("reason", "")),
-                _csv_safe(r.get("draft_reply") or ""),
-                _csv_safe(r.get("review_translation") or ""),
-                _csv_safe(r.get("report_note") or ""),
+                r.get("stars", ""),
+                r.get("text", ""),
+                r.get("language", ""),
+                r.get("action", ""),
+                r.get("sentiment", ""),
+                ", ".join(r.get("flags", [])),
+                r.get("reason", ""),
+                r.get("draft_reply") or "",
+                r.get("review_translation") or "",
+                r.get("report_note") or "",
             ]
         )
     st.download_button(
@@ -338,6 +333,7 @@ with tab_single:
         with c3:
             st.markdown("<div style='height:1.75rem'></div>", unsafe_allow_html=True)
             analyze_clicked = st.button("Analyze review", type="primary", key="ss_analyze")
+            st.markdown('<div class="rd-hint">Owner-in-the-loop · nothing posts itself</div>', unsafe_allow_html=True)
 
     owner_language = st.session_state.profile.get("default_language", "English")
     if owner_language == "auto":
@@ -389,7 +385,7 @@ with tab_single:
         ui.label("Result")
 
         # Result card with action-color left edge
-        style = ACTION_STYLE.get(action, {"label": action, "color": "#6b7280"})
+        style = ACTION_STYLE.get(action, ACTION_FALLBACK)
         card_key = f"card_{action}_single"
         with st.container(key=card_key):
             result_header(
@@ -696,7 +692,7 @@ with tab_batch:
             action = r.get("action", "reply")
             override_key = f"override_{idx}"
             draft_key = f"draft_{idx}"
-            style = ACTION_STYLE.get(action, {"label": action, "color": "#6b7280"})
+            style = ACTION_STYLE.get(action, ACTION_FALLBACK)
 
             card_key = f"card_{action}_{idx}"
             with st.container(key=card_key):
@@ -933,7 +929,7 @@ with tab_auto:
 
     # --- Three lists ---
     st.markdown("---")
-    ui.lane_header("Automatic draft lane", len(st.session_state.ap_auto), "#1B8A5A", "Records the simulated outcome after the veto window unless you cancel")
+    ui.lane_header("Automatic draft lane", len(st.session_state.ap_auto), "#1F7A5C", "Records the simulated outcome after the veto window unless you cancel")
     if not st.session_state.ap_auto:
         st.caption("No reviews waiting for the veto window.")
     now = time.time()
@@ -948,7 +944,7 @@ with tab_auto:
                 st.session_state.ap_handled.add(r["id"])
                 st.rerun()
 
-    ui.lane_header("Approval queue", len(st.session_state.ap_queue), "#B7791F", "You edit, then approve and record; copy any public reply by hand")
+    ui.lane_header("Approval queue", len(st.session_state.ap_queue), "#9A6A12", "You edit, then approve and record; copy any public reply by hand")
     if not st.session_state.ap_queue:
         st.caption("No reviews waiting for owner approval.")
     for i, row in enumerate(st.session_state.ap_queue):
@@ -992,7 +988,7 @@ with tab_auto:
                         st.session_state.ap_queue.pop(i)
                     st.rerun()
 
-    ui.lane_header("Skipped", len(st.session_state.ap_skipped), "#5F6B7A", "Held back by the safety rules")
+    ui.lane_header("Skipped", len(st.session_state.ap_skipped), "#66604D", "Held back by the safety rules")
     if not st.session_state.ap_skipped:
         st.caption("No skipped reviews.")
     for row in st.session_state.ap_skipped:
@@ -1009,14 +1005,13 @@ with tab_auto:
         audit_rows = []
         for a in st.session_state.ap_audit:
             audit_rows.append({
-                "timestamp": _csv_safe(a.get("timestamp", a.get("time", ""))),
-                "review_id": _csv_safe(a.get("review_id", "")),
-                "excerpt": _csv_safe(a["excerpt"]),
-                "action": _csv_safe(a.get("action", a.get("decision", ""))),
-                "status": _csv_safe(a.get("status", "")),
-                "reasons": _csv_safe("; ".join(a["reasons"])),
-                "actor": _csv_safe(a.get("actor", a.get("approver", ""))),
-                "error": _csv_safe(a.get("error", "")),
+                "timestamp": a.get("timestamp", a.get("time", "")),
+                "review_id": a.get("review_id", ""), "excerpt": a["excerpt"],
+                "action": a.get("action", a.get("decision", "")),
+                "status": a.get("status", ""),
+                "reasons": "; ".join(a["reasons"]),
+                "actor": a.get("actor", a.get("approver", "")),
+                "error": a.get("error", ""),
             })
         st.dataframe(audit_rows, use_container_width=True)
         csv_buf = io.StringIO()

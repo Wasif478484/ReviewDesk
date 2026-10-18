@@ -3,8 +3,8 @@
 > Know when not to reply.
 
 [![CI](https://github.com/Wasif478484/ReviewDesk/actions/workflows/ci.yml/badge.svg)](https://github.com/Wasif478484/ReviewDesk/actions/workflows/ci.yml)
-[![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![Streamlit](https://img.shields.io/badge/built%20with-Streamlit-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![Node](https://img.shields.io/badge/node-20%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Next.js](https://img.shields.io/badge/built%20with-Next.js-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
 
 ReviewDesk is an owner-in-the-loop review triage assistant for local businesses.
 It analyzes a customer review and recommends one of four actions:
@@ -17,17 +17,6 @@ It analyzes a customer review and recommends one of four actions:
 ReviewDesk drafts text for the owner to edit and copy by hand. It does **not**
 log in to Google, post replies, report reviews, scrape websites, or send
 anything automatically.
-
-## Why ReviewDesk?
-
-ReviewDesk helps an owner decide **whether a review deserves a reply before
-writing one**. It is designed for businesses that need a calmer workflow for
-multilingual feedback, complaints, possible spam, and reviews that require
-fact-checking.
-
-```text
-Review → Analyze → Triage → Edit → Owner copies and posts
-```
 
 ## Features
 
@@ -42,69 +31,58 @@ Review → Analyze → Triage → Edit → Owner copies and posts
 - Session-persistent demo workflow with veto windows, approval queue, audit CSV,
   idempotency checks, and owner-controlled retry.
 - Mock provider mode for offline demos without an API key.
-- Optional Hugging Face sentiment signal through `gradio_client`; it is
-  advisory and never overrides ReviewDesk's safety decision.
-
-## Free local demo
-
-ReviewDesk can be run and tested without OpenAI, Anthropic, Google, or any paid
-service. The mock provider returns deterministic sample responses:
-
-```powershell
-$env:REVIEWDESK_PROVIDER = "mock"
-python -m streamlit run app.py
-```
-
-Open <http://localhost:8501>, click **Try a sample**, or paste your own review.
-This is the recommended setup for demos, development, and CI.
 
 ## Quick start
 
-### Windows PowerShell
+### Prerequisites
 
-```powershell
-git clone https://github.com/Wasif478484/ReviewDesk.git
-cd ReviewDesk
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-python -m pip install -e .
-$env:REVIEWDESK_PROVIDER = "mock"
-python -m streamlit run app.py
-```
+- Node.js 20+ and npm
+- PostgreSQL database (or SQLite for local dev)
 
-### macOS/Linux
+### Setup
 
 ```bash
 git clone https://github.com/Wasif478484/ReviewDesk.git
 cd ReviewDesk
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
-python -m pip install -e .
-export REVIEWDESK_PROVIDER=mock
-python -m streamlit run app.py
+npm install --legacy-peer-deps
+cp .env.example .env
+# Edit .env: set DATABASE_URL and APP_SECRET (openssl rand -hex 32)
+npx prisma db push
+npm run dev
 ```
 
-## Deploy to Streamlit Community Cloud
+Open <http://localhost:3000>.
 
-The app can be deployed to Streamlit Community Cloud. For a free deployment,
-use mock mode first:
+### Mock mode (no API key)
 
-1. Sign in at <https://share.streamlit.io/> with GitHub.
-2. Select `Wasif478484/ReviewDesk`, branch `master`, and entrypoint `app.py`.
-3. In **Advanced settings**, add these secrets:
+Set `REVIEWDESK_PROVIDER=mock` in `.env` to run with canned responses.
+No API key needed.
 
-   ```toml
-   REVIEWDESK_PROVIDER = "mock"
-   ```
+## Deploy to Vercel (recommended)
 
-4. Deploy the app and open the generated public URL.
+The repository is ready to deploy as a Vercel app:
 
-If you later choose a paid provider, replace the mock settings with the
-provider configuration described below. Secrets are read from Streamlit's
-encrypted secrets store or environment variables. Never put an API key in Git,
-`.env` files committed to the repository, screenshots, or logs.
+1. Sign in at <https://vercel.com/> with GitHub.
+2. Import `Wasif478484/ReviewDesk`, branch `master`.
+3. Vercel auto-detects Next.js. Set the build command to `npm run build`.
+4. In **Environment Variables**, add:
+   - `DATABASE_URL` — your PostgreSQL connection string (e.g., Neon)
+   - `APP_SECRET` — a 64-hex-character secret (`openssl rand -hex 32`)
+   - `REVIEWDESK_PROVIDER` — `openai` (or `anthropic`)
+   - `OPENAI_API_KEY` — your OpenAI API key
+   - `OPENAI_MODEL` — `gpt-4o-mini`
+5. Deploy the app and open the generated public URL.
+
+For production database, use Neon PostgreSQL:
+- Create a Neon project at <https://neon.tech>
+- Copy the connection string
+- Set `DATABASE_URL` in Vercel environment variables
+- Run `npx prisma migrate deploy` on first deploy
+
+Secrets are read from Vercel's encrypted environment variables. Never put
+the API key in Git, `.env` files committed to the repository, screenshots,
+or logs. Live calls use OpenAI and may incur costs; the app remains
+owner-in-the-loop and never posts replies automatically.
 
 ## Using a live model provider
 
@@ -172,7 +150,6 @@ reply to Google.
 │   ├── policy.py              # Frozen safety rules
 │   ├── prompts.py             # Frozen prompts, parser, and draft checks
 │   ├── sources.py             # Mock source and provider boundary
-│   ├── sentiment.py           # Optional Hugging Face sentiment signal
 │   └── ui.py                  # Escaped rendering helpers
 ├── tests/                    # Regression tests
 ├── scripts/                  # Maintainer utilities
@@ -191,20 +168,19 @@ See [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) for module boundaries and
 
 Run the same checks used by CI:
 
-```powershell
-python -m reviewdesk.policy
-python -m reviewdesk.autopilot
-python -m unittest discover -s tests
-python -m compileall -q app.py src/reviewdesk
+```bash
+npm run build
+npm run lint
+npm test
 git diff --check
 ```
 
 Expected results:
 
-- Policy checks: **19/19 passed**
-- Autopilot checks: **9/9 passed**
-- Unit and edge-case tests: **27 passed**
-- Sample workflow: **15/15 expected actions matched**
+- Build: **success** (all routes compiled)
+- Lint: **no errors**
+- Tests: **11 passed**
+- Whitespace: **clean**
 
 GitHub Actions runs these checks on pushes and pull requests.
 
@@ -231,8 +207,7 @@ GitHub Actions runs these checks on pushes and pull requests.
 
 ### Deferred
 
-- Google Business Profile API integration; the current source is simulated and
-  does not scrape Google or access arbitrary companies.
+- Google Business Profile API integration.
 - Authentication and multi-user teams.
 - Durable database storage.
 - Background workers and scheduled processing.

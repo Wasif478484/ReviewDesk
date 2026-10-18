@@ -7,7 +7,7 @@ stars,language,text,expected_action
 1,Roman Urdu,Khana thanda tha aur 40 minute baad order mila. Bohat bura experience.,reply
 4,Roman Urdu,Khana accha tha lekin service bahut slow thi.,reply
 4,French,"Plats délicieux, mais l'attente était beaucoup trop longue.",reply
-4,Arabic,"الطعام كان لذيذا لكن الخدمة بطيئة جدا",reply
+4,Arabic,الطعام كان لذيذا لكن الخدمة بطئة جدا,reply
 2,Spanish,"Excelente comida, pero me cobraron de más y nadie quiso corregirlo.",reply_needs_owner
 2,Roman Urdu,Hamari booking cancel kar di aur koi information nahi di. Manager Kamran bohat rude tha.,reply_needs_owner
 1,Roman Urdu,"Khana khane ke baad meri tabiyat kharab hui, doctor ke paas jana para. Legal action loon ga.",hold

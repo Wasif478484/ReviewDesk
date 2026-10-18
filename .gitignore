@@ -2,6 +2,9 @@
 # This does NOT keep it out of your AI provider's conversation.
 /devpost/learner-profile.md
 
+# Z AI SDK config (contains API keys)
+.z-ai-config
+
 # Local credentials. Allow a secret-free template.
 .env
 .env.*
@@ -25,3 +28,15 @@ dist/
 
 # Generated demo output
 *.tmp
+
+# JavaScript build artifacts from local tooling
+node_modules/
+.next/
+dist/
+*.tsbuildinfo
+
+# Local workspace tooling
+.agents/
+
+# Local database files
+db/*.db

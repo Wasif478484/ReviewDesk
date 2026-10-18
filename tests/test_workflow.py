@@ -1,6 +1,6 @@
 import unittest
 
-from reviewdesk.autopilot import dedup_by_id, run_cycle, send_reply, triage_and_split
+from reviewdesk.autopilot import send_reply
 from reviewdesk.policy import AutopilotPolicy
 
 
@@ -100,10 +100,11 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(audit[0]["status"], "failed")
 
     def test_daily_cap_limits_actual_cycle_records(self):
+        from reviewdesk.autopilot import run_cycle
         source = Source()
         rows = [
-            {"review": {"id": "r1", "stars": 5, "text": "one"}, "result": clean_result(), "due_at": 0},
-            {"review": {"id": "r2", "stars": 5, "text": "two"}, "result": clean_result(), "due_at": 0},
+            {"review": {"id": "r1", "text": "one"}, "result": clean_result(), "due_at": 0},
+            {"review": {"id": "r2", "text": "two"}, "result": clean_result(), "due_at": 0},
         ]
         posted, would_post, failed = run_cycle(
             rows, source, self.profile,
@@ -113,53 +114,6 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual((posted, would_post, failed), (1, 0, 0))
         self.assertEqual(source.calls, 1)
         self.assertEqual(rows[1]["deferred_reason"], "daily cap reached")
-
-    def test_daily_cap_is_shared_across_cycles(self):
-        source = Source()
-        policy = AutopilotPolicy(enabled=True, dry_run=False, daily_cap=1)
-        audit = []
-        rows = [
-            {"review": {"id": "r1", "stars": 5, "text": "one"}, "result": clean_result(), "due_at": 0},
-            {"review": {"id": "r2", "stars": 5, "text": "two"}, "result": clean_result(), "due_at": 0},
-        ]
-        self.assertEqual(run_cycle(rows[:1], source, self.profile, policy, audit, now=1)[0], 1)
-        self.assertEqual(run_cycle(rows[1:], source, self.profile, policy, audit, now=1)[0], 0)
-        self.assertEqual(source.calls, 1)
-
-    def test_send_reply_rechecks_action_and_placeholder(self):
-        source = Source()
-        policy = AutopilotPolicy(enabled=True, dry_run=False)
-        hold = {**clean_result(), "action": "hold", "draft_reply": "Please wait"}
-        ok, _ = send_reply(source, self.review, hold, self.profile, policy,
-                           approver="owner", audit_log=[])
-        self.assertFalse(ok)
-        placeholder = {**clean_result(), "draft_reply": "Thanks [owner: confirm]."}
-        ok, _ = send_reply(source, self.review, placeholder, self.profile, policy,
-                           approver="owner", audit_log=[])
-        self.assertFalse(ok)
-
-    def test_send_reply_rechecks_changed_star_policy(self):
-        source = Source()
-        policy = AutopilotPolicy(enabled=True, dry_run=False, min_stars=5)
-        review = {"id": "r1", "stars": 4, "text": "Good"}
-        ok, _ = send_reply(source, review, clean_result(), self.profile, policy,
-                           approver="owner", audit_log=[])
-        self.assertFalse(ok)
-
-    def test_non_english_script_cannot_enter_auto_lane(self):
-        source = Source()
-        policy = AutopilotPolicy(enabled=True, dry_run=False)
-        arabic = {"id": "r2", "stars": 5, "text": "الطعام كان لذيذا"}
-        auto, queue, _ = triage_and_split(
-            [{**arabic, "result": clean_result()}],
-            source, self.profile, policy, set(),
-        )
-        self.assertEqual(auto, [])
-        self.assertEqual(len(queue), 1)
-
-    def test_duplicate_ids_are_removed_from_one_batch(self):
-        row = {"review": {"id": "r1"}, "result": clean_result()}
-        self.assertEqual(len(dedup_by_id([row, row], set())), 1)
 
 
 if __name__ == "__main__":

@@ -5,6 +5,3 @@ backgroundColor = "#F5F8FC"
 secondaryBackgroundColor = "#FFFFFF"
 textColor = "#10213B"
 font = "sans serif"
-
-[client]
-showErrorDetails = "none"

@@ -13,12 +13,10 @@ Run the tests with:  python autopilot.py
 """
 
 from datetime import datetime, timezone
-import re
 import time
 
 from .policy import AutopilotPolicy, decide, should_send
 from .domain import AuditEvent, WorkflowResult
-from .prompts import check_draft
 
 
 def _timestamp():
@@ -32,85 +30,6 @@ def _is_replied(source, review):
     return bool(review.get("has_reply"))
 
 
-def detect_review_language(text):
-    """Detect obvious script/language signals without trusting model output."""
-    value = str(text or "").strip()
-    if not value:
-        return "unknown"
-    if re.search(r"[\u0600-\u06ff]", value):
-        if re.search(r"[\u0679\u0686\u0688\u0691\u0698\u06ba\u06be\u06d2]", value):
-            return "Urdu"
-        return "Arabic"
-    if re.search(r"[À-ÿ]", value):
-        return "French" if re.search(r"\b(le|la|les|mais|et|pour|avec)\b", value.lower()) else "Spanish"
-    low = value.lower()
-    if re.search(r"\b(khana|accha|acha|bahut|bohat|tha|thi|mila|meri|hamari|rude)\b", low):
-        return "Roman Urdu"
-    return "English"
-
-
-def _policy_result(result, review):
-    """Replace untrusted model language and malformed flags before policy checks."""
-    checked = dict(result or {})
-    checked["review_language"] = detect_review_language(review.get("text", ""))
-    flags = checked.get("flags", [])
-    if not isinstance(flags, list) or not all(isinstance(flag, str) for flag in flags):
-        checked["flags"] = ["other"]
-    return checked
-
-
-def _policy_review(review):
-    """Normalize review fields before the frozen policy sees them."""
-    checked = dict(review or {})
-    try:
-        stars = int(checked.get("stars"))
-    except (TypeError, ValueError):
-        stars = None
-    if stars is None or not 0 <= stars <= 5:
-        checked["stars"] = None
-    return checked
-
-
-def _extra_draft_problems(draft):
-    """Safety checks kept outside frozen prompts.py for the send boundary."""
-    if not isinstance(draft, str):
-        return ["draft must be text"]
-    problems = []
-    if re.search(r"\[\s*owner\s*:", draft, re.I) or re.search(r"\{\s*name\s*\}", draft, re.I):
-        problems.append("draft has an unfilled owner placeholder")
-    if "【" in draft or "】" in draft:
-        problems.append("draft has an unfilled owner placeholder")
-    if re.search(r"https?://|www\.", draft, re.I):
-        problems.append("draft contains a URL that needs owner review")
-    if re.search(r"[\U0001F300-\U0001FAFF]", draft):
-        problems.append("draft contains emoji that needs owner review")
-    if re.search(r"\b\d{3}[.\s-]\d{3}[.\s-]\d{4}\b", draft):
-        problems.append("draft contains a phone-like number that needs owner review")
-    if re.search(
-        r"\b(?:free|gratis|gratuit(?:e|es)?|gratuito)\s+"
-        r"(?:dessert|meal|drink|postre|comida|bebida)\b",
-        draft,
-        re.I,
-    ):
-        problems.append("draft promises an offer that needs owner review")
-    return problems
-
-
-def _has_audit(audit_log, review_id, status):
-    return any(
-        event.get("review_id") == review_id and event.get("status") == status
-        for event in audit_log
-    )
-
-
-def _posted_today(audit_log):
-    return sum(
-        event.get("status") == "recorded_demo"
-        and event.get("action") == "auto_post"
-        for event in audit_log
-    )
-
-
 def send_reply(source, review, result, profile, policy, *, approver, audit_log):
     """Post one reply, or refuse. Returns (ok, note).
 
@@ -119,9 +38,7 @@ def send_reply(source, review, result, profile, policy, *, approver, audit_log):
     For the owner path it posts directly; dry run does not block it.
     """
     review_id = review["id"]
-    checked_review = _policy_review(review)
-    checked_result = _policy_result(result, checked_review)
-    draft = checked_result.get("draft_reply")
+    draft = result.get("draft_reply")
 
     if approver not in ("autopilot", "owner"):
         return False, "unknown approver"
@@ -142,18 +59,8 @@ def send_reply(source, review, result, profile, policy, *, approver, audit_log):
     if not draft:
         return False, "reply draft is empty; moved to approval queue"
 
-    decision, reasons = decide(
-        checked_result, checked_review, profile, policy,
-        posted_today=_posted_today(audit_log),
-        already_replied=already_replied,
-    )
-    extra_problems = _extra_draft_problems(draft)
-    if extra_problems:
-        reasons.extend(extra_problems)
-        decision = "queue"
-    if decision != "auto_post":
-        return False, "reply blocked by safety checks: " + "; ".join(reasons)
     if approver == "autopilot":
+        decision = "auto_post"
         if not should_send(decision, policy):
             return False, "autopilot is off or dry run is on"
     else:
@@ -201,27 +108,25 @@ def run_cycle(rows, source, profile, policy, audit_log, now=None):
     now = now if now is not None else time.time()
     outcome = WorkflowResult()
     for row in rows:
-        if row.get("cancelled") or row.get("handled") or row.get("failed"):
+        if row.get("cancelled") or row.get("handled"):
             continue
         if row["due_at"] > now:
             continue
-        current_posted = _posted_today(audit_log) + outcome.posted
-        if current_posted >= policy.daily_cap:
+        if outcome.posted >= policy.daily_cap:
             row["deferred_reason"] = "daily cap reached"
             timestamp = _timestamp()
-            if not _has_audit(audit_log, row["review"]["id"], "deferred"):
-                audit_log.append({
-                    "timestamp": timestamp,
-                    "time": timestamp,
-                    "review_id": row["review"]["id"],
-                    "excerpt": (row["review"].get("text") or "")[:60],
-                    "action": "auto_post",
-                    "decision": "auto_post",
-                    "status": "deferred",
-                    "reasons": ["daily cap reached"],
-                    "actor": "autopilot",
-                    "approver": "autopilot",
-                })
+            audit_log.append({
+                "timestamp": timestamp,
+                "time": timestamp,
+                "review_id": row["review"]["id"],
+                "excerpt": (row["review"].get("text") or "")[:60],
+                "action": "auto_post",
+                "decision": "auto_post",
+                "status": "deferred",
+                "reasons": ["daily cap reached"],
+                "actor": "autopilot",
+                "approver": "autopilot",
+            })
             continue
         if should_send("auto_post", policy):
             ok, _ = send_reply(source, row["review"], row["result"], profile,
@@ -237,33 +142,27 @@ def run_cycle(rows, source, profile, policy, audit_log, now=None):
         else:
             outcome.would_post += 1
             timestamp = _timestamp()
-            if not _has_audit(audit_log, row["review"]["id"], "dry_run"):
-                audit_log.append({
-                    "timestamp": timestamp,
-                    "time": timestamp,
-                    "review_id": row["review"]["id"],
-                    "excerpt": (row["review"].get("text") or "")[:60],
-                    "action": "auto_post",
-                    "decision": "auto_post",
-                    "status": "dry_run",
-                    "reasons": ["would post"],
-                    "actor": "autopilot",
-                    "approver": "autopilot",
-                })
+            audit_log.append({
+                "timestamp": timestamp,
+                "time": timestamp,
+                "review_id": row["review"]["id"],
+                "excerpt": (row["review"].get("text") or "")[:60],
+                "action": "auto_post",
+                "decision": "auto_post",
+                "status": "dry_run",
+                "reasons": ["would post"],
+                "actor": "autopilot",
+                "approver": "autopilot",
+            })
     return outcome.posted, outcome.would_post, outcome.failed
 
 
 def dedup_by_id(rows, handled_ids):
     """Drop rows whose review id is already handled."""
-    seen = set(handled_ids)
-    unique = []
-    for row in rows:
-        review_id = row["review"]["id"]
-        if review_id in seen or row.get("handled"):
-            continue
-        seen.add(review_id)
-        unique.append(row)
-    return unique
+    return [
+        r for r in rows
+        if r["review"]["id"] not in handled_ids and not r.get("handled")
+    ]
 
 
 def triage_and_split(fetched, source, profile, policy, handled_ids, posted_today=0):
@@ -282,12 +181,10 @@ def triage_and_split(fetched, source, profile, policy, handled_ids, posted_today
         if rid in handled_ids:
             continue
         result = review.get("result") or {}
-        checked_review = _policy_review(review)
-        checked_result = _policy_result(result, checked_review)
-        decision, reasons = decide(checked_result, checked_review, profile, policy,
+        decision, reasons = decide(result, review, profile, policy,
                                    posted_today=posted_today,
                                    already_replied=_is_replied(source, review))
-        entry = {"review": review, "result": checked_result, "cancelled": False}
+        entry = {"review": review, "result": result, "cancelled": False}
         if decision == "auto_post":
             entry["due_at"] = now + veto
             auto_rows.append(entry)

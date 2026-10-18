@@ -1,0 +1,170 @@
+'use client';
+
+/**
+ * bits.tsx, shared Owner's Desk UI primitives: logo, stars, stamps,
+ * banners, draft card, check-facts card, veto countdown, distribution bar.
+ */
+
+import { useEffect, useState } from "react";
+import { ACTION_META, type ReviewData, type TriageData } from "@/types/reviewdesk";
+
+export function LogoMark({ size = 28 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
+      <rect width="32" height="32" rx="9" fill="#1D4ED8" />
+      <path d="M9 17l5 5 9-12" stroke="#FFFFFF" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function Stars({ stars }: { stars: number | null | undefined }) {
+  if (stars == null) return <span className="rd-mono">no rating</span>;
+  return (
+    <span className="rd-stars" aria-label={`${stars} out of 5 stars`}>
+      {"★".repeat(stars)}
+      <span className="opacity-30">{"★".repeat(5 - stars)}</span>
+    </span>
+  );
+}
+
+export function Stamp({ action }: { action: string }) {
+  const meta = ACTION_META[action] ?? ACTION_META.reply_needs_owner;
+  return <span className={meta.stamp}>{meta.label}</span>;
+}
+
+/** Counts down a veto window. Shows "ready" when past due. */
+export function VetoCountdown({ dueAt }: { dueAt: string | null }) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  if (!dueAt) return <span className="rd-veto">ready</span>;
+  const ms = new Date(dueAt).getTime() - now;
+  if (ms <= 0) return <span className="rd-veto">ready now</span>;
+  const totalSec = Math.floor(ms / 1000);
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  return (
+    <span className="rd-veto" aria-live="off">
+      veto {m}:{String(s).padStart(2, "0")}
+    </span>
+  );
+}
+
+/** The check-facts card: draft problems + owner checklist, ledger style. */
+export function CheckFactsCard({ triage }: { triage: TriageData }) {
+  const items = [...triage.flags.map((f) => `risk flag: ${f.replace(/_/g, " ")}`), ...triage.ownerChecklist];
+  if (!items.length) return null;
+  return (
+    <div className="rounded-xl border-[1.5px] border-dashed p-4" style={{ borderColor: "#854D0E", background: "#FBF3D9" }}>
+      <div className="rd-kicker mb-2" style={{ color: "#854D0E" }}>Check facts before posting</div>
+      <ul className="space-y-1.5">
+        {items.map((item, i) => (
+          <li key={i} className="flex gap-2 text-sm" style={{ color: "#374151" }}>
+            <span className="rd-mono shrink-0" style={{ color: "#854D0E" }}>{String(i + 1).padStart(2, "0")}</span>
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** Draft reply with translation + word count target indicator. */
+export function DraftCard({
+  draft, translation, languageUsed, value, onChange, editable,
+}: {
+  draft: string;
+  translation: string | null;
+  languageUsed: string;
+  value?: string;
+  onChange?: (v: string) => void;
+  editable?: boolean;
+}) {
+  const words = (value ?? draft).split(/\s+/).filter(Boolean).length;
+  const inRange = words >= 25 && words <= 90;
+  return (
+    <div className="space-y-3">
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="rd-kicker">Draft reply · {languageUsed || "auto"}</span>
+        <span className="rd-mono" style={{ color: inRange ? "#15803D" : "#854D0E" }} aria-label={`${words} words`}>
+          {words} words {inRange ? "· on target" : "· aim 30-80"}
+        </span>
+      </div>
+      {editable && onChange ? (
+        <textarea
+          className="rd-input min-h-[120px] resize-y text-[15px]"
+          value={value ?? draft}
+          onChange={(e) => onChange(e.target.value)}
+          aria-label="Edit draft reply"
+        />
+      ) : (
+        <p className="whitespace-pre-wrap rounded-[10px] p-4 text-[15px]" style={{ background: "#FFFFFF", border: "1.5px solid #D1D5DB", color: "#111827" }}>
+          {draft}
+        </p>
+      )}
+      {translation && (
+        <div>
+          <div className="rd-kicker mb-1.5">What it says (owner copy)</div>
+          <p className="whitespace-pre-wrap rounded-[10px] p-4 text-sm italic" style={{ background: "#F6F7F9", border: "1px solid #E5E7EB", color: "#374151" }}>
+            {translation}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Triage banner: stamp + reason + optional report note. */
+export function TriageBanner({ triage }: { triage: TriageData }) {
+  const meta = ACTION_META[triage.action] ?? ACTION_META.reply_needs_owner;
+  return (
+    <div className={meta.banner}>
+      <Stamp action={triage.action} />
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium" style={{ color: "#111827" }}>{meta.blurb}</p>
+        {triage.reason && <p className="mt-1 text-sm" style={{ color: "#374151" }}>{triage.reason}</p>}
+        {triage.reportNote && (
+          <p className="mt-2 rounded-lg p-3 text-sm" style={{ background: "#FFFFFF", border: "1px dashed #57534E", color: "#374151" }}>
+            <span className="rd-kicker block" style={{ color: "#57534E" }}>Report note</span>
+            {triage.reportNote}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** Rating distribution bar. */
+export function Distribution({ reviews }: { reviews: ReviewData[] }) {
+  const buckets = [1, 2, 3, 4, 5].map(
+    (s) => reviews.filter((r) => r.stars === s).length,
+  );
+  const total = buckets.reduce((a, b) => a + b, 0) || 1;
+  const colors = ["#EF4444", "#F97316", "#EAB308", "#4ADE80", "#22C55E"];
+  return (
+    <div>
+      <div className="rd-dist" role="img" aria-label="Rating distribution">
+        {buckets.map((n, i) => (
+          <div key={i} style={{ width: `${(n / total) * 100}%`, background: colors[i] }} title={`${i + 1}★: ${n}`} />
+        ))}
+      </div>
+      <div className="rd-mono mt-1.5 flex justify-between">
+        {[1, 2, 3, 4, 5].map((s, i) => (
+          <span key={s}>{s}★ {buckets[i]}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Small metric in ledger style. */
+export function LedgerStat({ label, value, accent }: { label: string; value: string | number; accent?: boolean }) {
+  return (
+    <div className="rd-ledger-row">
+      <span className="rd-kicker">{label}</span>
+      <span className="rd-num text-2xl" style={{ color: accent ? "#1D4ED8" : "#111827" }}>{value}</span>
+    </div>
+  );
+}
