@@ -98,7 +98,6 @@ model Triage {
   review            Review    @relation(fields: [reviewId], references: [id], onDelete: Cascade)
   action            String // reply | reply_needs_owner | hold | report
   sentiment         String // positive | mixed | negative
-  priority          String    @default("normal") // urgent | normal | low
   flags             String    @default("[]")
   reason            String    @default("")
   reviewLanguage    String    @default("unknown")

@@ -34,13 +34,17 @@ npm run start               # serves .next/standalone on :3000
 2. Every workspace starts with a simulated inbox of 15 demo reviews.
 3. Triage lanes: auto (veto countdown), approval queue, recorded — plus
    report notes.
-4. Autopilot is off by default; dry-run first, daily cap, veto window, undo.
-5. Audit ledger records every decision with reasons.
-6. Draft version history with revert.
-7. Bulk actions: record/dismiss/copy multiple reviews at once.
-8. Per-review tone switching (warm/formal/apologetic).
-9. CSV export: reviews CSV and triage results CSV.
-10. Keyboard shortcuts: A=analyze, R=record, C=copy, D=dismiss, V=revert.
+4. Priority scoring: holds and risk flags are urgent, owner-check and
+   negative reviews are normal, clean positives are low.
+5. Autopilot is off by default; dry-run first, daily cap, veto window, undo.
+6. Audit ledger records every decision with reasons.
+7. Draft version history with revert.
+8. Bulk actions: record/dismiss/copy multiple reviews at once.
+9. Per-review tone switching (warm/formal/apologetic).
+10. CSV export: reviews CSV and triage results CSV.
+11. Reply template library: save reusable phrases and insert them into a draft.
+12. Review source filtering: Google, Yelp, Facebook, TripAdvisor, imported CSV.
+13. Keyboard shortcuts: A=analyze, R=record, C=copy, D=dismiss, V=revert.
 
 ## Honest-behavior contract (do not break in edits)
 

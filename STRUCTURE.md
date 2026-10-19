@@ -11,8 +11,10 @@ src/
     auth/              Sign in, sign up, reset password
     onboarding/        First-run business and Google setup
     dashboard/         The desk: Dashboard shell plus Ledger, Autopilot, Settings tabs
+                       and TemplateLibrary (saved reply snippets)
     legal/             Shared shell for privacy and terms pages
-    shared/            Small primitives used across screens (logo, stamps, banners)
+    shared/            Small primitives used across screens (logo, stamps, banners,
+                       sortable table, reply composer, priority badge)
     originkit/         Motion and type effects: SkewInText, SpotlightText,
                        LabelSlideButton. Local copies; the CSS for them lives in
                        app/globals.css (the ok-* rules).
@@ -25,12 +27,27 @@ src/
                        Safe to import from the browser.
     server/            Server-only: database, sessions, encryption, Google OAuth,
                        mail, LLM calls, workspace orchestration.
+                       computePriority() lives in workspace.ts: it derives the
+                       queue priority from the model's output and never sets a
+                       lane on its own.
     utils.ts           Class-name helper
   types/
     reviewdesk.ts      Shapes shared by the API and the UI
   hooks/               React hooks (toast, mobile breakpoint)
 prisma/schema.prisma   Data model
 ```
+
+## Database notes
+
+- The datasource is **PostgreSQL** (Neon in production). `npx prisma db push`
+  syncs the schema.
+- `Template` is read and written with `db.$queryRawUnsafe` /
+  `db.$executeRawUnsafe` in `src/app/api/templates/*`. The Prisma client
+  generated in this build does not expose that model, but the table exists and
+  is in sync with `schema.prisma`. When the client is regenerated with the
+  model, those routes can switch to the typed API.
+- Raw SQL is only used for `Template`. Everything else goes through the typed
+  Prisma client.
 
 ## Design layer
 

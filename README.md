@@ -29,6 +29,9 @@ anything automatically.
   untrusted languages out of the automatic lane.
 - Owner-in-the-loop workflow with veto windows, approval queue, audit log,
   CSV export (reviews + triage results).
+- Priority scoring (urgent / normal / low) so holds and risk flags surface first.
+- Reply template library: save the phrases you reuse, insert them into any draft.
+- Review source filtering (Google, Yelp, Facebook, TripAdvisor, imported CSV).
 - Google Business Profile API integration (optional, with honest status).
 - Encrypted credential storage (AES-256-GCM).
 - Email verification and password reset.
@@ -152,11 +155,13 @@ reply to Google.
 ├── src/components/           # React components
 │   ├── auth/                 # Authentication views
 │   ├── dashboard/            # Dashboard shell + Ledger, Autopilot, Settings tabs
+│   │                         # + TemplateLibrary (saved reply snippets)
 │   ├── landing/              # Public marketing page
 │   ├── legal/                # Privacy and Terms
 │   ├── onboarding/           # First-run business and Google setup
 │   ├── originkit/            # Motion/type effects (SkewInText, SpotlightText, LabelSlideButton)
-│   ├── shared/               # Primitives used across screens (logo, stamps, banners, draft card, sortable table)
+│   ├── shared/               # Primitives used across screens (logo, stamps, banners,
+│   │                         # draft composer, sortable table, priority badge)
 │   └── ui/                   # shadcn/ui primitives
 ├── src/hooks/                # React hooks (toast, mobile breakpoint)
 ├── src/lib/                  # Core libraries

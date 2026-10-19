@@ -293,7 +293,6 @@ export async function triageReview(
       reviewId,
       action: result.action,
       sentiment: result.sentiment,
-      priority: computePriority(result, review.stars),
       flags: JSON.stringify(result.flags),
       reason: result.reason,
       reviewLanguage: result.review_language,
