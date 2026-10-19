@@ -13,6 +13,9 @@ src/
     dashboard/         The desk: Dashboard shell plus Ledger, Autopilot, Settings tabs
     legal/             Shared shell for privacy and terms pages
     shared/            Small primitives used across screens (logo, stamps, banners)
+    originkit/         Motion and type effects: SkewInText, SpotlightText,
+                       LabelSlideButton. Local copies; the CSS for them lives in
+                       app/globals.css (the ok-* rules).
     ui/                shadcn/ui primitives. Generated; edit with care.
   lib/
     engine/            Pure logic: prompts, policy rules, sample inbox.
@@ -25,6 +28,18 @@ src/
   hooks/               React hooks (toast, mobile breakpoint)
 prisma/schema.prisma   Data model
 ```
+
+## Design layer
+
+- daisyUI 5 supplies components (btn, card, badge, tabs, input, alert, loading).
+  The theme is defined once in `app/globals.css` as the `reviewdesk` theme, and
+  `<html data-theme="reviewdesk">` in layout.tsx selects it.
+- Use daisyUI classes for anything daisyUI already covers. The `rd-*` classes
+  in globals.css are for ReviewDesk-specific pieces: review stamps, ledger rows,
+  mono kickers, and the product-window frame.
+- Originkit effects are for entry moments only (page and step headings, primary
+  actions). They respect reduced motion and keep the text available to screen
+  readers.
 
 ## Dependency rules
 

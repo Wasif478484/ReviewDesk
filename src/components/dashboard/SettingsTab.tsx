@@ -2,7 +2,8 @@
 
 /**
  * SettingsTab.tsx, business profile, Google Business connection manager and
- * honest security notes. Connection paths:
+ * honest security notes, built on daisyUI components (tabs-box, fieldset,
+ * input, toggle, alert, badge). Connection paths:
  *   1. Connect with Google (full OAuth, refresh tokens, location picker)
  *   2. API key (advanced; cannot read reviews without OAuth)
  *   3. Paste an OAuth access token (advanced; short-lived)
@@ -167,75 +168,76 @@ export default function SettingsTab({ ws, refresh, onNote }: SettingsTabProps) {
     }
   }
 
-  const statusColor =
-    cred?.status === "connected" ? "#15803D"
-    : cred?.status === "error" ? "#DC2626"
-    : "#854D0E";
+  const statusBadge =
+    cred?.status === "connected" ? "badge-success"
+    : cred?.status === "error" ? "badge-error"
+    : "badge-warning";
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       {/* Business profile */}
-      <section className="rd-card p-6">
+      <section className="card card-border bg-base-100 p-6">
         <div className="rd-double-rule mb-5" />
         <div className="rd-kicker mb-4">Business profile</div>
         <div className="space-y-4">
-          <div>
-            <label htmlFor="st-name" className="rd-kicker mb-1.5 block">Business name</label>
-            <input id="st-name" className="rd-input" value={name} onChange={(e) => setName(e.target.value)} />
-          </div>
+          <fieldset className="fieldset">
+            <legend className="fieldset-legend rd-kicker">Business name</legend>
+            <input id="st-name" className="input w-full" aria-label="Business name" value={name} onChange={(e) => setName(e.target.value)} />
+          </fieldset>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label htmlFor="st-category" className="rd-kicker mb-1.5 block">Category</label>
-              <select id="st-category" className="rd-input" value={category} onChange={(e) => setCategory(e.target.value)}>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend rd-kicker">Category</legend>
+              <select id="st-category" className="select w-full" aria-label="Category" value={category} onChange={(e) => setCategory(e.target.value)}>
                 {["restaurant", "cafe", "bakery", "salon", "clinic", "grocery", "gym", "hotel", "shop", "other"].map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
-            </div>
-            <div>
-              <label htmlFor="st-owner" className="rd-kicker mb-1.5 block">Owner name</label>
-              <input id="st-owner" className="rd-input" value={ownerName} onChange={(e) => setOwnerName(e.target.value)} />
-            </div>
+            </fieldset>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend rd-kicker">Owner name</legend>
+              <input id="st-owner" className="input w-full" aria-label="Owner name" value={ownerName} onChange={(e) => setOwnerName(e.target.value)} />
+            </fieldset>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label htmlFor="st-signoff" className="rd-kicker mb-1.5 block">Sign-off</label>
-              <input id="st-signoff" className="rd-input" value={signOff} onChange={(e) => setSignOff(e.target.value)} />
-            </div>
-            <div>
-              <label htmlFor="st-contact" className="rd-kicker mb-1.5 block">Contact line</label>
-              <input id="st-contact" className="rd-input" value={contactLine} onChange={(e) => setContactLine(e.target.value)} />
-            </div>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend rd-kicker">Sign-off</legend>
+              <input id="st-signoff" className="input w-full" aria-label="Sign-off" value={signOff} onChange={(e) => setSignOff(e.target.value)} />
+            </fieldset>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend rd-kicker">Contact line</legend>
+              <input id="st-contact" className="input w-full" aria-label="Contact line" value={contactLine} onChange={(e) => setContactLine(e.target.value)} />
+            </fieldset>
           </div>
-          <div>
-            <label htmlFor="st-offers" className="rd-kicker mb-1.5 block">Offers you allow in replies</label>
-            <input id="st-offers" className="rd-input" value={allowedOffers} onChange={(e) => setAllowedOffers(e.target.value)} />
-          </div>
-          <div>
-            <label htmlFor="st-desc" className="rd-kicker mb-1.5 block">What the business does</label>
-            <textarea id="st-desc" className="rd-input min-h-[72px]" value={description} onChange={(e) => setDescription(e.target.value)} />
-          </div>
+          <fieldset className="fieldset">
+            <legend className="fieldset-legend rd-kicker">Offers you allow in replies</legend>
+            <input id="st-offers" className="input w-full" aria-label="Offers you allow in replies" value={allowedOffers} onChange={(e) => setAllowedOffers(e.target.value)} />
+          </fieldset>
+          <fieldset className="fieldset">
+            <legend className="fieldset-legend rd-kicker">What the business does</legend>
+            <textarea id="st-desc" className="textarea w-full min-h-[72px]" aria-label="What the business does" value={description} onChange={(e) => setDescription(e.target.value)} />
+          </fieldset>
           <div className="grid gap-4 sm:grid-cols-3">
-            <div>
-              <span className="rd-kicker mb-1.5 block">Tone</span>
-              <select className="rd-input" value={replyTone} onChange={(e) => setReplyTone(e.target.value)} aria-label="Tone">
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend rd-kicker">Tone</legend>
+              <select className="select w-full" value={replyTone} onChange={(e) => setReplyTone(e.target.value)} aria-label="Tone">
                 {TONES.map((t) => <option key={t} value={t}>{t}</option>)}
               </select>
-            </div>
-            <div>
-              <label htmlFor="st-lang" className="rd-kicker mb-1.5 block">Reply language</label>
-              <select id="st-lang" className="rd-input" value={replyLanguage} onChange={(e) => setReplyLanguage(e.target.value)}>
+            </fieldset>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend rd-kicker">Reply language</legend>
+              <select id="st-lang" className="select w-full" value={replyLanguage} onChange={(e) => setReplyLanguage(e.target.value)}>
                 {COMMON_LANGUAGES.map((l) => <option key={l} value={l}>{l === "auto" ? "auto" : l}</option>)}
               </select>
-            </div>
-            <div>
-              <label htmlFor="st-ownerlang" className="rd-kicker mb-1.5 block">Your language</label>
-              <select id="st-ownerlang" className="rd-input" value={ownerLanguage} onChange={(e) => setOwnerLanguage(e.target.value)}>
+            </fieldset>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend rd-kicker">Your language</legend>
+              <select id="st-ownerlang" className="select w-full" value={ownerLanguage} onChange={(e) => setOwnerLanguage(e.target.value)}>
                 {COMMON_LANGUAGES.filter((l) => l !== "auto").map((l) => <option key={l} value={l}>{l}</option>)}
               </select>
-            </div>
+            </fieldset>
           </div>
-          <button className="rd-btn-ink w-full px-6 py-3 text-sm" onClick={saveBusiness} disabled={busy}>
+          <button className="btn btn-neutral w-full" onClick={saveBusiness} disabled={busy}>
+            {busy ? <span className="loading loading-spinner loading-sm" aria-hidden="true" /> : null}
             Save business profile
           </button>
         </div>
@@ -243,27 +245,27 @@ export default function SettingsTab({ ws, refresh, onNote }: SettingsTabProps) {
 
       {/* Connection + security notes */}
       <div className="space-y-6">
-        <section className="rd-card p-6">
+        <section className="card card-border bg-base-100 p-6">
           <div className="rd-double-rule mb-5" />
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <div className="rd-kicker">Google Business connection</div>
             {cred && cred.mode !== "none" && (
-              <span className="rd-chip" style={{ color: statusColor, borderColor: statusColor }}>
+              <span className={`badge badge-soft font-mono ${statusBadge}`}>
                 {cred.status} · {cred.mode === "oauth" ? `OAuth ${cred.keyHint}` : cred.mode === "oauth_token" ? `token ${cred.keyHint}` : `key ${cred.keyHint}`}
               </span>
             )}
           </div>
 
           {cred?.statusMessage && (
-            <p className="mb-4 rounded-[10px] p-3 text-xs" style={{ background: "#F6F7F9", color: "#374151" }}>
+            <p className="mb-4 rounded-[10px] p-3 text-xs text-base-content/70" style={{ background: "#F6F7F9" }}>
               Last check: {cred.statusMessage}
               {cred.lastCheckedAt ? ` (${new Date(cred.lastCheckedAt).toLocaleString()})` : ""}
             </p>
           )}
 
-          <div className="rd-tabs mb-4 w-full" role="tablist" aria-label="Connection type">
+          <div className="tabs tabs-box mb-4 w-full" role="tablist" aria-label="Connection type">
             {([["oauth", "Connect Google"], ["api_key", "API key"], ["oauth_token", "Paste token"]] as const).map(([v, label]) => (
-              <button key={v} role="tab" aria-selected={mode === v} className={`rd-tab ${mode === v ? "rd-tab-active" : ""}`} onClick={() => setMode(v)}>
+              <button key={v} role="tab" aria-selected={mode === v} className={`tab flex-1 ${mode === v ? "tab-active" : ""}`} onClick={() => setMode(v)}>
                 {label}
               </button>
             ))}
@@ -274,15 +276,17 @@ export default function SettingsTab({ ws, refresh, onNote }: SettingsTabProps) {
               {!oauthConnected ? (
                 <>
                   {ws.googleOAuthConfigured === false && (
-                    <p className="rounded-[10px] p-3 text-sm" style={{ background: "#FBF3D9", border: "1px dashed #854D0E", color: "#854D0E" }}>
-                      This deployment does not have Google OAuth configured yet. An admin must set
-                      GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET (plus the redirect URI in the Google
-                      Cloud console) before this button will work. You can still paste a token below.
-                    </p>
+                    <div className="alert alert-warning" role="status">
+                      <span className="text-sm">
+                        This deployment does not have Google OAuth configured yet. An admin must set
+                        GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET (plus the redirect URI in the Google
+                        Cloud console) before this button will work. You can still paste a token below.
+                      </span>
+                    </div>
                   )}
                   <a
                     href="/api/auth/google/start"
-                    className={`rd-btn-green flex w-full items-center justify-center gap-2 px-5 py-3 text-sm min-h-[44px] ${ws.googleOAuthConfigured === false ? "pointer-events-none opacity-55" : ""}`}
+                    className={`btn btn-primary w-full min-h-[44px] ${ws.googleOAuthConfigured === false ? "pointer-events-none opacity-55" : ""}`}
                     aria-disabled={ws.googleOAuthConfigured === false}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27 3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10c5.35 0 9.25-3.67 9.25-9.09c0-1.15-.15-1.81-.15-1.81"/></svg>
@@ -295,16 +299,19 @@ export default function SettingsTab({ ws, refresh, onNote }: SettingsTabProps) {
                 </>
               ) : (
                 <>
-                  <div className="rounded-[10px] p-3 text-sm" style={{ background: "#E9F9EF", border: "1px solid #15803D", color: "#166534" }}>
-                    Connected{cred?.grantedEmail ? ` as ${cred.grantedEmail}` : ""}. Access tokens refresh automatically.
+                  <div className="alert alert-success" role="status">
+                    <span className="text-sm">
+                      Connected{cred?.grantedEmail ? ` as ${cred.grantedEmail}` : ""}. Access tokens refresh automatically.
+                    </span>
                   </div>
                   <div>
                     <div className="rd-kicker mb-1.5 block">Location</div>
                     <div className="flex flex-wrap gap-2">
-                      <button className="rd-btn-ghost px-4 py-2 text-xs min-h-[36px]" onClick={discoverLocations} disabled={locBusy}>
-                        {locBusy ? "Looking…" : "Find my locations"}
+                      <button className="btn btn-outline btn-sm" onClick={discoverLocations} disabled={locBusy}>
+                        {locBusy ? <span className="loading loading-spinner loading-xs" aria-hidden="true" /> : null}
+                        {locBusy ? "Looking" : "Find my locations"}
                       </button>
-                      <button className="rd-btn-ghost px-4 py-2 text-xs min-h-[36px]" onClick={async () => {
+                      <button className="btn btn-outline btn-sm" onClick={async () => {
                         const res = await fetch("/api/reviews/fetch-google", { method: "POST" });
                         const data = await res.json();
                         onNote(res.ok ? (data.message ?? `Imported ${data.imported} review(s).`) : data.error);
@@ -315,7 +322,7 @@ export default function SettingsTab({ ws, refresh, onNote }: SettingsTabProps) {
                     </div>
                     {locations && (
                       <select
-                        className="rd-input mt-2"
+                        className="select mt-2 w-full"
                         value={locationId}
                         onChange={(e) => setLocationId(e.target.value)}
                         aria-label="Choose location"
@@ -327,17 +334,17 @@ export default function SettingsTab({ ws, refresh, onNote }: SettingsTabProps) {
                       </select>
                     )}
                     {!locations && locationId && (
-                      <input className="rd-input mt-2 font-mono text-xs" value={locationId} onChange={(e) => setLocationId(e.target.value)} aria-label="Location resource name" />
+                      <input className="input mt-2 w-full font-mono text-xs" value={locationId} onChange={(e) => setLocationId(e.target.value)} aria-label="Location resource name" />
                     )}
                   </div>
                   <label className="flex items-start justify-between gap-3 rounded-[10px] p-3" style={{ background: "#FBF3D9", border: "1px dashed #854D0E" }}>
-                    <span className="text-sm" style={{ color: "#854D0E" }}>
+                    <span className="text-sm text-[#854D0E]">
                       <strong>Live posting</strong>
                       <span className="block text-xs">Send approved replies to Google via API. Off = everything stays recorded here.</span>
                     </span>
-                    <input type="checkbox" checked={livePosting} onChange={(e) => setLivePosting(e.target.checked)} className="mt-0.5 h-5 w-5 accent-[#854D0E]" aria-label="Live posting" />
+                    <input type="checkbox" checked={livePosting} onChange={(e) => setLivePosting(e.target.checked)} className="toggle toggle-sm mt-0.5" aria-label="Live posting" />
                   </label>
-                  <button className="rd-btn-ink w-full px-5 py-2.5 text-sm" onClick={saveCredential} disabled={busy}>
+                  <button className="btn btn-neutral w-full" onClick={saveCredential} disabled={busy}>
                     Save location &amp; preferences
                   </button>
                 </>
@@ -347,66 +354,67 @@ export default function SettingsTab({ ws, refresh, onNote }: SettingsTabProps) {
 
           {mode === "api_key" && (
             <div className="space-y-4">
-              <div>
-                <label htmlFor="st-apikey" className="rd-kicker mb-1.5 block">
+              <fieldset className="fieldset">
+                <legend className="fieldset-legend rd-kicker">
                   API key {cred?.keyHint && cred.mode === "api_key" ? `(stored: ${cred.keyHint}; leave blank to keep)` : ""}
-                </label>
-                <input id="st-apikey" className="rd-input font-mono text-sm" type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="AIza…" autoComplete="off" />
-              </div>
-              <div>
-                <label htmlFor="st-loc" className="rd-kicker mb-1.5 block">Place or location id (optional)</label>
-                <input id="st-loc" className="rd-input font-mono text-sm" value={locationId} onChange={(e) => setLocationId(e.target.value)} placeholder="places/{place_id}" />
+                </legend>
+                <input id="st-apikey" className="input w-full font-mono text-sm" type="password" aria-label="API key" value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="AIza…" autoComplete="off" />
+              </fieldset>
+              <fieldset className="fieldset">
+                <legend className="fieldset-legend rd-kicker">Place or location id (optional)</legend>
+                <input id="st-loc" className="input w-full font-mono text-sm" aria-label="Place or location id" value={locationId} onChange={(e) => setLocationId(e.target.value)} placeholder="places/{place_id}" />
                 <p className="rd-mono mt-1.5">An API key alone cannot read reviews. Google requires OAuth consent for review data. Use Connect Google for the full experience.</p>
-              </div>
-              <button className="rd-btn-ink w-full px-5 py-2.5 text-sm" onClick={saveCredential} disabled={busy}>Save</button>
+              </fieldset>
+              <button className="btn btn-neutral w-full" onClick={saveCredential} disabled={busy}>Save</button>
             </div>
           )}
 
           {mode === "oauth_token" && (
             <div className="space-y-4">
-              <div>
-                <label htmlFor="st-token" className="rd-kicker mb-1.5 block">
+              <fieldset className="fieldset">
+                <legend className="fieldset-legend rd-kicker">
                   OAuth access token {cred?.keyHint && cred.mode === "oauth_token" ? `(stored: ${cred.keyHint}; leave blank to keep)` : ""}
-                </label>
-                <input id="st-token" className="rd-input font-mono text-sm" type="password" value={token} onChange={(e) => setToken(e.target.value)} placeholder="ya29.…" autoComplete="off" />
-              </div>
-              <div>
-                <label htmlFor="st-loc2" className="rd-kicker mb-1.5 block">Location resource name</label>
-                <input id="st-loc2" className="rd-input font-mono text-sm" value={locationId} onChange={(e) => setLocationId(e.target.value)} placeholder="accounts/{id}/locations/{id}" />
+                </legend>
+                <input id="st-token" className="input w-full font-mono text-sm" type="password" aria-label="OAuth access token" value={token} onChange={(e) => setToken(e.target.value)} placeholder="ya29.…" autoComplete="off" />
+              </fieldset>
+              <fieldset className="fieldset">
+                <legend className="fieldset-legend rd-kicker">Location resource name</legend>
+                <input id="st-loc2" className="input w-full font-mono text-sm" aria-label="Location resource name" value={locationId} onChange={(e) => setLocationId(e.target.value)} placeholder="accounts/{id}/locations/{id}" />
                 <p className="rd-mono mt-1.5">Pasted access tokens expire within the hour. Connect Google stores a refresh token instead.</p>
-              </div>
+              </fieldset>
               <label className="flex items-start justify-between gap-3 rounded-[10px] p-3" style={{ background: "#FBF3D9", border: "1px dashed #854D0E" }}>
-                <span className="text-sm" style={{ color: "#854D0E" }}>
+                <span className="text-sm text-[#854D0E]">
                   <strong>Live posting</strong>
                   <span className="block text-xs">Send approved replies to Google via API. Off = everything stays recorded here.</span>
                 </span>
-                <input type="checkbox" checked={livePosting} onChange={(e) => setLivePosting(e.target.checked)} className="mt-0.5 h-5 w-5 accent-[#854D0E]" aria-label="Live posting" />
+                <input type="checkbox" checked={livePosting} onChange={(e) => setLivePosting(e.target.checked)} className="toggle toggle-sm mt-0.5" aria-label="Live posting" />
               </label>
-              <button className="rd-btn-ink w-full px-5 py-2.5 text-sm" onClick={saveCredential} disabled={busy}>Save</button>
+              <button className="btn btn-neutral w-full" onClick={saveCredential} disabled={busy}>Save</button>
             </div>
           )}
 
           <div className="mt-4 flex flex-wrap gap-2">
             {mode !== "oauth" && (
-              <button className="rd-btn-ghost px-5 py-2.5 text-sm" onClick={testCredential} disabled={busy}>Test connection</button>
+              <button className="btn btn-outline btn-sm" onClick={testCredential} disabled={busy}>Test connection</button>
             )}
             {cred && cred.mode !== "none" && (
-              <button className="rd-btn-ghost px-5 py-2.5 text-sm" style={{ color: "#DC2626" }} onClick={disconnect} disabled={busy}>Disconnect</button>
+              <button className="btn btn-outline btn-sm text-error" onClick={disconnect} disabled={busy}>Disconnect</button>
             )}
           </div>
 
           {testResult && (
-            <p className="mt-4 rounded-[10px] p-3 text-sm" role="status"
-              style={{ background: testResult.ok ? "#E9F9EF" : "#FEE9E9", border: `1px solid ${testResult.ok ? "#15803D" : "#DC2626"}`, color: testResult.ok ? "#166534" : "#B91C1C" }}>
-              {testResult.message}
-              {testResult.fetchNote && <span className="mt-1 block text-xs">{testResult.fetchNote}</span>}
-            </p>
+            <div className={`alert mt-4 ${testResult.ok ? "alert-success" : "alert-error"}`} role="status">
+              <div className="text-sm">
+                <span>{testResult.message}</span>
+                {testResult.fetchNote && <span className="mt-1 block text-xs">{testResult.fetchNote}</span>}
+              </div>
+            </div>
           )}
         </section>
 
-        <section className="rd-night-card p-6">
-          <div className="rd-kicker mb-3" style={{ color: "rgba(250,250,252,.72)" }}>How your data is handled</div>
-          <ul className="space-y-2.5 text-sm" style={{ color: "rgba(250,250,252,.82)" }}>
+        <section className="card bg-neutral text-neutral-content border border-neutral p-6">
+          <div className="rd-kicker mb-3 text-[rgba(250,250,252,.72)]">How your data is handled</div>
+          <ul className="space-y-2.5 text-sm text-[rgba(250,250,252,.82)]">
             <li>· Your Google credential is encrypted with AES-256-GCM before storage and never sent back to the browser; only a masked hint.</li>
             <li>· Review text is sent to the model provider for triage. That is the only outbound AI call.</li>
             <li>· Approved replies are <strong>recorded in your workspace</strong>. They reach Google only when live posting is on and the API call succeeds.</li>

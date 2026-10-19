@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* daisyUI build: v5 reviewdesk theme, see plugin blocks below. */
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -23,7 +25,7 @@
   --color-chart-1: var(--chart-1);
   --color-ring: var(--ring);
   --color-input: var(--input);
-  --color-border: var(--border);
+  --color-border: var(--shadcn-border);
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
@@ -44,7 +46,52 @@
 }
 
 /* ==========================================================================
-   ReviewDesk design system: plain, professional, product-like.
+   daisyUI 5: one custom light theme, "reviewdesk".
+   Neutral surfaces, ink neutral buttons, one solid blue primary.
+   Squared field radius (0.5rem) everywhere: no pill shapes.
+   ========================================================================== */
+
+@plugin "daisyui" {
+  themes: false;
+}
+
+@plugin "daisyui/theme" {
+  name: "reviewdesk";
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+  --color-base-100: #ffffff;
+  --color-base-200: #f6f7f9;
+  --color-base-300: #e5e7eb;
+  --color-base-content: #111827;
+  --color-primary: #1d4ed8;
+  --color-primary-content: #ffffff;
+  --color-secondary: #f6f7f9;
+  --color-secondary-content: #111827;
+  --color-accent: #eaf1ff;
+  --color-accent-content: #1e40af;
+  --color-neutral: #111827;
+  --color-neutral-content: #f9fafb;
+  --color-info: #1d4ed8;
+  --color-info-content: #ffffff;
+  --color-success: #15803d;
+  --color-success-content: #ffffff;
+  --color-warning: #854d0e;
+  --color-warning-content: #ffffff;
+  --color-error: #dc2626;
+  --color-error-content: #ffffff;
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.75rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+/* ==========================================================================
+   ReviewDesk design system, layered on daisyUI theme variables.
    White background, gray borders, solid ink buttons, one solid blue accent.
    No gradients, no glows, no glass, no pill shapes, no decorative motion.
    Contrast (WCAG AA, small text >= 4.5:1 on their backgrounds):
@@ -58,21 +105,21 @@
 :root {
   --radius: 0.5rem;
 
-  /* Neutral palette */
-  --rd-paper: #FFFFFF;
-  --rd-subtle: #F6F7F9;
-  --rd-surface: #FFFFFF;
+  /* Neutral palette, aliased to the daisyUI reviewdesk theme */
+  --rd-paper: var(--color-base-100);
+  --rd-subtle: var(--color-base-200);
+  --rd-surface: var(--color-base-100);
+  --rd-line: var(--color-base-300);
   --rd-ink: #111827;
   --rd-body: #374151;
   --rd-muted: #6B7280;
-  --rd-line: #E5E7EB;
   --rd-line-strong: #D1D5DB;
   --rd-night: #111827;
   --rd-night-card: #1F2937;
   --rd-night-line: #374151;
   --rd-night-text: #F9FAFB;
   --rd-night-muted: rgba(249, 250, 251, 0.72);
-  --rd-brand: #1D4ED8;
+  --rd-brand: var(--color-primary);
   --rd-brand-deep: #1E40AF;
   --rd-brand-soft: #93C5FD;
   --rd-brand-tint: #EFF6FF;
@@ -106,7 +153,7 @@
   --accent: var(--rd-brand-tint);
   --accent-foreground: var(--rd-ink);
   --destructive: var(--rd-hold);
-  --border: var(--rd-line);
+  --shadcn-border: var(--rd-line);
   --input: var(--rd-line-strong);
   --ring: var(--rd-brand);
   --chart-1: #1D4ED8;
@@ -238,9 +285,9 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* ---------- Buttons (rectangular, solid) ---------- */
+/* ---------- Buttons (kept for legacy hooks; daisyUI btn is primary) ---------- */
 .rd-btn-ink {
-  background: var(--rd-ink);
+  background: var(--rd-neutral, #111827);
   color: var(--rd-night-text);
   border-radius: 8px;
   font-weight: 600;
@@ -265,7 +312,7 @@
 }
 .rd-btn-ghost:hover { background: var(--rd-subtle); border-color: #9CA3AF; }
 
-/* ---------- Inputs ---------- */
+/* ---------- Inputs (kept for app forms) ---------- */
 .rd-input {
   width: 100%;
   background: #FFFFFF;
@@ -355,7 +402,7 @@
   white-space: nowrap;
 }
 
-/* ---------- Dark section (footer) ---------- */
+/* ---------- Dark section ---------- */
 .rd-hero {
   background: var(--rd-night);
   color: var(--rd-night-text);
@@ -467,10 +514,70 @@
   border-radius: 14px;
 }
 
+/* ==========================================================================
+   Originkit pattern styles (SpotlightText / SkewInText / LabelSlideButton).
+   Hover- and mount-triggered only, no scroll-linked motion.
+   ========================================================================== */
+
+/* SpotlightText: chars dim only when the JS effect is active */
+.ok-spotlight [data-ok-char] {
+  transition: opacity 120ms linear;
+}
+.ok-spotlight[data-ok-active] [data-ok-char] {
+  opacity: 0.42;
+}
+
+/* SkewInText: one-time staggered entrance */
+.ok-skewin-word {
+  display: inline-block;
+  opacity: 0;
+  animation: ok-skew-in 560ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@keyframes ok-skew-in {
+  from { opacity: 0; transform: translateY(14px) skewY(2.5deg) skewX(-5deg); }
+  to { opacity: 1; transform: translateY(0) skewY(0) skewX(0); }
+}
+
+/* RollLabel: stacked label rolls one line up on host hover */
+.ok-roll {
+  display: inline-block;
+  overflow: hidden;
+  height: 1.3em;
+}
+.ok-roll-stack {
+  display: flex;
+  flex-direction: column;
+  transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.ok-roll-line {
+  display: block;
+  height: 1.3em;
+  line-height: 1.3em;
+}
+.ok-roll-host:hover .ok-roll-stack,
+.ok-roll-host:focus-visible .ok-roll-stack {
+  transform: translateY(-50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ok-skewin-word {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .ok-roll-stack {
+    transition: none;
+  }
+  .ok-spotlight [data-ok-char] {
+    transition: none;
+  }
+}
+
 /* ---------- Selection ---------- */
 ::selection {
   background: rgba(29, 78, 216, 0.15);
 }
+
 
 /* ---------- Focus: visible for keyboard users, quiet for mouse users ---------- */
 :where(a, button, [role="button"], [role="tab"], input, select, textarea, summary):focus-visible {
@@ -479,7 +586,7 @@
   border-radius: 4px;
 }
 
-/* ---------- Button states ---------- */
+/* ---------- Disabled and pointer ---------- */
 button, [role="button"] {
   cursor: pointer;
 }
@@ -491,6 +598,7 @@ button:disabled,
 
 /* Touch screens get 44px targets (WCAG 2.5.5); mouse layouts stay compact. */
 @media (pointer: coarse) {
+  .btn,
   .rd-btn-ink,
   .rd-btn-green,
   .rd-btn-ghost,
@@ -499,7 +607,7 @@ button:disabled,
   }
 }
 
-/* Respect the OS setting for reduced motion. */
+/* Respect the OS setting for reduced motion (covers the ok-* effects too). */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

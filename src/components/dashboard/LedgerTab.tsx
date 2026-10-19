@@ -2,7 +2,7 @@
 
 /**
  * LedgerTab.tsx, the audit ledger: every decision, approval, veto and undo
- * with reasons, newest first.
+ * with reasons, newest first. Rendered as a daisyUI table.
  */
 
 import type { WorkspaceData } from "@/types/reviewdesk";
@@ -15,7 +15,7 @@ export default function LedgerTab({ ws }: { ws: WorkspaceData }) {
   };
 
   return (
-    <section className="rd-card p-6">
+    <section className="card card-border bg-base-100 p-6">
       <div className="rd-double-rule mb-5" />
       <div className="mb-5 flex items-baseline justify-between">
         <div>
@@ -29,31 +29,42 @@ export default function LedgerTab({ ws }: { ws: WorkspaceData }) {
         <p className="rd-mono py-8 text-center">No entries yet. Analyze a review to start the ledger.</p>
       ) : (
         <div className="rd-scroll max-h-[64vh] overflow-y-auto pr-1">
-          {ws.audits.map((a) => {
-            const meta = ACTION_META[a.action];
-            const statusColor =
-              a.status === "failed" ? "#DC2626"
-              : a.status === "recorded_demo" || a.status === "sent" ? "#15803D"
-              : a.status === "deferred" || a.status === "dry_run" ? "#854D0E"
-              : "#57534E";
-            return (
-              <article key={a.id} className="rd-ledger-row !items-start">
-                <div className="min-w-0 flex-1">
-                  <div className="mb-1 flex flex-wrap items-center gap-2">
-                    <span className="rd-mono font-semibold" style={{ color: "#111827" }}>{fmt(a.timestamp)}</span>
-                    <span className="rd-chip">{meta?.label ?? (a.action || "(none)")}</span>
-                    <span className="rd-chip" style={{ color: statusColor, borderColor: statusColor }}>{a.status.replace(/_/g, " ")}</span>
-                    <span className="rd-mono">by {a.actor}</span>
-                  </div>
-                  {a.excerpt && <p className="line-clamp-1 text-sm text-[#374151]">&ldquo;{a.excerpt}&rdquo;</p>}
-                  {a.reasons.length > 0 && (
-                    <p className="mt-1 text-xs text-[#6B7280]">{a.reasons.join(" · ")}</p>
-                  )}
-                  {a.error && <p className="mt-1 text-xs" style={{ color: "#DC2626" }}>{a.error}</p>}
-                </div>
-              </article>
-            );
-          })}
+          <table className="table table-sm">
+            <thead>
+              <tr>
+                <th className="rd-kicker">When</th>
+                <th className="rd-kicker">Action</th>
+                <th className="rd-kicker">Status</th>
+                <th className="rd-kicker">Actor</th>
+                <th className="rd-kicker">Detail</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ws.audits.map((a) => {
+                const meta = ACTION_META[a.action];
+                const statusBadge =
+                  a.status === "failed" ? "badge-error"
+                  : a.status === "recorded_demo" || a.status === "sent" ? "badge-success"
+                  : a.status === "deferred" || a.status === "dry_run" ? "badge-warning"
+                  : "badge-ghost";
+                return (
+                  <tr key={a.id} className="align-top">
+                    <td className="whitespace-nowrap font-mono text-xs font-semibold text-[#111827]">{fmt(a.timestamp)}</td>
+                    <td><span className="badge badge-ghost badge-sm font-mono">{meta?.label ?? (a.action || "(none)")}</span></td>
+                    <td><span className={`badge badge-soft badge-sm font-mono ${statusBadge}`}>{a.status.replace(/_/g, " ")}</span></td>
+                    <td className="font-mono text-xs text-[#6B7280]">{a.actor}</td>
+                    <td className="min-w-0">
+                      {a.excerpt && <p className="line-clamp-1 text-sm text-[#374151]">&ldquo;{a.excerpt}&rdquo;</p>}
+                      {a.reasons.length > 0 && (
+                        <p className="mt-0.5 text-xs text-[#6B7280]">{a.reasons.join(" · ")}</p>
+                      )}
+                      {a.error && <p className="mt-0.5 text-xs text-error">{a.error}</p>}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
     </section>

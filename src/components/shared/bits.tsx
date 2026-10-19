@@ -94,7 +94,7 @@ export function DraftCard({
       </div>
       {editable && onChange ? (
         <textarea
-          className="rd-input min-h-[120px] resize-y text-[15px]"
+          className="textarea w-full min-h-[120px] resize-y text-[15px]"
           value={value ?? draft}
           onChange={(e) => onChange(e.target.value)}
           aria-label="Edit draft reply"

@@ -112,7 +112,8 @@ export default function Home() {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="rd-kicker mb-3">ReviewDesk</div>
-          <p className="rd-mono">Opening the desk…</p>
+          <p className="rd-mono mb-3">Opening the desk…</p>
+          <span className="loading loading-spinner text-primary" aria-hidden="true"></span>
         </div>
       </div>
     );
@@ -121,7 +122,7 @@ export default function Home() {
   if (view === "verify-result") {
     return (
       <div className="flex min-h-screen items-center justify-center px-5">
-        <div className="rd-card w-full max-w-[440px] p-8 text-center">
+        <div className="card card-border bg-base-100 w-full max-w-[440px] p-8 text-center">
           <div className="mb-6 flex items-center justify-center gap-2.5">
             <LogoMark size={26} />
             <span className="rd-display text-lg">ReviewDesk</span>
@@ -133,7 +134,7 @@ export default function Home() {
             {verifyOutcome === null ? "One moment." : verifyOutcome.message}
           </p>
           <button
-            className="rd-btn-ink px-6 py-2.5 text-sm"
+            className="btn btn-neutral"
             disabled={verifyOutcome === null}
             onClick={async () => {
               const { status, data } = await loadWorkspace();

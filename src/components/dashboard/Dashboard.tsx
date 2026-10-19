@@ -2,7 +2,8 @@
 
 /**
  * Dashboard.tsx, the owner's desk after onboarding: top ledger bar, stats,
- and tabs (Desk / Autopilot / Ledger / Settings). The Desk tab is the
+ and tabs (Desk / Autopilot / Ledger / Settings), built on daisyUI
+ components (tabs-box, alert, badge, btn). The Desk tab is the
  single-review triage surface.
  */
 
@@ -145,7 +146,7 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
   return (
     <div className="min-h-screen">
       {/* Top bar */}
-      <header className="sticky top-0 z-40 border-b border-[#E5E7EB] bg-[rgba(255,255,255,0.85)] backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-base-300 bg-base-100/85 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-4 px-6">
           <div className="flex items-center gap-2.5">
             <LogoMark size={26} />
@@ -156,19 +157,14 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
           </div>
           <div className="flex items-center gap-3">
             <span
-              className="rd-chip"
+              className={`badge badge-soft font-mono ${cred?.status === "connected" ? "badge-success" : "badge-ghost"}`}
               title={cred ? cred.statusMessage : "Demo mode: nothing is sent to Google"}
-              style={{
-                color: cred?.status === "connected" ? "#166534" : "#6B7280",
-                background: cred?.status === "connected" ? "#E9F9EF" : "#F6F7F9",
-                borderColor: cred?.status === "connected" ? "#1D4ED8" : "#E5E7EB",
-              }}
             >
               {cred?.status === "connected" ? "Google connected" : "Demo inbox"}
             </span>
             <button
               onClick={async () => { await fetch("/api/auth/logout", { method: "POST" }); onSignOut(); }}
-              className="rd-mono hover:text-[#111827]"
+              className="btn btn-ghost btn-sm rd-mono"
             >
               Sign out
             </button>
@@ -179,7 +175,7 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
       <main className="mx-auto max-w-[1200px] px-6 py-8">
         {/* Stats ledger */}
         <section className="mb-8 grid gap-6 md:grid-cols-[1fr_320px]">
-          <div className="rd-card p-6">
+          <div className="card card-border bg-base-100 p-6">
             <div className="mb-3 flex items-center justify-between">
               <span className="rd-kicker">Desk at a glance</span>
               <span className="rd-mono">{ws.stats.pending} pending · {ws.stats.recordedToday} recorded today</span>
@@ -190,16 +186,16 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
               <LedgerStat label="Reply rate" value={`${ws.stats.total ? Math.round((ws.stats.replied / ws.stats.total) * 100) : 0}%`} accent />
             </div>
           </div>
-          <div className="rd-card p-6">
+          <div className="card card-border bg-base-100 p-6">
             <span className="rd-kicker mb-3 block">Rating distribution</span>
             <Distribution reviews={ws.reviews} />
           </div>
         </section>
 
-        {/* Tabs */}
-        <div className="rd-tabs mb-6" role="tablist" aria-label="Workspace sections">
+        {/* Tabs: daisyUI */}
+        <div className="tabs tabs-box mb-6 w-fit" role="tablist" aria-label="Workspace sections">
           {([["desk", "Desk"], ["autopilot", "Autopilot"], ["ledger", "Ledger"], ["settings", "Settings"]] as const).map(([v, label]) => (
-            <button key={v} role="tab" aria-selected={tab === v} className={`rd-tab ${tab === v ? "rd-tab-active" : ""}`} onClick={() => setTab(v)}>
+            <button key={v} role="tab" aria-selected={tab === v} className={`tab ${tab === v ? "tab-active" : ""}`} onClick={() => setTab(v)}>
               {label}
               {v === "autopilot" && ws.reviews.some((r) => r.triage?.lane === "auto" && r.triage?.status === "pending") ? " ●" : ""}
             </button>
@@ -207,23 +203,23 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
         </div>
 
         {note && (
-          <div className="rd-card mb-6 p-4 text-sm" style={{ background: "#E9F9EF", borderColor: "#1D4ED8", color: "#166534" }} role="status">
-            {note}
+          <div className="alert alert-success mb-6" role="status">
+            <span className="text-sm">{note}</span>
           </div>
         )}
 
         {googleNote && (
-          <div className="rd-card mb-6 p-4 text-sm" style={{ background: initialGoogleStatus === "connected" ? "#E9F9EF" : "#FBF3D9", borderColor: initialGoogleStatus === "connected" ? "#15803D" : "#854D0E", color: initialGoogleStatus === "connected" ? "#166534" : "#854D0E" }} role="status">
-            {googleNote}
+          <div className={`alert mb-6 ${initialGoogleStatus === "connected" ? "alert-success" : "alert-warning"}`} role="status">
+            <span className="text-sm">{googleNote}</span>
           </div>
         )}
 
         {!ws.user.emailVerified && (
-          <div className="rd-card mb-6 flex flex-wrap items-center justify-between gap-3 p-4 text-sm" style={{ background: "#FBF3D9", borderColor: "#854D0E", color: "#854D0E" }} role="status">
-            <span>
+          <div className="alert alert-warning mb-6" role="status">
+            <span className="text-sm">
               <strong>Verify your email</strong>. {ws.user.email} is not verified yet. Verification keeps your account recoverable.
             </span>
-            <button className="rd-btn-ghost px-4 py-2 text-xs min-h-[36px]" style={{ borderColor: "#854D0E", color: "#854D0E" }} onClick={resendVerification}>
+            <button className="btn btn-outline btn-sm" onClick={resendVerification}>
               Resend verification link
             </button>
           </div>
@@ -232,14 +228,14 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
         {tab === "desk" && (
           <section className="grid gap-6 lg:grid-cols-[380px_1fr]">
             {/* Inbox */}
-            <div className="rd-card flex max-h-[72vh] flex-col p-5">
+            <div className="card card-border bg-base-100 flex max-h-[72vh] flex-col p-5">
               <div className="mb-3 flex items-center justify-between gap-2">
                 <span className="rd-kicker">Inbox</span>
-                <div className="flex gap-1.5">
+                <div className="tabs tabs-box tabs-xs" role="group" aria-label="Inbox filter">
                   {(["all", "pending", "replied"] as const).map((f) => (
                     <button
                       key={f}
-                      className={`rd-tab !min-h-[28px] !px-2.5 !py-1 ${filter === f ? "rd-tab-active" : ""}`}
+                      className={`tab ${filter === f ? "tab-active" : ""}`}
                       onClick={() => setFilter(f)}
                     >
                       {f}
@@ -250,19 +246,19 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
 
               <div className="mb-3 flex flex-wrap gap-2">
                 <button
-                  className="rd-btn-green px-4 py-2 text-xs min-h-[36px]"
+                  className="btn btn-primary btn-sm"
                   onClick={() => analyze(pendingIds)}
                   disabled={batchBusy || !pendingIds.length}
-                  style={{ opacity: batchBusy || !pendingIds.length ? 0.5 : 1 }}
                 >
-                  {batchBusy ? "Analyzing…" : pendingIds.length ? `Analyze all (${pendingIds.length})` : "Inbox analyzed"}
+                  {batchBusy ? <span className="loading loading-spinner loading-xs" aria-hidden="true" /> : null}
+                  {batchBusy ? "Analyzing" : pendingIds.length ? `Analyze all (${pendingIds.length})` : "Inbox analyzed"}
                 </button>
                 {cred?.status === "connected" && (
-                  <button className="rd-btn-ghost px-4 py-2 text-xs min-h-[36px]" onClick={fetchGoogle}>
+                  <button className="btn btn-outline btn-sm" onClick={fetchGoogle}>
                     Fetch from Google
                   </button>
                 )}
-                <button className="rd-btn-ghost px-4 py-2 text-xs min-h-[36px]" onClick={() => setShowImport(!showImport)}>
+                <button className="btn btn-outline btn-sm" onClick={() => setShowImport(!showImport)}>
                   Import CSV
                 </button>
               </div>
@@ -270,13 +266,13 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
               {showImport && (
                 <div className="mb-3 space-y-2">
                   <textarea
-                    className="rd-input min-h-[80px] font-mono text-xs"
+                    className="textarea w-full min-h-[80px] font-mono text-xs"
                     placeholder={'stars,text per line, e.g. 4,"Great food but slow service"'}
                     value={csv}
                     onChange={(e) => setCsv(e.target.value)}
                     aria-label="CSV import"
                   />
-                  <button className="rd-btn-ink w-full px-4 py-2 text-xs" onClick={importCsv}>Import reviews</button>
+                  <button className="btn btn-neutral btn-sm w-full" onClick={importCsv}>Import reviews</button>
                 </div>
               )}
 
@@ -302,7 +298,7 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
                       <p className="line-clamp-2 text-sm text-[#374151]">{r.text || "(star rating only)"}</p>
                       <div className="mt-2 flex flex-wrap items-center gap-2">
                         {r.hasReply ? (
-                          <span className="rd-chip" style={{ color: "#166534", background: "#E9F9EF", borderColor: "#15803D" }}>
+                          <span className="badge badge-soft badge-success font-mono">
                             {r.replyMode === "sent" ? "sent" : "recorded"}
                           </span>
                         ) : r.triage ? (
@@ -311,7 +307,7 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
                             {lane === "auto" && r.triage.status === "pending" && <VetoCountdown dueAt={r.triage.dueAt} />}
                           </>
                         ) : (
-                          <span className="rd-chip">not analyzed</span>
+                          <span className="badge badge-outline font-mono">not analyzed</span>
                         )}
                       </div>
                     </button>
@@ -323,22 +319,22 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
 
             {/* Detail */}
             <div className="space-y-5">
-              {!selected && <div className="rd-card p-10 text-center rd-mono">Select a review from the inbox.</div>}
+              {!selected && <div className="card card-border bg-base-100 p-10 text-center rd-mono">Select a review from the inbox.</div>}
               {selected && (
                 <>
-                  <div className="rd-card p-6">
+                  <div className="card card-border bg-base-100 p-6">
                     <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                       <div className="flex items-center gap-3">
                         <Stars stars={selected.stars} />
                         <span className="rd-mono">{selected.author || "Reviewer"} · {selected.date || "recent"}</span>
                       </div>
-                      <span className="rd-chip">{selected.triage?.reviewLanguage || "(none)"}</span>
+                      <span className="badge badge-ghost font-mono">{selected.triage?.reviewLanguage || "(none)"}</span>
                     </div>
                     <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-[#111827]">
                       {selected.text || "(no text, star rating only)"}
                     </p>
                     {selected.triage?.reviewTranslation && (
-                      <div className="mt-4 border-t border-dashed border-[#D1D5DB] pt-3">
+                      <div className="mt-4 border-t border-dashed border-base-300 pt-3">
                         <div className="rd-kicker mb-1">What it says (owner copy)</div>
                         <p className="text-sm italic text-[#374151]">{selected.triage.reviewTranslation}</p>
                       </div>
@@ -346,10 +342,11 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
                   </div>
 
                   {!selected.triage && (
-                    <div className="rd-card p-6 text-center">
+                    <div className="card card-border bg-base-100 p-6 text-center">
                       <p className="rd-mono mb-4">Not analyzed yet.</p>
-                      <button className="rd-btn-ink px-6 py-2.5 text-sm" onClick={() => analyzeOne(selected)} disabled={busyReview === selected.id}>
-                        {busyReview === selected.id ? "Thinking…" : "Analyze this review"}
+                      <button className="btn btn-neutral" onClick={() => analyzeOne(selected)} disabled={busyReview === selected.id}>
+                        {busyReview === selected.id ? <span className="loading loading-spinner loading-sm" aria-hidden="true" /> : null}
+                        {busyReview === selected.id ? "Thinking" : "Analyze this review"}
                       </button>
                     </div>
                   )}
@@ -359,7 +356,7 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
                       <TriageBanner triage={selected.triage} />
 
                       {selected.triage.draftReply && (
-                        <div className="rd-card p-6">
+                        <div className="card card-border bg-base-100 p-6">
                           <DraftCard
                             draft={selected.triage.draftReply}
                             translation={selected.triage.draftTranslation}
@@ -372,19 +369,19 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
                             {!selected.hasReply ? (
                               <>
                                 <button
-                                  className="rd-btn-green px-6 py-2.5 text-sm"
+                                  className="btn btn-primary"
                                   onClick={() => act({ type: "record", triageId: selected.triage!.id, draft: draftEdit }, "Recorded in your workspace (demo; nothing is sent to Google).")}
                                 >
                                   Approve &amp; record
                                 </button>
                                 <button
-                                  className="rd-btn-ghost px-5 py-2.5 text-sm"
+                                  className="btn btn-outline"
                                   onClick={() => act({ type: "dismiss", triageId: selected.triage!.id }, "Draft dismissed.")}
                                 >
                                   Dismiss
                                 </button>
                                 <button
-                                  className="rd-mono hover:text-[#111827]"
+                                  className="btn btn-ghost btn-sm rd-mono"
                                   onClick={() => { navigator.clipboard?.writeText(draftEdit || selected.triage!.draftReply || ""); setNote("Draft copied to clipboard."); }}
                                 >
                                   Copy draft
@@ -392,13 +389,13 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
                               </>
                             ) : (
                               <>
-                                <span className="rd-chip" style={{ color: "#166534", background: "#E9F9EF", borderColor: "#15803D" }}>
+                                <span className="badge badge-soft badge-success font-mono">
                                   {selected.replyMode === "sent" ? "Sent via Google API" : "Recorded in your workspace"}
                                 </span>
-                                <button className="rd-btn-ghost px-5 py-2.5 text-sm" onClick={() => act({ type: "undo", reviewId: selected.id }, "Reply undone; the review is back in the desk.")}>
+                                <button className="btn btn-outline btn-sm" onClick={() => act({ type: "undo", reviewId: selected.id }, "Reply undone; the review is back in the desk.")}>
                                   Undo
                                 </button>
-                                <button className="rd-mono hover:text-[#111827]" onClick={() => { navigator.clipboard?.writeText(selected.replyText ?? ""); setNote("Reply copied to clipboard."); }}>
+                                <button className="btn btn-ghost btn-sm rd-mono" onClick={() => { navigator.clipboard?.writeText(selected.replyText ?? ""); setNote("Reply copied to clipboard."); }}>
                                   Copy reply
                                 </button>
                               </>
@@ -408,19 +405,19 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
                       )}
 
                       {selected.triage.action === "hold" && selected.triage.ownerChecklist.length > 0 && (
-                        <div className="rd-card p-6">
+                        <div className="card card-border bg-base-100 p-6">
                           <CheckFactsCard triage={selected.triage} />
                         </div>
                       )}
 
                       {selected.triage.action === "reply_needs_owner" && selected.triage.draftReply && (
-                        <div className="rd-card p-6">
+                        <div className="card card-border bg-base-100 p-6">
                           <CheckFactsCard triage={selected.triage} />
                         </div>
                       )}
 
                       {selected.triage.action === "report" && selected.triage.reportNote && (
-                        <div className="rd-card p-6">
+                        <div className="card card-border bg-base-100 p-6">
                           <span className="rd-kicker mb-2 block">For Google&apos;s report form</span>
                           <p className="text-sm text-[#374151]">{selected.triage.reportNote}</p>
                           <p className="rd-mono mt-3">Submit via Google&apos;s own &ldquo;report review&rdquo; option. Copy this note.</p>

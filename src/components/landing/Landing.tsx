@@ -1,22 +1,28 @@
 'use client';
 
 /**
- * Landing.tsx, marketing page with a precision-tool look:
- * centered display hero over a masked dot grid, a large honest product
+ * Landing.tsx, marketing page built on the daisyUI component system
+ * (btn, badge, card, steps, collapse, alert, footer) with three
+ * Originkit patterns (SkewInText entrance, LabelSlideButton CTA,
+ * SpotlightText section title).
+ * Centered display hero over a masked dot grid, a large honest product
  * mockup (sample data from the demo inbox), a bento feature grid with
- * sample artifacts, a dark control section, numbered setup steps, FAQ,
- * a dark CTA panel, and a dark footer with legal links.
+ * sample artifacts, a dark control section, setup steps, FAQ, a dark
+ * CTA panel, and a dark footer with legal links.
  * Copy contract: no vague claims, no fabricated metrics or testimonials,
- * no em dashes, no emoji, no decorative motion. Analysis sends review
+ * no em dashes, no emoji, no scroll-driven motion. Analysis sends review
  * text to the model provider, and that is stated plainly.
  */
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import {
   LayoutGrid, Languages, ShieldCheck, Timer, KeyRound, ScrollText,
   ArrowRight, Check, X,
 } from "lucide-react";
 import { LogoMark, Stamp } from "@/components/shared/bits";
+import SkewInText from "@/components/originkit/SkewInText";
+import LabelSlideButton from "@/components/originkit/LabelSlideButton";
+import SpotlightText from "@/components/originkit/SpotlightText";
 
 interface LandingProps {
   onSignup: () => void;
@@ -91,7 +97,7 @@ const LANES = [
 function SectionHead({
   num, title, desc, dark,
 }: {
-  num: string; title: string; desc?: string; dark?: boolean;
+  num: string; title: ReactNode; desc?: string; dark?: boolean;
 }) {
   return (
     <div className="mb-12 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
@@ -130,19 +136,19 @@ function ProductMockup() {
   return (
     <div className="rd-window-xl rd-shadow-float overflow-hidden text-left">
       {/* browser chrome */}
-      <div className="flex items-center gap-3 border-b border-[#E5E7EB] bg-[#FAFAFA] px-4 py-2.5">
+      <div className="flex items-center gap-3 border-b border-base-300 bg-base-200 px-4 py-2.5">
         <div className="flex gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-[#D1D5DB]" />
-          <span className="h-2.5 w-2.5 rounded-full bg-[#D1D5DB]" />
-          <span className="h-2.5 w-2.5 rounded-full bg-[#D1D5DB]" />
+          <span className="h-2.5 w-2.5 rounded-full bg-base-300" />
+          <span className="h-2.5 w-2.5 rounded-full bg-base-300" />
+          <span className="h-2.5 w-2.5 rounded-full bg-base-300" />
         </div>
-        <div className="rounded-md border border-[#E5E7EB] bg-white px-4 py-1 font-mono text-[0.7rem] text-[#6B7280]">
+        <div className="rounded-md border border-base-300 bg-base-100 px-4 py-1 font-mono text-[0.7rem] text-[#6B7280]">
           reviewdesk.app/desk
         </div>
         <span className="w-10" />
       </div>
       {/* app bar */}
-      <div className="flex items-center justify-between gap-3 border-b border-[#E5E7EB] px-4 py-2">
+      <div className="flex items-center justify-between gap-3 border-b border-base-300 px-4 py-2">
         <div className="flex items-center gap-2">
           <LogoMark size={18} />
           <span className="text-sm font-semibold tracking-[-0.01em] text-[#111827]">ReviewDesk</span>
@@ -153,7 +159,7 @@ function ProductMockup() {
               key={t}
               className={
                 i === 0
-                  ? "rounded-md bg-[#F6F7F9] px-2.5 py-1 font-mono text-[0.68rem] font-bold uppercase tracking-[0.04em] text-[#111827]"
+                  ? "rounded-md bg-base-200 px-2.5 py-1 font-mono text-[0.68rem] font-bold uppercase tracking-[0.04em] text-[#111827]"
                   : "px-2.5 py-1 font-mono text-[0.68rem] font-semibold uppercase tracking-[0.04em] text-[#9CA3AF]"
               }
             >
@@ -161,16 +167,16 @@ function ProductMockup() {
             </span>
           ))}
         </div>
-        <span className="rd-chip">Demo workspace</span>
+        <span className="badge badge-outline font-mono">Demo workspace</span>
       </div>
       {/* body */}
       <div className="grid lg:grid-cols-[210px_minmax(0,1fr)_225px]">
         {/* inbox rail */}
-        <div className="hidden border-r border-[#E5E7EB] lg:block">
+        <div className="hidden border-r border-base-300 lg:block">
           <p className="rd-kicker px-4 pb-2 pt-4">Inbox · demo</p>
-          <div className="divide-y divide-[#E5E7EB] border-t border-[#E5E7EB]">
+          <div className="divide-y divide-base-300 border-t border-base-300">
             {inboxRows.map((r, i) => (
-              <div key={i} className={r.selected ? "border-l-2 border-[#1D4ED8] bg-[#F6F7F9] px-3.5 py-3" : "border-l-2 border-transparent px-3.5 py-3"}>
+              <div key={i} className={r.selected ? "border-l-2 border-primary bg-base-200 px-3.5 py-3" : "border-l-2 border-transparent px-3.5 py-3"}>
                 <div className="flex items-center justify-between gap-2">
                   <StarsSmall n={r.stars} />
                   <Stamp action={r.stamp} />
@@ -182,7 +188,7 @@ function ProductMockup() {
         </div>
         {/* center: selected review + draft */}
         <div className="min-w-0 space-y-4 p-5">
-          <div className="rd-inset p-4">
+          <div className="rounded-box border border-base-300 bg-base-200 p-4">
             <div className="flex items-center justify-between gap-3">
               <StarsSmall n={2} />
               <span className="rd-mono">Demo Reviewer · 2026-10-17</span>
@@ -205,18 +211,18 @@ function ProductMockup() {
               <span className="rd-kicker">Draft reply · English</span>
               <span className="rd-mono" style={{ color: "#15803D" }}>34 words · on target</span>
             </div>
-            <p className="mt-2 whitespace-pre-wrap rounded-lg border border-[#D1D5DB] bg-white p-3.5 text-sm leading-relaxed text-[#111827]">
+            <p className="mt-2 whitespace-pre-wrap rounded-lg border border-base-300 bg-base-100 p-3.5 text-sm leading-relaxed text-[#111827]">
               We are sorry the biryani reached you cold. That is not how we want food to leave our kitchen. Send us your order details and we will make it right on your next visit. Imran, Spice Corner
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rd-btn-green inline-flex px-4 py-2 text-sm">Approve and record</span>
-            <span className="rd-btn-ghost inline-flex px-4 py-2 text-sm">Edit draft</span>
-            <span className="rd-btn-ghost inline-flex px-4 py-2 text-sm">Dismiss</span>
+            <span className="btn btn-primary btn-sm pointer-events-none">Approve and record</span>
+            <span className="btn btn-outline btn-sm pointer-events-none">Edit draft</span>
+            <span className="btn btn-outline btn-sm pointer-events-none">Dismiss</span>
           </div>
         </div>
         {/* policy rail */}
-        <div className="hidden space-y-5 border-l border-[#E5E7EB] bg-[#FAFAFA] p-4 lg:block">
+        <div className="hidden space-y-5 border-l border-base-300 bg-base-200 p-4 lg:block">
           <div>
             <p className="rd-kicker mb-2.5">Reply policy</p>
             <dl className="space-y-2 text-xs">
@@ -234,11 +240,11 @@ function ProductMockup() {
               </div>
             </dl>
           </div>
-          <div className="border-t border-[#E5E7EB] pt-4">
+          <div className="border-t border-base-300 pt-4">
             <p className="rd-kicker mb-2.5">Autopilot</p>
             <div className="flex flex-wrap gap-1.5">
-              <span className="rd-chip">Off by default</span>
-              <span className="rd-chip">Daily cap · 10</span>
+              <span className="badge badge-outline font-mono">Off by default</span>
+              <span className="badge badge-outline font-mono">Daily cap · 10</span>
               <span className="rd-veto">veto 29:41</span>
             </div>
           </div>
@@ -262,16 +268,16 @@ function StarsSmall({ n }: { n: number }) {
 /* ------------------------------------------------------------------ */
 function LanguageVisual() {
   return (
-    <div className="rd-inset mt-5 space-y-3 p-4">
+    <div className="rounded-box border border-base-300 bg-base-200 mt-5 space-y-3 p-4">
       <div>
         <p className="rd-mono mb-1">Review · Roman Urdu</p>
         <p className="text-sm text-[#111827]">Biryani zabardast thi, service bhi achi.</p>
       </div>
-      <div className="border-t border-[#E5E7EB] pt-3">
+      <div className="border-t border-base-300 pt-3">
         <p className="rd-mono mb-1">Draft · Roman Urdu</p>
         <p className="text-sm text-[#111827]">Shukriya! Khushi hui ke sab pasand aaya. Dobarah tashreef layen. Imran, Spice Corner</p>
       </div>
-      <div className="border-t border-[#E5E7EB] pt-3">
+      <div className="border-t border-base-300 pt-3">
         <p className="rd-mono mb-1">Owner copy · English</p>
         <p className="text-sm italic text-[#374151]">Thank you! Glad everything hit the spot. Please come again. Imran, Spice Corner</p>
       </div>
@@ -286,10 +292,10 @@ function PolicyVisual() {
     "No offers you did not allow",
   ];
   return (
-    <ul className="rd-inset mt-5 space-y-2.5 p-4">
+    <ul className="rounded-box border border-base-300 bg-base-200 mt-5 space-y-2.5 p-4">
       {rules.map((r) => (
         <li key={r} className="flex items-center gap-2.5 text-sm text-[#374151]">
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-[#E5E7EB] bg-white text-[#6B7280]">
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-base-300 bg-base-100 text-[#6B7280]">
             <X size={12} aria-hidden="true" />
           </span>
           {r}
@@ -301,10 +307,10 @@ function PolicyVisual() {
 
 function AutopilotVisual() {
   return (
-    <div className="rd-inset mt-5 flex flex-wrap items-center gap-2 p-4">
+    <div className="rounded-box border border-base-300 bg-base-200 mt-5 flex flex-wrap items-center gap-2 p-4">
       <span className="rd-veto">veto 29:41</span>
-      <span className="rd-chip">Daily cap · 10 replies</span>
-      <span className="rd-chip">Mixed sentiment · queue</span>
+      <span className="badge badge-outline font-mono">Daily cap · 10 replies</span>
+      <span className="badge badge-outline font-mono">Mixed sentiment · queue</span>
       <span className="rd-mono w-full pt-1">Sample policy. Autopilot starts off.</span>
     </div>
   );
@@ -312,15 +318,15 @@ function AutopilotVisual() {
 
 function CredentialVisual() {
   return (
-    <div className="rd-inset mt-5 p-4">
+    <div className="rounded-box border border-base-300 bg-base-200 mt-5 p-4">
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="rd-mono mb-1">GBP · API key</p>
           <p className="font-mono text-sm tracking-[0.08em] text-[#111827]">•••• •••• •••• 7890</p>
         </div>
-        <span className="rd-chip">AES-256-GCM</span>
+        <span className="badge badge-outline font-mono">AES-256-GCM</span>
       </div>
-      <p className="rd-mono mt-3 border-t border-[#E5E7EB] pt-2.5">
+      <p className="rd-mono mt-3 border-t border-base-300 pt-2.5">
         Never returned to the browser after saving. Masked hint only.
       </p>
     </div>
@@ -334,11 +340,11 @@ function LedgerVisual() {
     { t: "13:31", a: "analyze", d: "5-star review triaged to auto lane" },
   ];
   return (
-    <div className="rd-inset mt-5 p-4">
+    <div className="rounded-box border border-base-300 bg-base-200 mt-5 p-4">
       {rows.map((r) => (
-        <div key={r.t} className="flex gap-3 border-b border-[#E5E7EB] py-2 font-mono text-xs last:border-b-0 last:pb-0 first:pt-0">
+        <div key={r.t} className="flex gap-3 border-b border-base-300 py-2 font-mono text-xs last:border-b-0 last:pb-0 first:pt-0">
           <span className="w-10 shrink-0 text-[#9CA3AF]">{r.t}</span>
-          <span className="w-14 shrink-0 font-semibold text-[#1D4ED8]">{r.a}</span>
+          <span className="w-14 shrink-0 font-semibold text-primary">{r.a}</span>
           <span className="text-[#374151]">{r.d}</span>
         </div>
       ))}
@@ -357,7 +363,7 @@ function HonestyVisual() {
     <ul className="mt-5 space-y-3">
       {items.map((item) => (
         <li key={item} className="flex gap-3 text-sm leading-relaxed text-[#374151]">
-          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-[#BFDBFE] bg-[#EFF6FF] text-[#1D4ED8]">
+          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-base-300 bg-base-100 text-primary">
             <Check size={12} strokeWidth={3} aria-hidden="true" />
           </span>
           {item}
@@ -368,7 +374,6 @@ function HonestyVisual() {
 }
 
 export default function Landing({ onSignup, onLogin, initialGoogleStatus, initialGoogleMessage }: LandingProps) {
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [menuOpen, setMenuOpen] = useState(false);
 
   const googleNotice = initialGoogleStatus === "connected"
@@ -381,42 +386,43 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
           ? { ok: false, text: `Google connection failed: ${initialGoogleMessage ?? "unknown error"}` }
           : null;
 
+  const navLinks = [
+    ["#features", "Features"],
+    ["#control", "Control"],
+    ["#setup", "Setup"],
+    ["#faq", "FAQ"],
+  ] as const;
+
   return (
     <div className="flex min-h-screen flex-col">
       {googleNotice && (
         <div className="px-5 pt-4">
           <div
-            className="mx-auto max-w-[1120px] rounded-lg p-3.5 text-sm"
-            style={{
-              background: googleNotice.ok ? "#ECFDF3" : "#FBF3D9",
-              border: `1px solid ${googleNotice.ok ? "#15803D" : "#854D0E"}`,
-              color: googleNotice.ok ? "#166534" : "#854D0E",
-            }}
+            className={`alert mx-auto max-w-[1120px] ${googleNotice.ok ? "alert-success" : "alert-warning"}`}
             role="status"
           >
-            {googleNotice.text}
+            <span className="text-sm">{googleNotice.text}</span>
           </div>
         </div>
       )}
 
       {/* ===================== Nav ===================== */}
-      <nav className="sticky top-0 z-40 border-b border-[#E5E7EB] bg-white/90 backdrop-blur-md">
+      <nav className="sticky top-0 z-40 border-b border-base-300 bg-base-100/90 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-[1120px] items-center justify-between px-6">
           <div className="flex items-center gap-2.5">
             <LogoMark />
             <span className="rd-display text-lg">ReviewDesk</span>
           </div>
-          <div className="hidden items-center gap-7 md:flex">
-            <a href="#features" className="text-sm font-medium text-[#374151] hover:text-[#111827]">Features</a>
-            <a href="#control" className="text-sm font-medium text-[#374151] hover:text-[#111827]">Control</a>
-            <a href="#setup" className="text-sm font-medium text-[#374151] hover:text-[#111827]">Setup</a>
-            <a href="#faq" className="text-sm font-medium text-[#374151] hover:text-[#111827]">FAQ</a>
-            <span className="h-5 w-px bg-[#E5E7EB]" aria-hidden="true" />
-            <button onClick={onLogin} className="text-sm font-semibold text-[#111827] hover:text-[#1D4ED8]">Sign in</button>
-            <button onClick={onSignup} className="rd-btn-ink px-4 py-2.5 text-sm min-h-[44px]">Create account</button>
+          <div className="hidden items-center gap-2 md:flex">
+            {navLinks.map(([href, label]) => (
+              <a key={href} href={href} className="btn btn-ghost btn-sm">{label}</a>
+            ))}
+            <span className="mx-1 h-5 w-px bg-base-300" aria-hidden="true" />
+            <button onClick={onLogin} className="btn btn-ghost btn-sm">Sign in</button>
+            <button onClick={onSignup} className="btn btn-neutral btn-sm min-h-[40px]">Create account</button>
           </div>
           <button
-            className="flex h-11 w-11 items-center justify-center md:hidden"
+            className="btn btn-ghost btn-square md:hidden"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Toggle menu"
             aria-expanded={menuOpen}
@@ -427,27 +433,28 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
           </button>
         </div>
         {menuOpen && (
-          <div className="border-b border-[#E5E7EB] bg-white px-6 py-4 md:hidden">
-            <div className="flex flex-col gap-3">
-              <a href="#features" onClick={() => setMenuOpen(false)} className="flex min-h-[44px] items-center text-sm font-medium">Features</a>
-              <a href="#control" onClick={() => setMenuOpen(false)} className="flex min-h-[44px] items-center text-sm font-medium">Control</a>
-              <a href="#setup" onClick={() => setMenuOpen(false)} className="flex min-h-[44px] items-center text-sm font-medium">Setup</a>
-              <a href="#faq" onClick={() => setMenuOpen(false)} className="flex min-h-[44px] items-center text-sm font-medium">FAQ</a>
-              <button onClick={onLogin} className="rd-btn-ghost px-4 py-2.5 text-sm">Sign in</button>
-              <button onClick={onSignup} className="rd-btn-ink px-4 py-2.5 text-sm">Create account</button>
+          <div className="border-b border-base-300 bg-base-100 px-6 py-4 md:hidden">
+            <ul className="menu menu-vertical w-full gap-1 p-0">
+              {navLinks.map(([href, label]) => (
+                <li key={href}><a href={href} onClick={() => setMenuOpen(false)}>{label}</a></li>
+              ))}
+            </ul>
+            <div className="mt-3 flex flex-col gap-2">
+              <button onClick={onLogin} className="btn btn-outline btn-sm">Sign in</button>
+              <button onClick={onSignup} className="btn btn-neutral btn-sm">Create account</button>
             </div>
           </div>
         )}
       </nav>
 
       {/* ===================== Hero ===================== */}
-      <header className="relative overflow-hidden bg-white">
+      <header className="relative overflow-hidden bg-base-100">
         <div className="rd-grid pointer-events-none absolute inset-0" aria-hidden="true" />
         <div className="relative mx-auto max-w-[1120px] px-6 pb-16 pt-16 md:pb-20 md:pt-24">
           <div className="mx-auto max-w-[820px] text-center">
             <span className="rd-chip-outline">Review triage for Google Business profiles</span>
             <h1 className="rd-hero-display mt-7 text-[clamp(2.5rem,5.5vw,4rem)]">
-              The reply desk for your Google reviews
+              <SkewInText text="The reply desk for your Google reviews" startDelay={80} />
             </h1>
             <p className="mx-auto mt-6 max-w-[680px] text-pretty text-lg leading-[1.7] text-[#374151]">
               ReviewDesk triages every review into a lane, drafts a policy-checked reply in the
@@ -455,13 +462,13 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
               Connect Google when you are ready, or start with the demo inbox.
             </p>
             <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-              <button
+              <LabelSlideButton
                 onClick={onSignup}
-                className="inline-flex min-h-[48px] items-center gap-2 rounded-lg bg-[#111827] px-6 py-3 text-base font-semibold text-white hover:bg-[#1F2937]"
-              >
-                Create an account <ArrowRight size={18} aria-hidden="true" />
-              </button>
-              <a href="#setup" className="rd-btn-ghost inline-flex min-h-[48px] items-center px-6 py-3 text-base">
+                label="Create an account"
+                hoverLabel="Open the demo inbox"
+                className="btn btn-neutral btn-lg min-h-[52px] px-7 text-base font-semibold"
+              />
+              <a href="#setup" className="btn btn-outline btn-lg min-h-[52px] px-7 text-base">
                 See how it works
               </a>
             </div>
@@ -480,10 +487,10 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
       </header>
 
       {/* ===================== Facts strip ===================== */}
-      <section className="border-y border-[#E5E7EB] bg-[#FAFAFA]">
-        <div className="mx-auto grid max-w-[1120px] grid-cols-2 gap-px lg:grid-cols-4" style={{ background: "#E5E7EB" }}>
+      <section className="border-y border-base-300 bg-base-200">
+        <div className="mx-auto grid max-w-[1120px] grid-cols-2 gap-px bg-base-300 lg:grid-cols-4">
           {FACTS.map((s) => (
-            <div key={s.label} className="px-6 py-9" style={{ background: "#FAFAFA" }}>
+            <div key={s.label} className="px-6 py-9">
               <div className="rd-num text-[2rem] text-[#111827]">{s.value}</div>
               <p className="mt-1.5 max-w-[200px] text-sm leading-snug text-[#6B7280]">{s.label}</p>
             </div>
@@ -492,7 +499,7 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
       </section>
 
       {/* ===================== Features (bento) ===================== */}
-      <section id="features" className="scroll-mt-20 bg-white py-20 md:py-24">
+      <section id="features" className="scroll-mt-20 bg-base-100 py-20 md:py-24">
         <div className="mx-auto max-w-[1120px] px-6">
           <SectionHead
             num="01 · Features"
@@ -501,19 +508,19 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
           />
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {/* Four lanes, wide card with lane visual */}
-            <article className="rd-card rd-card-hover p-6 md:col-span-2">
-              <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#E5E7EB] bg-[#F6F7F9] text-[#374151]">
-                <LayoutGrid size={20} aria-hidden="true" />
+            <article className="card card-border rd-card-hover bg-base-100 p-6 md:col-span-2">
+              <div className="badge badge-lg badge-outline gap-1.5 border-base-300 bg-base-200 p-3.5 text-[#374151]">
+                <LayoutGrid size={16} aria-hidden="true" />
               </div>
-              <h3 className="rd-display mb-2 text-lg">Four lanes for every review</h3>
+              <h3 className="rd-display mb-2 mt-4 text-lg">Four lanes for every review</h3>
               <p className="max-w-[520px] text-sm leading-relaxed text-[#374151]">
                 Each review lands in one lane, and the lane decides what happens next. Reviews that
                 need human judgment surface first, and a real complaint is never treated as spam.
               </p>
-              <div className="rd-inset mt-5 grid gap-x-6 gap-y-4 p-4 sm:grid-cols-2">
+              <div className="rounded-box border border-base-300 bg-base-200 mt-5 grid gap-x-6 gap-y-4 p-4 sm:grid-cols-2">
                 {LANES.map((l, i) => (
                   <div key={l.name} className="flex gap-3">
-                    <span className="rd-mono pt-0.5" style={{ color: "#1D4ED8" }}>{String(i + 1).padStart(2, "0")}</span>
+                    <span className="rd-mono pt-0.5 text-primary">{String(i + 1).padStart(2, "0")}</span>
                     <div>
                       <p className="text-sm font-semibold text-[#111827]">{l.name}</p>
                       <p className="text-xs leading-snug text-[#6B7280]">{l.desc}</p>
@@ -524,11 +531,11 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
             </article>
 
             {/* Language matching with sample artifact */}
-            <article className="rd-card rd-card-hover p-6">
-              <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#E5E7EB] bg-[#F6F7F9] text-[#374151]">
-                <Languages size={20} aria-hidden="true" />
+            <article className="card card-border rd-card-hover bg-base-100 p-6">
+              <div className="badge badge-lg badge-outline gap-1.5 border-base-300 bg-base-200 p-3.5 text-[#374151]">
+                <Languages size={16} aria-hidden="true" />
               </div>
-              <h3 className="rd-display mb-2 text-lg">Drafts in the reviewer&apos;s language</h3>
+              <h3 className="rd-display mb-2 mt-4 text-lg">Drafts in the reviewer&apos;s language</h3>
               <p className="text-sm leading-relaxed text-[#374151]">
                 Every draft ships with a copy in your language, so you know exactly what it says
                 before you approve it.
@@ -537,11 +544,11 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
             </article>
 
             {/* Policy checks */}
-            <article className="rd-card rd-card-hover p-6">
-              <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#E5E7EB] bg-[#F6F7F9] text-[#374151]">
-                <ShieldCheck size={20} aria-hidden="true" />
+            <article className="card card-border rd-card-hover bg-base-100 p-6">
+              <div className="badge badge-lg badge-outline gap-1.5 border-base-300 bg-base-200 p-3.5 text-[#374151]">
+                <ShieldCheck size={16} aria-hidden="true" />
               </div>
-              <h3 className="rd-display mb-2 text-lg">Policy-checked drafts</h3>
+              <h3 className="rd-display mb-2 mt-4 text-lg">Policy-checked drafts</h3>
               <p className="text-sm leading-relaxed text-[#374151]">
                 The model suggests, the policy decides. Drafts cannot invent details you did not
                 allow, and mixed-sentiment reviews wait for you by default.
@@ -550,11 +557,11 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
             </article>
 
             {/* Autopilot */}
-            <article className="rd-card rd-card-hover p-6">
-              <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#E5E7EB] bg-[#F6F7F9] text-[#374151]">
-                <Timer size={20} aria-hidden="true" />
+            <article className="card card-border rd-card-hover bg-base-100 p-6">
+              <div className="badge badge-lg badge-outline gap-1.5 border-base-300 bg-base-200 p-3.5 text-[#374151]">
+                <Timer size={16} aria-hidden="true" />
               </div>
-              <h3 className="rd-display mb-2 text-lg">Autopilot with a veto window</h3>
+              <h3 className="rd-display mb-2 mt-4 text-lg">Autopilot with a veto window</h3>
               <p className="text-sm leading-relaxed text-[#374151]">
                 Clean 5-star replies can go out automatically after a countdown you set. Veto any
                 draft, undo anything, and a daily cap keeps volume predictable.
@@ -563,11 +570,11 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
             </article>
 
             {/* Credentials */}
-            <article className="rd-card rd-card-hover p-6">
-              <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#E5E7EB] bg-[#F6F7F9] text-[#374151]">
-                <KeyRound size={20} aria-hidden="true" />
+            <article className="card card-border rd-card-hover bg-base-100 p-6">
+              <div className="badge badge-lg badge-outline gap-1.5 border-base-300 bg-base-200 p-3.5 text-[#374151]">
+                <KeyRound size={16} aria-hidden="true" />
               </div>
-              <h3 className="rd-display mb-2 text-lg">Your own Google connection</h3>
+              <h3 className="rd-display mb-2 mt-4 text-lg">Your own Google connection</h3>
               <p className="text-sm leading-relaxed text-[#374151]">
                 Connect with Google OAuth, or paste an API key or access token. Without a
                 connection, the demo inbox still works.
@@ -576,8 +583,8 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
             </article>
 
             {/* Honesty card, wide */}
-            <article className="rd-card rd-card-hover p-6 md:col-span-2">
-              <h3 className="rd-display mb-2 text-lg">What the desk does not claim</h3>
+            <article className="card card-border rd-card-hover bg-base-100 p-6 md:col-span-2">
+              <h3 className="rd-display mb-2 mt-1 text-lg">What the desk does not claim</h3>
               <p className="max-w-[520px] text-sm leading-relaxed text-[#374151]">
                 Trust comes from specifics, so here is exactly where the line sits.
               </p>
@@ -585,11 +592,11 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
             </article>
 
             {/* Audit ledger */}
-            <article className="rd-card rd-card-hover p-6">
-              <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#E5E7EB] bg-[#F6F7F9] text-[#374151]">
-                <ScrollText size={20} aria-hidden="true" />
+            <article className="card card-border rd-card-hover bg-base-100 p-6">
+              <div className="badge badge-lg badge-outline gap-1.5 border-base-300 bg-base-200 p-3.5 text-[#374151]">
+                <ScrollText size={16} aria-hidden="true" />
               </div>
-              <h3 className="rd-display mb-2 text-lg">Audit ledger</h3>
+              <h3 className="rd-display mb-2 mt-4 text-lg">Audit ledger</h3>
               <p className="text-sm leading-relaxed text-[#374151]">
                 Every decision, approval, veto, and undo is written down with the reason attached.
               </p>
@@ -600,7 +607,7 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
       </section>
 
       {/* ===================== Control (dark) ===================== */}
-      <section id="control" className="scroll-mt-20 bg-[#111827]">
+      <section id="control" className="scroll-mt-20 bg-neutral text-neutral-content">
         <div className="relative overflow-hidden">
           <div className="rd-grid-dark pointer-events-none absolute inset-0" aria-hidden="true" />
           <div className="relative mx-auto max-w-[1120px] px-6 py-20 md:py-24">
@@ -630,11 +637,11 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
                     },
                   ].map((row, i) => (
                     <div key={row.n} className={`flex gap-6 py-6 ${i > 0 ? "border-t border-[#374151]" : ""}`}>
-                      <span className="font-mono text-sm font-bold" style={{ color: "#93C5FD" }}>{row.n}</span>
+                      <span className="font-mono text-sm font-bold text-[#93C5FD]">{row.n}</span>
                       <div>
-                        <p className="text-base font-semibold" style={{ color: "#F9FAFB" }}>{row.t}</p>
-                        <p className="mt-1 text-sm leading-relaxed" style={{ color: "rgba(249,250,251,0.72)" }}>{row.d}</p>
-                        <p className="rd-mono mt-2" style={{ color: "rgba(249,250,251,0.55)" }}>{row.m}</p>
+                        <p className="text-base font-semibold text-[#F9FAFB]">{row.t}</p>
+                        <p className="mt-1 text-sm leading-relaxed text-[rgba(249,250,251,0.72)]">{row.d}</p>
+                        <p className="rd-mono mt-2 text-[rgba(249,250,251,0.55)]">{row.m}</p>
                       </div>
                     </div>
                   ))}
@@ -642,12 +649,12 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
               </div>
 
               {/* dark ledger card */}
-              <div className="rounded-xl border border-[#374151] bg-[#1F2937] p-5" aria-hidden="true">
+              <div className="card bg-neutral text-neutral-content border border-neutral p-5" aria-hidden="true">
                 <div className="flex items-center justify-between border-b border-[#374151] pb-3">
-                  <p className="font-mono text-xs font-bold uppercase tracking-[0.08em]" style={{ color: "rgba(249,250,251,0.72)" }}>
+                  <p className="font-mono text-xs font-bold uppercase tracking-[0.08em] text-[rgba(249,250,251,0.72)]">
                     Audit ledger
                   </p>
-                  <span className="font-mono text-xs" style={{ color: "rgba(249,250,251,0.55)" }}>sample entries</span>
+                  <span className="font-mono text-xs text-[rgba(249,250,251,0.55)]">sample entries</span>
                 </div>
                 {[
                   { t: "14:02", a: "approve", d: "Reply recorded in workspace" },
@@ -656,12 +663,12 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
                   { t: "13:12", a: "undo", d: "Recorded reply returned to queue" },
                 ].map((r) => (
                   <div key={r.t + r.a} className="flex gap-3 border-b border-[#374151] py-3 font-mono text-xs last:border-b-0">
-                    <span className="w-10 shrink-0" style={{ color: "rgba(249,250,251,0.55)" }}>{r.t}</span>
-                    <span className="w-16 shrink-0 font-bold" style={{ color: "#93C5FD" }}>{r.a}</span>
-                    <span style={{ color: "rgba(249,250,251,0.82)" }}>{r.d}</span>
+                    <span className="w-10 shrink-0 text-[rgba(249,250,251,0.55)]">{r.t}</span>
+                    <span className="w-16 shrink-0 font-bold text-[#93C5FD]">{r.a}</span>
+                    <span className="text-[rgba(249,250,251,0.82)]">{r.d}</span>
                   </div>
                 ))}
-                <p className="mt-4 font-mono text-xs" style={{ color: "rgba(249,250,251,0.55)" }}>
+                <p className="mt-4 font-mono text-xs text-[rgba(249,250,251,0.55)]">
                   Every entry carries the reason and the actor.
                 </p>
               </div>
@@ -670,77 +677,66 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
         </div>
       </section>
 
-      {/* ===================== Setup steps ===================== */}
-      <section id="setup" className="scroll-mt-20 bg-[#FAFAFA] py-20 md:py-24">
+      {/* ===================== Setup steps (daisyUI steps) ===================== */}
+      <section id="setup" className="scroll-mt-20 bg-base-200 py-20 md:py-24">
         <div className="mx-auto max-w-[1120px] px-6">
           <SectionHead
             num="03 · Setup"
             title="Four steps from signup to a working desk"
             desc="The demo inbox means the desk is usable on day one. The Google connection is optional and can wait."
           />
-          <div className="grid gap-x-8 gap-y-10 md:grid-cols-2 lg:grid-cols-4">
+          <ul className="steps steps-vertical w-full border-base-300 font-display lg:steps-horizontal">
             {STEPS.map((s) => (
-              <article key={s.num} className="border-t border-[#D1D5DB] pt-6">
-                <div className="rd-num mb-3 text-2xl" style={{ color: "#1D4ED8" }}>{s.num}</div>
-                <h3 className="rd-display mb-2 text-base">{s.title}</h3>
-                <p className="text-sm leading-relaxed text-[#374151]">{s.body}</p>
-              </article>
+              <li key={s.num} className="step step-primary" data-content={s.num}>
+                <div className="mt-2 max-w-[240px] text-left lg:mt-6">
+                  <h3 className="rd-display mb-2 text-base">{s.title}</h3>
+                  <p className="text-sm leading-relaxed text-[#374151]">{s.body}</p>
+                </div>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </section>
 
-      {/* ===================== FAQ ===================== */}
-      <section id="faq" className="scroll-mt-20 bg-white py-20 md:py-24">
+      {/* ===================== FAQ (daisyUI collapse) ===================== */}
+      <section id="faq" className="scroll-mt-20 bg-base-100 py-20 md:py-24">
         <div className="mx-auto max-w-[1120px] px-6">
-          <SectionHead num="04 · FAQ" title="Straight answers" />
+          <SectionHead num="04 · FAQ" title={<SpotlightText text="Straight answers" />} />
           <div className="max-w-[760px] space-y-3">
             {FAQ.map((item, i) => (
-              <div key={i} className="rd-card overflow-hidden">
-                <button
-                  className="flex w-full items-center justify-between gap-4 p-5 text-left"
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  aria-expanded={openFaq === i}
-                >
+              <details key={i} className="collapse collapse-arrow card card-border bg-base-100">
+                <summary className="collapse-title cursor-pointer">
                   <span className="rd-display text-base">{item.q}</span>
-                  <span
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-[#E5E7EB] text-sm font-semibold text-[#374151]"
-                    aria-hidden="true"
-                  >
-                    {openFaq === i ? "-" : "+"}
-                  </span>
-                </button>
-                {openFaq === i && (
-                  <p className="border-t border-[#E5E7EB] p-5 text-sm leading-relaxed text-[#374151]">
-                    {item.a}
-                  </p>
-                )}
-              </div>
+                </summary>
+                <div className="collapse-content border-t border-base-300">
+                  <p className="pt-4 text-sm leading-relaxed text-[#374151]">{item.a}</p>
+                </div>
+              </details>
             ))}
           </div>
         </div>
       </section>
 
       {/* ===================== CTA ===================== */}
-      <section className="bg-white pb-20">
+      <section className="bg-base-100 pb-20">
         <div className="mx-auto max-w-[1120px] px-6">
-          <div className="relative overflow-hidden rounded-[14px] bg-[#111827] px-6 py-16 text-center md:py-20">
+          <div className="relative overflow-hidden rounded-[14px] bg-neutral px-6 py-16 text-center text-neutral-content md:py-20">
             <div className="rd-grid-dark pointer-events-none absolute inset-0" aria-hidden="true" />
             <div className="relative">
               <h2 className="rd-hero-display mx-auto max-w-[560px] text-[clamp(1.75rem,3.2vw,2.5rem)]" style={{ color: "#F9FAFB" }}>
                 Create an account and try the demo inbox
               </h2>
-              <p className="mx-auto mt-4 max-w-[480px] text-base leading-relaxed" style={{ color: "rgba(249,250,251,0.72)" }}>
+              <p className="mx-auto mt-4 max-w-[480px] text-base leading-relaxed text-[rgba(249,250,251,0.72)]">
                 Sign up, add your business details, and analyze the 15 sample reviews. Connect
                 Google whenever you are ready.
               </p>
               <button
                 onClick={onSignup}
-                className="mt-8 inline-flex min-h-[48px] items-center gap-2 rounded-lg bg-white px-6 py-3 text-base font-semibold text-[#111827] hover:bg-[#F6F7F9]"
+                className="btn btn-lg mt-8 min-h-[52px] border-0 bg-base-100 px-7 text-base font-semibold text-neutral hover:bg-base-200"
               >
                 Create an account <ArrowRight size={18} aria-hidden="true" />
               </button>
-              <p className="rd-mono mt-6" style={{ color: "rgba(249,250,251,0.55)" }}>
+              <p className="rd-mono mt-6 text-[rgba(249,250,251,0.55)]">
                 No credit card · Demo inbox included · Your data stays on this server
               </p>
             </div>
@@ -748,49 +744,49 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
         </div>
       </section>
 
-      {/* ===================== Footer ===================== */}
-      <footer className="border-t border-[#374151] bg-[#111827] mt-auto">
-        <div className="mx-auto max-w-[1120px] px-6 py-12">
+      {/* ===================== Footer (daisyUI) ===================== */}
+      <footer className="footer mt-auto border-t border-[#374151] bg-neutral p-10 text-neutral-content sm:footer-horizontal">
+        <div className="mx-auto w-full max-w-[1120px] px-6">
           <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr_1.4fr]">
             <div>
               <div className="flex items-center gap-2.5">
                 <LogoMark size={22} />
                 <span className="rd-display text-base" style={{ color: "#F9FAFB" }}>ReviewDesk</span>
               </div>
-              <p className="mt-3 max-w-[260px] text-sm leading-relaxed" style={{ color: "rgba(249,250,251,0.72)" }}>
+              <p className="mt-3 max-w-[260px] text-sm leading-relaxed text-[rgba(249,250,251,0.72)]">
                 Review triage and reply drafts for Google Business profiles. The final word is
                 always yours.
               </p>
             </div>
-            <div>
-              <p className="rd-kicker mb-3" style={{ color: "rgba(249,250,251,0.6)" }}>Product</p>
-              <ul className="space-y-2 text-sm" style={{ color: "rgba(249,250,251,0.82)" }}>
-                <li><a href="#features" className="hover:text-white">Features</a></li>
-                <li><a href="#control" className="hover:text-white">Control</a></li>
-                <li><a href="#setup" className="hover:text-white">Setup</a></li>
-                <li><a href="#faq" className="hover:text-white">FAQ</a></li>
+            <nav aria-label="Product">
+              <p className="rd-kicker mb-3 text-[rgba(249,250,251,0.6)]">Product</p>
+              <ul className="space-y-2 text-sm text-[rgba(249,250,251,0.82)]">
+                <li><a href="#features" className="link-hover link">Features</a></li>
+                <li><a href="#control" className="link-hover link">Control</a></li>
+                <li><a href="#setup" className="link-hover link">Setup</a></li>
+                <li><a href="#faq" className="link-hover link">FAQ</a></li>
               </ul>
-            </div>
-            <div>
-              <p className="rd-kicker mb-3" style={{ color: "rgba(249,250,251,0.6)" }}>Account</p>
-              <ul className="space-y-2 text-sm" style={{ color: "rgba(249,250,251,0.82)" }}>
-                <li><button onClick={onSignup} className="hover:text-white">Create account</button></li>
-                <li><button onClick={onLogin} className="hover:text-white">Sign in</button></li>
+            </nav>
+            <nav aria-label="Account">
+              <p className="rd-kicker mb-3 text-[rgba(249,250,251,0.6)]">Account</p>
+              <ul className="space-y-2 text-sm text-[rgba(249,250,251,0.82)]">
+                <li><button onClick={onSignup} className="link-hover link">Create account</button></li>
+                <li><button onClick={onLogin} className="link-hover link">Sign in</button></li>
               </ul>
-            </div>
-            <div>
-              <p className="rd-kicker mb-3" style={{ color: "rgba(249,250,251,0.6)" }}>Legal</p>
-              <ul className="space-y-2 text-sm" style={{ color: "rgba(249,250,251,0.82)" }}>
-                <li><a href="/privacy" className="hover:text-white">Privacy policy</a></li>
-                <li><a href="/terms" className="hover:text-white">Terms and conditions</a></li>
+            </nav>
+            <nav aria-label="Legal">
+              <p className="rd-kicker mb-3 text-[rgba(249,250,251,0.6)]">Legal</p>
+              <ul className="space-y-2 text-sm text-[rgba(249,250,251,0.82)]">
+                <li><a href="/privacy" className="link-hover link">Privacy policy</a></li>
+                <li><a href="/terms" className="link-hover link">Terms and conditions</a></li>
               </ul>
-            </div>
+            </nav>
           </div>
           <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-[#374151] pt-6">
-            <p className="font-mono text-[0.75rem]" style={{ color: "rgba(249,250,251,0.55)" }}>
+            <p className="font-mono text-[0.75rem] text-[rgba(249,250,251,0.55)]">
               © 2026 ReviewDesk
             </p>
-            <p className="font-mono text-[0.75rem]" style={{ color: "rgba(249,250,251,0.55)" }}>
+            <p className="font-mono text-[0.75rem] text-[rgba(249,250,251,0.55)]">
               Approved replies are recorded, not sent, until you connect Google yourself
             </p>
           </div>
@@ -799,4 +795,3 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
     </div>
   );
 }
-

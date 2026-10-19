@@ -17,8 +17,8 @@ export default function LegalShell({
   children: ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen flex-col bg-[#F6F7F9]">
-      <div className="border-b border-[#E5E7EB] bg-white">
+    <div className="flex min-h-screen flex-col bg-base-200">
+      <div className="border-b border-base-300 bg-base-100">
         <div className="mx-auto flex h-16 max-w-[800px] items-center px-5">
           <Link href="/" className="flex items-center gap-2.5">
             <LogoMark />
@@ -28,20 +28,20 @@ export default function LegalShell({
       </div>
 
       <main className="flex-1 px-5 py-10">
-        <div className="rd-card rd-shadow-float mx-auto max-w-[800px] p-6 md:p-10">
+        <div className="card card-border rd-shadow-float bg-base-100 mx-auto max-w-[800px] p-6 md:p-10">
           <p className="rd-eyebrow-num mb-3">Legal</p>
           <h1 className="rd-display text-2xl">{title}</h1>
           <p className="rd-mono mt-1.5">Last updated: {updated}</p>
           <div className="mt-8 space-y-8">{children}</div>
-          <div className="mt-10 border-t border-[#E5E7EB] pt-5">
-            <Link href="/" className="text-sm font-semibold text-[#1D4ED8] hover:underline">
+          <div className="mt-10 border-t border-base-300 pt-5">
+            <Link href="/" className="link text-sm font-semibold text-primary hover:underline">
               Back to ReviewDesk
             </Link>
           </div>
         </div>
       </main>
 
-      <footer className="border-t border-[#E5E7EB] bg-white py-6">
+      <footer className="border-t border-base-300 bg-base-100 py-6">
         <div className="mx-auto max-w-[800px] px-5">
           <p className="rd-mono">
             Questions about this document? Contact the administrator who operates this ReviewDesk deployment.

@@ -27,21 +27,33 @@ anything automatically.
   oversized responses.
 - Safety policy that keeps holds, reports, negative sentiment, risk flags, and
   untrusted languages out of the automatic lane.
-- Simulated review source using the 15-row [`samples.csv`](./samples.csv) demo.
-- Session-persistent demo workflow with veto windows, approval queue, audit CSV,
-  idempotency checks, and owner-controlled retry.
+- Owner-in-the-loop workflow with veto windows, approval queue, audit log, and
+  CSV export.
+- Google Business Profile API integration (optional, with honest status).
+- Encrypted credential storage (AES-256-GCM).
+- Email verification and password reset.
 - Mock provider mode for offline demos without an API key.
+- Dark slate theme with paper-white cards and action-colored badges.
+
+## Tech stack
+
+- **Frontend:** Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, DaisyUI
+- **Backend:** Next.js API Routes, Prisma ORM
+- **Database:** PostgreSQL (Neon)
+- **Auth:** bcrypt + JWT httpOnly sessions, email verification, password reset
+- **LLM:** OpenAI / Anthropic (optional), mock provider for demos
+- **UI:** OriginKit components (SkewInText, LabelSlideButton, SpotlightText)
 
 ## Quick start
 
 ### Prerequisites
 
 - Node.js 20+ and npm
-- PostgreSQL database (or SQLite for local dev)
+- PostgreSQL database (Neon recommended)
 
 ### Setup
 
-```bash
+`ash
 git clone https://github.com/Wasif478484/ReviewDesk.git
 cd ReviewDesk
 npm install --legacy-peer-deps
@@ -49,88 +61,72 @@ cp .env.example .env
 # Edit .env: set DATABASE_URL and APP_SECRET (openssl rand -hex 32)
 npx prisma db push
 npm run dev
-```
+`
 
-Open <http://localhost:3000>.
+Open http://localhost:3000.
 
 ### Mock mode (no API key)
 
-Set `REVIEWDESK_PROVIDER=mock` in `.env` to run with canned responses.
+Set REVIEWDESK_PROVIDER=mock in .env to run with canned responses.
 No API key needed.
 
 ## Deploy to Vercel (recommended)
 
 The repository is ready to deploy as a Vercel app:
 
-1. Sign in at <https://vercel.com/> with GitHub.
-2. Import `Wasif478484/ReviewDesk`, branch `master`.
-3. Vercel auto-detects Next.js. Set the build command to `npm run build`.
+1. Sign in at https://vercel.com/ with GitHub.
+2. Import Wasif478484/ReviewDesk, branch master.
+3. Vercel auto-detects Next.js. Set the build command to 
+pm run build.
 4. In **Environment Variables**, add:
-   - `DATABASE_URL` — your PostgreSQL connection string (e.g., Neon)
-   - `APP_SECRET` — a 64-hex-character secret (`openssl rand -hex 32`)
-   - `REVIEWDESK_PROVIDER` — `openai` (or `anthropic`)
-   - `OPENAI_API_KEY` — your OpenAI API key
-   - `OPENAI_MODEL` — `gpt-4o-mini`
+   - DATABASE_URL — your PostgreSQL connection string (e.g., Neon)
+   - APP_SECRET — a 64-hex-character secret (openssl rand -hex 32)
+   - REVIEWDESK_PROVIDER — mock or openai
+   - OPENAI_API_KEY — your OpenAI API key (if using openai)
+   - OPENAI_MODEL — gpt-4o-mini
 5. Deploy the app and open the generated public URL.
 
 For production database, use Neon PostgreSQL:
-- Create a Neon project at <https://neon.tech>
+- Create a Neon project at https://neon.tech
 - Copy the connection string
-- Set `DATABASE_URL` in Vercel environment variables
-- Run `npx prisma migrate deploy` on first deploy
+- Set DATABASE_URL in Vercel environment variables
+- Run 
+px prisma migrate deploy on first deploy
 
-Secrets are read from Vercel's encrypted environment variables. Never put
-the API key in Git, `.env` files committed to the repository, screenshots,
+Secrets are read from Vercel encrypted environment variables. Never put
+the API key in Git, .env files committed to the repository, screenshots,
 or logs. Live calls use OpenAI and may incur costs; the app remains
 owner-in-the-loop and never posts replies automatically.
 
 ## Using a live model provider
 
-Copy [`.env.example`](./.env.example) to `.env`, then configure one provider.
-The `.env` file is ignored by Git and must never be committed.
+Copy .env.example to .env, then configure one provider.
+The .env file is ignored by Git and must never be committed.
 
-```powershell
+`powershell
 Copy-Item .env.example .env
-```
+`
 
 Supported providers:
 
 | Provider | Environment variable | Default model |
 | --- | --- | --- |
-| `mock` | None | Canned offline responses |
-| `anthropic` | `ANTHROPIC_API_KEY` | `claude-3-haiku-20240307` |
-| `openai` | `OPENAI_API_KEY` | `gpt-4o-mini` |
+| mock | None | Canned offline responses |
+| nthropic | ANTHROPIC_API_KEY | claude-3-haiku-20240307 |
+| openai | OPENAI_API_KEY | gpt-4o-mini |
 
-Set the provider with `REVIEWDESK_PROVIDER`. Live model calls cost money and
+Set the provider with REVIEWDESK_PROVIDER. Live model calls cost money and
 review text is sent to the selected provider. Use mock mode for demos and tests.
-
-### Optional Qwen sentiment signal
-
-The cloned Hugging Face Space can be used as an advisory sentiment signal; it
-does not replace ReviewDesk triage or safety policy. Enable it only when the
-Space is running and reachable:
-
-```toml
-REVIEWDESK_SENTIMENT_PROVIDER = "qwen"
-REVIEWDESK_SENTIMENT_SPACE = "Hariharasudhan07/qwen3-0.6b-sentiment-classification"
-HF_TOKEN = "only-if-the-model-repository-is-private"
-```
-
-The integration uses `gradio_client` and calls the Space's
-`/classify_review` endpoint. If it is unavailable, the primary ReviewDesk
-analysis remains visible and the app shows an explicit warning. The Qwen
-signal is advisory; ReviewDesk's action decision and owner approval remain
-authoritative.
 
 ## How the workflow works
 
 1. The owner enters a review and business profile.
-2. `reviewdesk.prompts` builds a constrained model request.
-3. `reviewdesk.llm` calls the configured provider, with one retry and a bounded
+2. The app builds a constrained model request.
+3. The LLM calls the configured provider, with one retry and a bounded
    local cache.
 4. The response is parsed and validated. Invalid output falls back to owner
    review.
-5. `reviewdesk.policy` applies the frozen safety rules.
+5. The safety policy applies the frozen safety rules.
 6. The owner edits, copies, and manually posts any public reply.
 
 The Autopilot tab is a simulated, opt-in workflow for demonstrating veto windows
@@ -139,61 +135,63 @@ reply to Google.
 
 ## Repository structure
 
-```text
+`
 .
-├── app.py                    # Stable Streamlit launcher
-├── src/reviewdesk/           # Installable application package
-│   ├── app.py                # Streamlit screens and session state
-│   ├── autopilot.py          # Plain-Python workflow orchestration
-│   ├── domain.py             # Typed workflow and audit records
-│   ├── llm.py                # Provider gateway and cache
-│   ├── policy.py              # Frozen safety rules
-│   ├── prompts.py             # Frozen prompts, parser, and draft checks
-│   ├── sources.py             # Mock source and provider boundary
-│   └── ui.py                  # Escaped rendering helpers
-├── tests/                    # Regression tests
-├── scripts/                  # Maintainer utilities
-├── docs/                     # Architecture documentation
-├── website/                  # Static landing page
-├── devpost/                  # Product and learning artifacts
-├── .github/workflows/        # CI checks
-├── pyproject.toml            # Package metadata
-└── requirements.txt          # Runtime dependencies
-```
+├── src/app/                # Next.js App Router pages and API routes
+│   ├── api/                # API endpoints (auth, workspace, analyze, etc.)
+│   ├── page.tsx            # Landing page
+│   └── layout.tsx          # Root layout
+├── src/components/         # React components
+│   ├── auth/               # Authentication views
+│   ├── dashboard/          # Dashboard tabs (Autopilot, Ledger, Settings)
+│   ├── landing/            # Landing page sections
+│   ├── onboarding/         # 3-step onboarding flow
+│   ├── legal/              # Privacy and Terms
+│   ├── originkit/          # OriginKit animated components
+│   └── shared/             # Shared UI bits
+├── src/lib/                # Core libraries
+│   ├── engine/             # Review analysis engine (prompts, policy, etc.)
+│   ├── server/             # Server-side utilities (auth, crypto, db, google)
+│   └── *.ts                # Client-side utilities
+├── prisma/                 # Database schema
+├── public/                 # Static assets
+├── website/                # Static landing page (marketing site)
+├── docs/                   # Architecture documentation
+├── .github/workflows/      # CI checks
+├── .env.example            # Environment template
+├── vercel.json             # Vercel deployment config
+└── README.md
+`
 
-See [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) for module boundaries and
-[`CONTRIBUTING.md`](./CONTRIBUTING.md) for development rules.
+See CONTRIBUTING.md for development rules.
 
 ## Verification
 
 Run the same checks used by CI:
 
-```bash
+`ash
 npm run build
 npm run lint
 npm test
 git diff --check
-```
+`
 
 Expected results:
 
-- Build: **success** (all routes compiled)
-- Lint: **no errors**
-- Tests: **11 passed**
-- Whitespace: **clean**
+- Build: success (all routes compiled)
+- Lint: no errors
+- Whitespace: clean
 
 GitHub Actions runs these checks on pushes and pull requests.
 
 ## Privacy and safety
 
-- No accounts or database are required.
-- Reviews remain in the Streamlit session unless sent to the selected model
+- Reviews remain in the database session unless sent to the selected model
   provider for analysis.
-- Local model results are cached temporarily; configure
-  `REVIEWDESK_CACHE_TTL_SECONDS` and `REVIEWDESK_CACHE_MAX_ENTRIES`.
-- The sidebar provides a control to clear the local model cache.
+- Local model results are cached temporarily.
 - No secrets, personal review data, cache files, or bytecode belong in Git.
 - User and model-produced text is HTML-escaped before custom rendering.
+- The app never posts replies automatically — the owner copies by hand.
 
 ## Project scope
 
@@ -204,21 +202,16 @@ GitHub Actions runs these checks on pushes and pull requests.
 - Owner review and manual copy workflow.
 - Mock provider and simulated source.
 - Audit and export for the local demo.
+- Google Business Profile API integration (stub until approved access).
 
 ### Deferred
 
-- Google Business Profile API integration.
-- Authentication and multi-user teams.
-- Durable database storage.
 - Background workers and scheduled processing.
 - Payments, scraping, and automatic posting.
 
 ## Contributing
 
-Read [`CONTRIBUTING.md`](./CONTRIBUTING.md) before changing the code. Keep
-[`src/reviewdesk/prompts.py`](./src/reviewdesk/prompts.py) and
-[`src/reviewdesk/policy.py`](./src/reviewdesk/policy.py) frozen unless an
-explicit product decision changes their contract.
+Read CONTRIBUTING.md before changing the code.
 
 ## License
 
