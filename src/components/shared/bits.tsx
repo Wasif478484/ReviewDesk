@@ -137,6 +137,159 @@ export function TriageBanner({ triage }: { triage: TriageData }) {
   );
 }
 
+/** Reply composer: editable draft with sign-off, word target, and preview. */
+export function ReplyComposer({
+  draft,
+  translation,
+  languageUsed,
+  value,
+  onChange,
+  signOff,
+  ownerLanguage,
+  editable,
+}: {
+  draft: string;
+  translation: string | null;
+  languageUsed: string;
+  value?: string;
+  onChange?: (v: string) => void;
+  signOff?: string;
+  ownerLanguage?: string;
+  editable?: boolean;
+}) {
+  const text = value ?? draft;
+  const words = text.split(/\s+/).filter(Boolean).length;
+  const withSignOff = signOff && !text.trim().endsWith(signOff.trim());
+  const preview = withSignOff ? `${text}\n\n${signOff}` : text;
+  const inRange = words >= 25 && words <= 90;
+  const [showPreview, setShowPreview] = useState(false);
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="rd-kicker">
+          Draft reply {editable ? "· edit before you copy" : ""}
+        </span>
+        <span className="rd-mono" style={{ color: inRange ? "#15803D" : "#854D0E" }} aria-label={`${words} words`}>
+          {words} words {inRange ? "· on target" : "· aim 30-80"}
+        </span>
+      </div>
+      {editable && onChange ? (
+        <>
+          <textarea
+            className="textarea w-full min-h-[140px] resize-y text-[15px] font-display"
+            value={text}
+            onChange={(e) => onChange(e.target.value)}
+            aria-label="Edit draft reply"
+            placeholder="Type your reply here…"
+          />
+          {signOff && (
+            <div className="flex items-center gap-2 mt-2">
+              <input
+                type="checkbox"
+                checked={Boolean(withSignOff)}
+                onChange={() => onChange(withSignOff ? text : `${text}\n\n${signOff}`)}
+                className="toggle toggle-sm shrink-0" aria-label="Add sign-off"
+              />
+              <label className="text-xs text-[#6B7280] cursor-pointer select-none">Add sign-off (“{signOff}”)</label>
+            </div>
+          )}
+          {translation && ownerLanguage && (
+            <div className="mt-2 flex items-center gap-2">
+              <button
+                className="btn btn-ghost btn-xs rd-mono"
+                onClick={() => setShowPreview(!showPreview)}
+              >
+                {showPreview ? "Show reply draft" : `Show in ${ownerLanguage} (owner copy)`}
+              </button>
+            </div>
+          )}
+          {showPreview && translation && (
+            <div className="mt-2 rounded-lg border border-base-300 bg-[#F6F7F9] p-3 text-sm italic text-[#374151]">
+              {translation}
+            </div>
+          )}
+        </>
+      ) : (
+        <p className="whitespace-pre-wrap rounded-[10px] p-4 text-[15px] font-display" style={{ background: "#FFFFFF", border: "1.5px solid #D1D5DB", color: "#111827" }}>
+          {preview}
+        </p>
+      )}
+      {translation && !editable && (
+        <div>
+          <div className="rd-kicker mb-1.5">What it says (owner copy)</div>
+          <p className="whitespace-pre-wrap rounded-[10px] p-4 text-sm italic" style={{ background: "#F6F7F9", border: "1px solid #E5E7EB", color: "#374151" }}>
+            {translation}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** One-click copy of reviewer + draft reply, formatted for pasting into Google Business. */
+export function CopyReviewAndReply({
+  review, draft, signOff, onCopied,
+}: {
+  review: ReviewData;
+  draft: string;
+  signOff?: string;
+  onCopied?: () => void;
+}) {
+  const fullText = [
+    `Reviewer: ${review.author || "Reviewer"}`,
+    `Rating: ${review.stars ?? "—"}★`,
+    `Review: ${review.text || "(no text)"}`,
+    ``,
+    `Your reply:`,
+    `${draft}${signOff ? `\n\n${signOff}` : ""}`,
+  ].join("\n");
+
+  return (
+    <button
+      className="btn btn-neutral btn-sm w-full flex items-center justify-center gap-2"
+      onClick={async () => {
+        await navigator.clipboard?.writeText(fullText);
+        onCopied?.();
+      }}
+      aria-label="Copy reviewer and reply to clipboard"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+        <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+      </svg>
+      Copy review + reply
+    </button>
+  );
+}
+
+/** Quick reply templates the owner can insert into the draft. */
+export function ReplyTemplates({ onInsert }: { onInsert: (phrase: string) => void }) {
+  const templates = [
+    "Thank you for your feedback!",
+    "We're sorry to hear about your experience.",
+    "Thank you for bringing this to our attention.",
+    "We appreciate you taking the time to review us.",
+    "We look forward to serving you again.",
+  ];
+  return (
+    <div className="space-y-2">
+      <div className="rd-kicker mb-2">Quick insert</div>
+      <div className="flex flex-wrap gap-2">
+        {templates.map((t) => (
+          <button
+            key={t}
+            className="btn btn-outline btn-xs rd-mono"
+            onClick={() => onInsert(t)}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /** Rating distribution bar. */
 export function Distribution({ reviews }: { reviews: ReviewData[] }) {
   const buckets = [1, 2, 3, 4, 5].map(

@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { LogoMark, Stars, TriageBanner, DraftCard, CheckFactsCard, Distribution, LedgerStat } from "@/components/shared/bits";
+import { LogoMark, Stars, TriageBanner, CheckFactsCard, Distribution, LedgerStat, ReplyComposer, CopyReviewAndReply, ReplyTemplates } from "@/components/shared/bits";
 import SortableTable from "@/components/shared/SortableTable";
 import { ACTION_META, type ReviewData, type WorkspaceData } from "@/types/reviewdesk";
 import AutopilotTab from "@/components/dashboard/AutopilotTab";
@@ -354,17 +354,34 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
 
                       {selected.triage.draftReply && (
                         <div className="card card-border bg-base-100 p-6">
-                          <DraftCard
+                          <ReplyComposer
                             draft={selected.triage.draftReply}
                             translation={selected.triage.draftTranslation}
                             languageUsed={selected.triage.languageUsed}
-                            editable={!selected.hasReply}
                             value={draftEdit}
                             onChange={setDraftEdit}
+                            signOff={ws.business?.signOff}
+                            ownerLanguage={ws.business?.ownerLanguage}
+                            editable={!selected.hasReply}
                           />
+                          {!selected.hasReply && (
+                            <ReplyTemplates
+                              onInsert={(phrase) => {
+                                setDraftEdit((prev) =>
+                                  prev ? `${prev} ${phrase}` : phrase,
+                                );
+                              }}
+                            />
+                          )}
                           <div className="mt-4 flex flex-wrap items-center gap-3">
                             {!selected.hasReply ? (
                               <>
+                                <CopyReviewAndReply
+                                  review={selected}
+                                  draft={draftEdit || selected.triage!.draftReply || ""}
+                                  signOff={ws.business?.signOff}
+                                  onCopied={() => setNote("Reviewer + reply copied to clipboard.")}
+                                />
                                 <button
                                   className="btn btn-primary"
                                   onClick={() => act({ type: "record", triageId: selected.triage!.id, draft: draftEdit }, "Recorded in your workspace (demo; nothing is sent to Google).")}
@@ -381,7 +398,7 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
                                   className="btn btn-ghost btn-sm rd-mono"
                                   onClick={() => { navigator.clipboard?.writeText(draftEdit || selected.triage!.draftReply || ""); setNote("Draft copied to clipboard."); }}
                                 >
-                                  Copy draft
+                                  Copy draft only
                                 </button>
                               </>
                             ) : (
