@@ -8,7 +8,8 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { LogoMark, Stars, Stamp, TriageBanner, DraftCard, CheckFactsCard, Distribution, LedgerStat, VetoCountdown } from "@/components/shared/bits";
+import { LogoMark, Stars, TriageBanner, DraftCard, CheckFactsCard, Distribution, LedgerStat } from "@/components/shared/bits";
+import SortableTable from "@/components/shared/SortableTable";
 import { ACTION_META, type ReviewData, type WorkspaceData } from "@/types/reviewdesk";
 import AutopilotTab from "@/components/dashboard/AutopilotTab";
 import LedgerTab from "@/components/dashboard/LedgerTab";
@@ -114,6 +115,24 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
     const data = await res.json();
     setNote(res.ok ? `Imported ${data.imported} review${data.imported === 1 ? "" : "s"}.` : data.error);
     if (res.ok) { setCsv(""); setShowImport(false); await refresh(); }
+  }
+
+  async function exportCsv() {
+    setNote("");
+    const rows = ws.reviews.map((r) =>
+      `${r.stars ?? ""},"${(r.text ?? "").replace(/"/g, '""')}","${r.author ?? ""}","${r.date ?? ""}"`
+    );
+    const csvContent = `stars,text,author,date\n${rows.join("\n")}`;
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `reviewdesk-reviews-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    setNote(`Exported ${ws.reviews.length} review${ws.reviews.length === 1 ? "" : "s"} to CSV.`);
   }
 
   async function fetchGoogle() {
@@ -261,6 +280,9 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
                 <button className="btn btn-outline btn-sm" onClick={() => setShowImport(!showImport)}>
                   Import CSV
                 </button>
+                <button className="btn btn-outline btn-sm rd-mono" onClick={exportCsv}>
+                  Export CSV
+                </button>
               </div>
 
               {showImport && (
@@ -277,42 +299,15 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
               )}
 
               <div className="rd-scroll -mx-2 flex-1 overflow-y-auto px-2">
-                {visible.map((r) => {
-                  const isSel = r.id === selectedId;
-                  const lane = r.triage?.lane;
-                  return (
-                    <button
-                      key={r.id}
-                      onClick={() => setSelectedId(r.id)}
-                      className="mb-2 w-full rounded-xl p-3.5 text-left transition-colors"
-                      style={{
-                        background: isSel ? "#F6F7F9" : "#FFFFFF",
-                        border: `1.5px solid ${isSel ? "#111827" : "#E5E7EB"}`,
-                      }}
-                      aria-current={isSel}
-                    >
-                      <div className="mb-1 flex items-center justify-between gap-2">
-                        <Stars stars={r.stars} />
-                        <span className="rd-mono">{r.source === "demo" ? "demo" : r.source}</span>
-                      </div>
-                      <p className="line-clamp-2 text-sm text-[#374151]">{r.text || "(star rating only)"}</p>
-                      <div className="mt-2 flex flex-wrap items-center gap-2">
-                        {r.hasReply ? (
-                          <span className="badge badge-soft badge-success font-mono">
-                            {r.replyMode === "sent" ? "sent" : "recorded"}
-                          </span>
-                        ) : r.triage ? (
-                          <>
-                            <Stamp action={r.triage.action} />
-                            {lane === "auto" && r.triage.status === "pending" && <VetoCountdown dueAt={r.triage.dueAt} />}
-                          </>
-                        ) : (
-                          <span className="badge badge-outline font-mono">not analyzed</span>
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
+                <SortableTable
+                  reviews={visible}
+                  onSelect={(id) => setSelectedId(id)}
+                  selectedId={selectedId}
+                  onAnalyze={analyzeOne}
+                  onRecord={(triageId, draft) => act({ type: "record", triageId, draft }, "Recorded in your workspace (demo; nothing is sent to Google).")}
+                  onDismiss={(triageId) => act({ type: "dismiss", triageId }, "Draft dismissed.")}
+                  onCopy={(text) => { navigator.clipboard?.writeText(text); setNote("Draft copied to clipboard."); }}
+                />
                 {!visible.length && <p className="rd-mono py-8 text-center">Nothing here under this filter.</p>}
               </div>
             </div>

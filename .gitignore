@@ -40,3 +40,4 @@ dist/
 
 # Local database files
 db/*.db
+.vercel

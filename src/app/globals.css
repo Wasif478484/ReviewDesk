@@ -362,6 +362,133 @@
 /* ---------- Stars ---------- */
 .rd-stars { color: var(--rd-star); letter-spacing: 2px; }
 
+/* ---------- Density-controlled table (ant-design pattern) ---------- */
+.rd-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.rd-table thead th {
+  background: var(--rd-subtle);
+  border-bottom: 2px solid var(--rd-line-strong);
+  text-align: left;
+  font-family: var(--font-ledger);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rd-muted);
+  padding: 10px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.rd-table thead th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+.rd-table thead th.sortable:hover {
+  color: var(--rd-ink);
+}
+.rd-table thead th .sort-indicator {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 6px;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 4px solid var(--rd-muted);
+  opacity: 0.5;
+}
+.rd-table thead th.sort-asc .sort-indicator,
+.rd-table thead th.sort-desc .sort-indicator {
+  opacity: 1;
+  border-bottom-color: var(--rd-brand);
+}
+.rd-table thead th.sort-desc .sort-indicator {
+  border-top: 4px solid var(--rd-brand);
+  border-bottom: none;
+}
+.rd-table tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--rd-line);
+  color: var(--rd-body);
+  vertical-align: top;
+}
+.rd-table tbody tr {
+  transition: background 0.15s ease;
+}
+.rd-table tbody tr:hover {
+  background: var(--rd-subtle);
+}
+.rd-table tbody tr.selected {
+  background: #F6F7F9;
+  border-left: 3px solid var(--rd-ink);
+  padding-left: 9px; /* compensate for border */
+}
+
+/* ---------- Export button ---------- */
+.rd-btn-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-ledger);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--rd-ink);
+  background: var(--rd-surface);
+  border: 1px solid var(--rd-line);
+  border-radius: 6px;
+  padding: 8px 14px;
+  min-height: 36px;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.rd-btn-export:hover {
+  background: var(--rd-brand);
+  border-color: var(--rd-brand);
+  color: #FFFFFF;
+}
+.rd-btn-export:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ---------- Empty state ---------- */
+.rd-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--rd-muted);
+}
+.rd-empty p {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* ---------- Action row (density control) ---------- */
+.rd-action-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* ---------- Note toast ---------- */
+.rd-note {
+  font-family: var(--font-ledger);
+  font-size: 0.875rem;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--rd-line);
+}
+.rd-note-ok { background: var(--rd-reply-tint); border-color: rgba(21, 128, 61, 0.3); color: var(--rd-reply); }
+.rd-note-bad { background: var(--rd-hold-tint); border-color: rgba(220, 38, 38, 0.28); color: var(--rd-hold); }
+
 /* ---------- Distribution bar ---------- */
 .rd-dist {
   display: flex;

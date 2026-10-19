@@ -619,23 +619,21 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
                   dark
                 />
                 <div className="border-t border-[#374151]">
-                  {[
-                    {
-                      n: "01", t: "Draft",
-                      d: "The model writes a reply in the reviewer's language and attaches a translation for you.",
-                      m: "30-80 word target",
-                    },
-                    {
-                      n: "02", t: "Decide",
-                      d: "Approve, edit, veto, or report. Mixed-sentiment reviews always wait for a human.",
-                      m: "veto window you set",
-                    },
-                    {
-                      n: "03", t: "Ledger",
-                      d: "Every decision is written down with its reason, so the desk can always explain itself.",
-                      m: "who, what, why",
-                    },
-                  ].map((row, i) => (
+                  {[{
+                    n: "01", t: "Draft",
+                    d: "The model writes a reply in the reviewer's language and attaches a translation for you.",
+                    m: "30-80 word target",
+                  },
+                  {
+                    n: "02", t: "Decide",
+                    d: "Approve, edit, veto, or report. Mixed-sentiment reviews always wait for a human.",
+                    m: "veto window you set",
+                  },
+                  {
+                    n: "03", t: "Ledger",
+                    d: "Every decision is written down with its reason, so the desk can always explain itself.",
+                    m: "who, what, why",
+                  }].map((row, i) => (
                     <div key={row.n} className={`flex gap-6 py-6 ${i > 0 ? "border-t border-[#374151]" : ""}`}>
                       <span className="font-mono text-sm font-bold text-[#93C5FD]">{row.n}</span>
                       <div>
