@@ -1,27 +1,22 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/server/db";
 import { requireUserId } from "@/lib/server/auth";
+import { v4 as uuidv4 } from "uuid";
 
-/** GET /api/templates, list templates for the user's organization(s). */
+/** GET /api/templates, list templates for the signed-in user. */
 export async function GET() {
   try {
     const userId = await requireUserId();
-    const user = await db.user.findUnique({
-      where: { id: userId },
-      include: { templates: true },
-    });
-    if (!user) return NextResponse.json({ error: "User not found." }, { status: 404 });
+    const rows = await db.$queryRawUnsafe(
+      `SELECT id, name, content, category, usage_count, created_at, updated_at
+       FROM "Template"
+       WHERE "userId" = $1
+       ORDER BY "created_at" DESC`,
+      [userId],
+    );
     return NextResponse.json({
       ok: true,
-      templates: user.templates.map((t) => ({
-        id: t.id,
-        name: t.name,
-        content: t.content,
-        category: t.category,
-        usageCount: t.usageCount,
-        createdAt: t.createdAt,
-        updatedAt: t.updatedAt,
-      })),
+      templates: Array.isArray(rows) ? rows : [],
     });
   } catch (err) {
     const status = (err as { status?: number }).status ?? 500;
@@ -41,13 +36,17 @@ export async function POST(req: Request) {
     const category = String(body.category ?? "general").trim().slice(0, 40);
     if (!name) return NextResponse.json({ error: "Template name is required." }, { status: 400 });
     if (!content) return NextResponse.json({ error: "Template content is required." }, { status: 400 });
-    const user = await db.user.findUnique({ where: { id: userId } });
-    if (!user?.organizationId)
-      return NextResponse.json({ error: "You must belong to an organization to create templates." }, { status: 400 });
-    const template = await db.template.create({
-      data: { organizationId: user.organizationId, userId, name, content, category },
+
+    const rows = await db.$queryRawUnsafe(
+      `INSERT INTO "Template" ("id", "organizationId", "userId", "name", "content", "category", "usageCount", "createdAt", "updatedAt")
+       VALUES ($1, NULL, $2, $3, $4, $5, 0, NOW(), NOW())
+       RETURNING id, name, content, category, "usageCount", "createdAt", "updatedAt"`,
+      [uuidv4(), userId, name, content, category],
+    );
+    return NextResponse.json({
+      ok: true,
+      template: Array.isArray(rows) && rows.length > 0 ? rows[0] : null,
     });
-    return NextResponse.json({ ok: true, template: { id: template.id, name: template.name, content: template.content, category: template.category } });
   } catch (err) {
     const status = (err as { status?: number }).status ?? 500;
     if (status === 401) return NextResponse.json({ error: "Not signed in" }, { status: 401 });

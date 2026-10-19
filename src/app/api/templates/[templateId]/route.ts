@@ -1,19 +1,23 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/server/db";
 import { requireUserId } from "@/lib/server/auth";
+import { v4 as uuidv4 } from "uuid";
 
 /** GET /api/templates/[templateId], get a single template. */
 export async function GET(req: Request, { params }: { params: { templateId: string } }) {
   try {
     const userId = await requireUserId();
     const { templateId } = params;
-    const template = await db.template.findUnique({ where: { id: templateId } });
-    if (!template) return NextResponse.json({ error: "Template not found." }, { status: 404 });
-    const user = await db.user.findUnique({ where: { id: userId } });
-    if (!user || template.organizationId !== user.organizationId)
-      return NextResponse.json({ error: "Not authorized to view this template." }, { status: 403 });
-    await db.template.update({ where: { id: templateId }, data: { usageCount: { increment: 1 } } });
-    return NextResponse.json({ ok: true, template });
+    const rows = await db.$queryRawUnsafe(
+      `SELECT id, name, content, category, usage_count, created_at, updated_at
+       FROM "Template"
+       WHERE id = $1 AND "userId" = $2`,
+      [templateId, userId],
+    );
+    const rowsArray = Array.isArray(rows) ? rows : [];
+    if (rowsArray.length === 0)
+      return NextResponse.json({ error: "Template not found." }, { status: 404 });
+    return NextResponse.json({ ok: true, template: rowsArray[0] });
   } catch (err) {
     const status = (err as { status?: number }).status ?? 500;
     if (status === 401) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
@@ -27,17 +31,26 @@ export async function PUT(req: Request, { params }: { params: { templateId: stri
   try {
     const userId = await requireUserId();
     const { templateId } = params;
-    const template = await db.template.findUnique({ where: { id: templateId } });
-    if (!template) return NextResponse.json({ error: "Template not found." }, { status: 404 });
-    const user = await db.user.findUnique({ where: { id: userId } });
-    if (!user || template.organizationId !== user.organizationId)
-      return NextResponse.json({ error: "Not authorized to edit this template." }, { status: 403 });
     const body = await req.json();
-    const data: Record<string, unknown> = {};
-    if (body.name) data.name = String(body.name).trim().slice(0, 120);
-    if (body.content !== undefined) data.content = String(body.content).trim().slice(0, 2000);
-    if (body.category) data.category = String(body.category).trim().slice(0, 40);
-    await db.template.update({ where: { id: templateId }, data });
+    const data: string[] = [];
+    const values: unknown[] = [templateId, userId];
+    if (body.name) {
+      data.push(`"name" = $${values.push(String(body.name).trim().slice(0, 120))}`);
+    }
+    if (body.content !== undefined) {
+      data.push(`"content" = $${values.push(String(body.content).trim().slice(0, 2000))}`);
+    }
+    if (body.category) {
+      data.push(`"category" = $${values.push(String(body.category).trim().slice(0, 40))}`);
+    }
+    if (data.length === 0) {
+      return NextResponse.json({ error: "No fields to update." }, { status: 400 });
+    }
+    data.push(`"updatedAt" = NOW()`);
+    await db.$queryRawUnsafe(
+      `UPDATE "Template" SET ${data.join(", ")} WHERE id = $1 AND "userId" = $2`,
+      ...values,
+    );
     return NextResponse.json({ ok: true });
   } catch (err) {
     const status = (err as { status?: number }).status ?? 500;
@@ -52,12 +65,10 @@ export async function DELETE(req: Request, { params }: { params: { templateId: s
   try {
     const userId = await requireUserId();
     const { templateId } = params;
-    const template = await db.template.findUnique({ where: { id: templateId } });
-    if (!template) return NextResponse.json({ error: "Template not found." }, { status: 404 });
-    const user = await db.user.findUnique({ where: { id: userId } });
-    if (!user || template.organizationId !== user.organizationId)
-      return NextResponse.json({ error: "Not authorized to delete this template." }, { status: 403 });
-    await db.template.delete({ where: { id: templateId } });
+    await db.$queryRawUnsafe(
+      `DELETE FROM "Template" WHERE id = $1 AND "userId" = $2`,
+      [templateId, userId],
+    );
     return NextResponse.json({ ok: true });
   } catch (err) {
     const status = (err as { status?: number }).status ?? 500;
