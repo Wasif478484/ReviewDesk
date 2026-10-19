@@ -1,18 +1,20 @@
-/**
- * llm.ts
- */
-
 import ZAI from "z-ai-web-dev-sdk";
 
-const MOCK_OUTPUTS = [
-  { action: "reply", sentiment: "positive", flags: [], reason: "Simple praise.", review_language: "English", language_used: "English", draft_reply: "Thank you! The Owner.", review_translation: null, draft_translation: null, report_note: null, owner_checklist: [] },
-  { action: "hold", sentiment: "negative", flags: ["health"], reason: "Needs review.", review_language: "English", language_used: "none", draft_reply: null, review_translation: null, draft_translation: null, report_note: null, owner_checklist: ["Verify claim"] },
-];
-
 function mockResponse(user: string): string {
-  let hash = 0;
-  for (let i = 0; i < user.length; i++) hash = ((hash << 5) - hash + user.charCodeAt(i)) | 0;
-  return JSON.stringify(MOCK_OUTPUTS[Math.abs(hash) % MOCK_OUTPUTS.length]);
+  const lower = user.toLowerCase();
+  let result: any;
+  if (/health|doctor|sick|legal|sue/i.test(lower)) {
+    result = { action: "hold", sentiment: "negative", flags: ["health"], reason: "Needs owner review.", review_language: "English", language_used: "none", draft_reply: null, review_translation: null, draft_translation: null, report_note: null, owner_checklist: ["Verify claim"] };
+  } else if (/spam|fake|scam|http/i.test(lower)) {
+    result = { action: "report", sentiment: "negative", flags: ["spam"], reason: "Appears to be spam.", review_language: "English", language_used: "none", draft_reply: null, review_translation: null, draft_translation: null, report_note: "Consider reporting.", owner_checklist: ["Verify spam"] };
+  } else if (/great|amazing|excellent|love|best|wonderful|thank|good/i.test(lower)) {
+    result = { action: "reply", sentiment: "positive", flags: [], reason: "Positive feedback.", review_language: "English", language_used: "English", draft_reply: "Thank you for the kind words! We look forward to seeing you again. The Owner, Your Business", review_translation: null, draft_translation: null, report_note: null, owner_checklist: [] };
+  } else if (/cold|late|slow|bad|terrible|worst|wait|poor/i.test(lower)) {
+    result = { action: "reply", sentiment: "negative", flags: [], reason: "Genuine complaint.", review_language: "English", language_used: "English", draft_reply: "We are sorry to hear about your experience. We are looking into this. Thank you for your feedback. The Owner, Your Business", review_translation: null, draft_translation: null, report_note: null, owner_checklist: [] };
+  } else {
+    result = { action: "reply", sentiment: "mixed", flags: [], reason: "Mixed feedback.", review_language: "English", language_used: "English", draft_reply: "Thank you for your feedback. We appreciate your input. The Owner, Your Business", review_translation: null, draft_translation: null, report_note: null, owner_checklist: [] };
+  }
+  return JSON.stringify(result);
 }
 
 export async function callModel(system: string, user: string): Promise<string> {
