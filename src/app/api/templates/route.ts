@@ -38,8 +38,8 @@ export async function POST(req: Request) {
     if (!content) return NextResponse.json({ error: "Template content is required." }, { status: 400 });
 
     const rows = await db.$queryRawUnsafe(
-      `INSERT INTO "Template" ("id", "organizationId", "userId", "name", "content", "category", "usageCount", "createdAt", "updatedAt")
-       VALUES ($1, NULL, $2, $3, $4, $5, 0, NOW(), NOW())
+      `INSERT INTO "Template" ("id", "userId", "name", "content", "category", "usageCount", "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, $4, $5, 0, NOW(), NOW())
        RETURNING id, name, content, category, "usageCount", "createdAt", "updatedAt"`,
       [uuidv4(), userId, name, content, category],
     );

@@ -24,6 +24,7 @@ model User {
   triages    Triage[]
   audits     AuditEvent[]
   authTokens AuthToken[]
+  templates  Template[]
 }
 
 model Business {
@@ -158,4 +159,18 @@ model AuditEvent {
   error     String   @default("")
 
   @@index([userId, timestamp])
+}
+
+model Template {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  content       String
+  category      String   @default("general")
+  usageCount    Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
 }
