@@ -65,6 +65,8 @@ npm run dev
 
 Open http://localhost:3000.
 
+**Live demo:** https://reviewdesk-nu.vercel.app
+
 ### Mock mode (no API key)
 
 Set REVIEWDESK_PROVIDER=mock in .env to run with canned responses.
