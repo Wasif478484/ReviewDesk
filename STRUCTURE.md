@@ -16,6 +16,9 @@ src/
     originkit/         Motion and type effects: SkewInText, SpotlightText,
                        LabelSlideButton. Local copies; the CSS for them lives in
                        app/globals.css (the ok-* rules).
+    effects/           Site-wide motion: Reveal (scroll reveal), CountUp (numbers),
+                       GlowCard (pointer glow), Marquee. CSS is the "modern layer"
+                       at the end of app/globals.css.
     ui/                shadcn/ui primitives. Generated; edit with care.
   lib/
     engine/            Pure logic: prompts, policy rules, sample inbox.
@@ -40,6 +43,15 @@ prisma/schema.prisma   Data model
 - Originkit effects are for entry moments only (page and step headings, primary
   actions). They respect reduced motion and keep the text available to screen
   readers.
+
+## Motion rules
+
+- Server HTML is always the final, readable page. Effects hide or animate
+  content only after mount, and only for blocks below the fold.
+- Every effect has a reduced-motion path (end of globals.css). Add new
+  animations to that block.
+- Decorative layers (aurora, halo, progress bar) are aria-hidden.
+- Keep gradient text on colors that hold 4.5:1 contrast on white.
 
 ## Dependency rules
 

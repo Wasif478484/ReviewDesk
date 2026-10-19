@@ -137,6 +137,7 @@ export default function AuthView({ mode, resetToken, onSwitch, onBack, onDone }:
 
       <main className="relative flex flex-1 items-start justify-center overflow-hidden px-5 py-10 md:items-center">
         <div className="rd-grid pointer-events-none absolute inset-0" aria-hidden="true" />
+        <div className="rd-aurora" aria-hidden="true"><i /></div>
         <div className="relative w-full max-w-[440px]">
           <div className="card card-border rd-shadow-float bg-base-100 p-8">
             <span className="rd-chip-outline mb-5">ReviewDesk account</span>

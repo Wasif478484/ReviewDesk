@@ -14,7 +14,7 @@
  * text to the model provider, and that is stated plainly.
  */
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   LayoutGrid, Languages, ShieldCheck, Timer, KeyRound, ScrollText,
   ArrowRight, Check, X,
@@ -23,6 +23,10 @@ import { LogoMark, Stamp } from "@/components/shared/bits";
 import SkewInText from "@/components/originkit/SkewInText";
 import LabelSlideButton from "@/components/originkit/LabelSlideButton";
 import SpotlightText from "@/components/originkit/SpotlightText";
+import Reveal from "@/components/effects/Reveal";
+import CountUp from "@/components/effects/CountUp";
+import GlowCard from "@/components/effects/GlowCard";
+import Marquee from "@/components/effects/Marquee";
 
 interface LandingProps {
   onSignup: () => void;
@@ -100,9 +104,9 @@ function SectionHead({
   num: string; title: ReactNode; desc?: string; dark?: boolean;
 }) {
   return (
-    <div className="mb-12 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+    <Reveal className="mb-12 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
       <div className="max-w-[560px]">
-        <p className="rd-eyebrow-num mb-3" style={dark ? { color: "#93C5FD" } : undefined}>{num}</p>
+        <p className={`rd-eyebrow-num mb-3 ${dark ? "" : "rd-gradient-text"}`} style={dark ? { color: "#93C5FD" } : undefined}>{num}</p>
         <h2
           className="rd-hero-display text-[clamp(1.75rem,3.2vw,2.5rem)]"
           style={dark ? { color: "#F9FAFB" } : undefined}
@@ -118,7 +122,7 @@ function SectionHead({
           {desc}
         </p>
       )}
-    </div>
+    </Reveal>
   );
 }
 
@@ -375,6 +379,14 @@ function HonestyVisual() {
 
 export default function Landing({ onSignup, onLogin, initialGoogleStatus, initialGoogleMessage }: LandingProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  // The nav gains a soft shadow once the page scrolls under it.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const googleNotice = initialGoogleStatus === "connected"
     ? { ok: true, text: "Google connected. Your reviews can now be fetched from your chosen location in Settings." }
@@ -395,6 +407,7 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
 
   return (
     <div className="flex min-h-screen flex-col">
+      <div className="rd-progress" aria-hidden="true" />
       {googleNotice && (
         <div className="px-5 pt-4">
           <div
@@ -407,7 +420,7 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
       )}
 
       {/* ===================== Nav ===================== */}
-      <nav className="sticky top-0 z-40 border-b border-base-300 bg-base-100/90 backdrop-blur-md">
+      <nav data-scrolled={scrolled} className="rd-nav sticky top-0 z-40 border-b border-base-300 bg-base-100/90 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-[1120px] items-center justify-between px-6">
           <div className="flex items-center gap-2.5">
             <LogoMark />
@@ -450,9 +463,10 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
       {/* ===================== Hero ===================== */}
       <header className="relative overflow-hidden bg-base-100">
         <div className="rd-grid pointer-events-none absolute inset-0" aria-hidden="true" />
+        <div className="rd-aurora" aria-hidden="true"><i /></div>
         <div className="relative mx-auto max-w-[1120px] px-6 pb-16 pt-16 md:pb-20 md:pt-24">
           <div className="mx-auto max-w-[820px] text-center">
-            <span className="rd-chip-outline">Review triage for Google Business profiles</span>
+            <span className="rd-chip-outline rd-chip-shimmer">Review triage for Google Business profiles</span>
             <h1 className="rd-hero-display mt-7 text-[clamp(2.5rem,5.5vw,4rem)]">
               <SkewInText text="The reply desk for your Google reviews" startDelay={80} />
             </h1>
@@ -466,7 +480,7 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
                 onClick={onSignup}
                 label="Create an account"
                 hoverLabel="Open the demo inbox"
-                className="btn btn-neutral btn-lg min-h-[52px] px-7 text-base font-semibold"
+                className="btn btn-neutral btn-lg rd-cta-glow min-h-[52px] px-7 text-base font-semibold"
               />
               <a href="#setup" className="btn btn-outline btn-lg min-h-[52px] px-7 text-base">
                 See how it works
@@ -477,23 +491,37 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
             </p>
           </div>
 
-          <div className="mt-14 md:mt-16" aria-hidden="true">
-            <ProductMockup />
-          </div>
+          <Reveal>
+            <div className="rd-halo mt-14 md:mt-16" aria-hidden="true">
+              <ProductMockup />
+            </div>
+          </Reveal>
           <p className="rd-mono mt-4 text-center">
             Sample data from the demo inbox that ships with every account. Nothing shown was sent to Google.
           </p>
         </div>
       </header>
 
+      <Marquee
+        items={[
+          "Four decision lanes",
+          "Policy-checked drafts",
+          "Replies in the reviewer's language",
+          "Approval before anything is recorded",
+          "Veto window you set",
+          "Every decision in the ledger",
+          "Demo inbox included",
+        ]}
+      />
+
       {/* ===================== Facts strip ===================== */}
       <section className="border-y border-base-300 bg-base-200">
         <div className="mx-auto grid max-w-[1120px] grid-cols-2 gap-px bg-base-300 lg:grid-cols-4">
-          {FACTS.map((s) => (
-            <div key={s.label} className="px-6 py-9">
-              <div className="rd-num text-[2rem] text-[#111827]">{s.value}</div>
+          {FACTS.map((s, i) => (
+            <Reveal key={s.label} delay={i * 80} className="bg-base-200 px-6 py-9">
+              <CountUp value={s.value} className="rd-num rd-gradient-text block text-[2rem]" />
               <p className="mt-1.5 max-w-[200px] text-sm leading-snug text-[#6B7280]">{s.label}</p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -508,7 +536,7 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
           />
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {/* Four lanes, wide card with lane visual */}
-            <article className="card card-border rd-card-hover bg-base-100 p-6 md:col-span-2">
+            <GlowCard delay={0} className="card card-border rd-card-hover bg-base-100 p-6 md:col-span-2">
               <div className="badge badge-lg badge-outline gap-1.5 border-base-300 bg-base-200 p-3.5 text-[#374151]">
                 <LayoutGrid size={16} aria-hidden="true" />
               </div>
@@ -528,10 +556,10 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
                   </div>
                 ))}
               </div>
-            </article>
+            </GlowCard>
 
             {/* Language matching with sample artifact */}
-            <article className="card card-border rd-card-hover bg-base-100 p-6">
+            <GlowCard delay={90} className="card card-border rd-card-hover bg-base-100 p-6">
               <div className="badge badge-lg badge-outline gap-1.5 border-base-300 bg-base-200 p-3.5 text-[#374151]">
                 <Languages size={16} aria-hidden="true" />
               </div>
@@ -541,10 +569,10 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
                 before you approve it.
               </p>
               <LanguageVisual />
-            </article>
+            </GlowCard>
 
             {/* Policy checks */}
-            <article className="card card-border rd-card-hover bg-base-100 p-6">
+            <GlowCard delay={180} className="card card-border rd-card-hover bg-base-100 p-6">
               <div className="badge badge-lg badge-outline gap-1.5 border-base-300 bg-base-200 p-3.5 text-[#374151]">
                 <ShieldCheck size={16} aria-hidden="true" />
               </div>
@@ -554,10 +582,10 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
                 allow, and mixed-sentiment reviews wait for you by default.
               </p>
               <PolicyVisual />
-            </article>
+            </GlowCard>
 
             {/* Autopilot */}
-            <article className="card card-border rd-card-hover bg-base-100 p-6">
+            <GlowCard delay={0} className="card card-border rd-card-hover bg-base-100 p-6">
               <div className="badge badge-lg badge-outline gap-1.5 border-base-300 bg-base-200 p-3.5 text-[#374151]">
                 <Timer size={16} aria-hidden="true" />
               </div>
@@ -567,10 +595,10 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
                 draft, undo anything, and a daily cap keeps volume predictable.
               </p>
               <AutopilotVisual />
-            </article>
+            </GlowCard>
 
             {/* Credentials */}
-            <article className="card card-border rd-card-hover bg-base-100 p-6">
+            <GlowCard delay={90} className="card card-border rd-card-hover bg-base-100 p-6">
               <div className="badge badge-lg badge-outline gap-1.5 border-base-300 bg-base-200 p-3.5 text-[#374151]">
                 <KeyRound size={16} aria-hidden="true" />
               </div>
@@ -580,19 +608,19 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
                 connection, the demo inbox still works.
               </p>
               <CredentialVisual />
-            </article>
+            </GlowCard>
 
             {/* Honesty card, wide */}
-            <article className="card card-border rd-card-hover bg-base-100 p-6 md:col-span-2">
+            <GlowCard delay={180} className="card card-border rd-card-hover bg-base-100 p-6 md:col-span-2">
               <h3 className="rd-display mb-2 mt-1 text-lg">What the desk does not claim</h3>
               <p className="max-w-[520px] text-sm leading-relaxed text-[#374151]">
                 Trust comes from specifics, so here is exactly where the line sits.
               </p>
               <HonestyVisual />
-            </article>
+            </GlowCard>
 
             {/* Audit ledger */}
-            <article className="card card-border rd-card-hover bg-base-100 p-6">
+            <GlowCard delay={0} className="card card-border rd-card-hover bg-base-100 p-6">
               <div className="badge badge-lg badge-outline gap-1.5 border-base-300 bg-base-200 p-3.5 text-[#374151]">
                 <ScrollText size={16} aria-hidden="true" />
               </div>
@@ -601,7 +629,7 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
                 Every decision, approval, veto, and undo is written down with the reason attached.
               </p>
               <LedgerVisual />
-            </article>
+            </GlowCard>
           </div>
         </div>
       </section>
@@ -619,21 +647,23 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
                   dark
                 />
                 <div className="border-t border-[#374151]">
-                  {[{
-                    n: "01", t: "Draft",
-                    d: "The model writes a reply in the reviewer's language and attaches a translation for you.",
-                    m: "30-80 word target",
-                  },
-                  {
-                    n: "02", t: "Decide",
-                    d: "Approve, edit, veto, or report. Mixed-sentiment reviews always wait for a human.",
-                    m: "veto window you set",
-                  },
-                  {
-                    n: "03", t: "Ledger",
-                    d: "Every decision is written down with its reason, so the desk can always explain itself.",
-                    m: "who, what, why",
-                  }].map((row, i) => (
+                  {[
+                    {
+                      n: "01", t: "Draft",
+                      d: "The model writes a reply in the reviewer's language and attaches a translation for you.",
+                      m: "30-80 word target",
+                    },
+                    {
+                      n: "02", t: "Decide",
+                      d: "Approve, edit, veto, or report. Mixed-sentiment reviews always wait for a human.",
+                      m: "veto window you set",
+                    },
+                    {
+                      n: "03", t: "Ledger",
+                      d: "Every decision is written down with its reason, so the desk can always explain itself.",
+                      m: "who, what, why",
+                    },
+                  ].map((row, i) => (
                     <div key={row.n} className={`flex gap-6 py-6 ${i > 0 ? "border-t border-[#374151]" : ""}`}>
                       <span className="font-mono text-sm font-bold text-[#93C5FD]">{row.n}</span>
                       <div>
@@ -683,6 +713,7 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
             title="Four steps from signup to a working desk"
             desc="The demo inbox means the desk is usable on day one. The Google connection is optional and can wait."
           />
+          <Reveal>
           <ul className="steps steps-vertical w-full border-base-300 font-display lg:steps-horizontal">
             {STEPS.map((s) => (
               <li key={s.num} className="step step-primary" data-content={s.num}>
@@ -693,6 +724,7 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
               </li>
             ))}
           </ul>
+          </Reveal>
         </div>
       </section>
 
@@ -700,7 +732,7 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
       <section id="faq" className="scroll-mt-20 bg-base-100 py-20 md:py-24">
         <div className="mx-auto max-w-[1120px] px-6">
           <SectionHead num="04 · FAQ" title={<SpotlightText text="Straight answers" />} />
-          <div className="max-w-[760px] space-y-3">
+          <Reveal className="max-w-[760px] space-y-3">
             {FAQ.map((item, i) => (
               <details key={i} className="collapse collapse-arrow card card-border bg-base-100">
                 <summary className="collapse-title cursor-pointer">
@@ -711,7 +743,7 @@ export default function Landing({ onSignup, onLogin, initialGoogleStatus, initia
                 </div>
               </details>
             ))}
-          </div>
+          </Reveal>
         </div>
       </section>
 

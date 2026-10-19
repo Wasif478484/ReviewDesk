@@ -98,8 +98,9 @@ export default function Onboarding({ userName, initialGoogleStatus, initialGoogl
   const stepLabels = ["Business", "Google connection", "Preferences"];
 
   return (
-    <div className="min-h-screen px-5 py-10">
-      <div className="mx-auto max-w-[640px]">
+    <div className="relative min-h-screen overflow-hidden px-5 py-10">
+      <div className="rd-aurora" aria-hidden="true"><i /></div>
+      <div className="relative mx-auto max-w-[640px]">
         <div className="mb-8 flex items-center gap-2.5">
           <LogoMark size={26} />
           <span className="rd-display text-lg">ReviewDesk</span>

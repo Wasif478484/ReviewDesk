@@ -163,7 +163,8 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="relative min-h-screen overflow-x-clip">
+      <div className="rd-aurora h-[460px] opacity-70" aria-hidden="true"><i /></div>
       {/* Top bar */}
       <header className="sticky top-0 z-40 border-b border-base-300 bg-base-100/85 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-4 px-6">
@@ -191,7 +192,7 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1200px] px-6 py-8">
+      <main className="relative mx-auto max-w-[1200px] px-6 py-8">
         {/* Stats ledger */}
         <section className="mb-8 grid gap-6 md:grid-cols-[1fr_320px]">
           <div className="card card-border bg-base-100 p-6">
@@ -244,6 +245,7 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
           </div>
         )}
 
+        <div key={tab} className="rd-enter">
         {tab === "desk" && (
           <section className="grid gap-6 lg:grid-cols-[380px_1fr]">
             {/* Inbox */}
@@ -431,6 +433,7 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
         )}
         {tab === "ledger" && <LedgerTab ws={ws} />}
         {tab === "settings" && <SettingsTab ws={ws} refresh={refresh} onNote={setNote} />}
+        </div>
       </main>
     </div>
   );

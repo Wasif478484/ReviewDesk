@@ -362,6 +362,32 @@
 /* ---------- Stars ---------- */
 .rd-stars { color: var(--rd-star); letter-spacing: 2px; }
 
+/* ---------- Distribution bar ---------- */
+.rd-dist {
+  display: flex;
+  height: 10px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--rd-line);
+  gap: 2px;
+}
+
+/* ---------- Chip (squared) ---------- */
+.rd-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-ledger);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--rd-body);
+  background: var(--rd-subtle);
+  border: 1px solid var(--rd-line);
+  border-radius: 4px;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
 /* ---------- Density-controlled table (ant-design pattern) ---------- */
 .rd-table {
   width: 100%;
@@ -424,7 +450,7 @@
 .rd-table tbody tr.selected {
   background: #F6F7F9;
   border-left: 3px solid var(--rd-ink);
-  padding-left: 9px; /* compensate for border */
+  padding-left: 9px;
 }
 
 /* ---------- Export button ---------- */
@@ -489,31 +515,6 @@
 .rd-note-ok { background: var(--rd-reply-tint); border-color: rgba(21, 128, 61, 0.3); color: var(--rd-reply); }
 .rd-note-bad { background: var(--rd-hold-tint); border-color: rgba(220, 38, 38, 0.28); color: var(--rd-hold); }
 
-/* ---------- Distribution bar ---------- */
-.rd-dist {
-  display: flex;
-  height: 10px;
-  border-radius: 4px;
-  overflow: hidden;
-  border: 1px solid var(--rd-line);
-  gap: 2px;
-}
-
-/* ---------- Chip (squared) ---------- */
-.rd-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-ledger);
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--rd-body);
-  background: var(--rd-subtle);
-  border: 1px solid var(--rd-line);
-  border-radius: 4px;
-  padding: 4px 8px;
-  white-space: nowrap;
-}
 
 /* ---------- Veto countdown ---------- */
 .rd-veto {
@@ -743,5 +744,269 @@ button:disabled,
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* =====================================================================
+   MODERN LAYER
+   Soft aurora light, gradient accents, glow cards, marquee, scroll reveal.
+   Every motion here is off for prefers-reduced-motion (block at the end).
+   Gradient text stays on colors that keep 4.5:1+ contrast on white.
+   ===================================================================== */
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* ---------- Aurora: drifting colored light behind hero and entry screens ---------- */
+.rd-aurora {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.rd-aurora::before,
+.rd-aurora::after,
+.rd-aurora > i {
+  content: "";
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(80px);
+  opacity: 0.6;
+  will-change: transform;
+}
+.rd-aurora::before {
+  width: 560px;
+  height: 560px;
+  left: -140px;
+  top: -200px;
+  background: radial-gradient(circle, #93c5fd 0%, transparent 68%);
+  animation: rd-drift 18s ease-in-out infinite alternate;
+}
+.rd-aurora::after {
+  width: 520px;
+  height: 520px;
+  right: -160px;
+  top: -100px;
+  background: radial-gradient(circle, #c7d2fe 0%, transparent 68%);
+  animation: rd-drift 23s ease-in-out infinite alternate-reverse;
+}
+.rd-aurora > i {
+  width: 420px;
+  height: 420px;
+  left: 38%;
+  top: 28%;
+  background: radial-gradient(circle, #a5f3fc 0%, transparent 70%);
+  opacity: 0.4;
+  animation: rd-drift 27s ease-in-out infinite alternate;
+}
+@keyframes rd-drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(70px, 50px, 0) scale(1.12); }
+}
+
+/* ---------- Gradient accents ---------- */
+.rd-gradient-text {
+  background: linear-gradient(100deg, #1d4ed8 0%, #4f46e5 55%, #0369a1 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Hero chip: animated gradient edge */
+.rd-chip-shimmer {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid transparent !important;
+  background:
+    linear-gradient(var(--color-base-100), var(--color-base-100)) padding-box,
+    linear-gradient(110deg, #93c5fd, #a5b4fc, #67e8f9, #93c5fd) border-box !important;
+  background-size: 100% 100%, 250% 100% !important;
+  animation: rd-shimmer 6s linear infinite;
+}
+@keyframes rd-shimmer {
+  to { background-position: 0 0, 250% 0; }
+}
+
+/* Primary call to action: colored lift */
+.rd-cta-glow {
+  box-shadow: 0 12px 32px -12px rgba(29, 78, 216, 0.55);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.rd-cta-glow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 38px -12px rgba(29, 78, 216, 0.6);
+}
+
+/* Soft halo behind the product mockup */
+.rd-halo {
+  position: relative;
+  isolation: isolate;
+}
+.rd-halo::before {
+  content: "";
+  position: absolute;
+  inset: -4% 6% auto;
+  height: 70%;
+  border-radius: 9999px;
+  background: radial-gradient(closest-side, rgba(99, 102, 241, 0.28), rgba(29, 78, 216, 0.12) 55%, transparent 100%);
+  filter: blur(40px);
+  z-index: -1;
+}
+
+/* ---------- Glow card: light that follows the pointer ---------- */
+.rd-glow {
+  position: relative;
+  isolation: isolate;
+}
+.rd-glow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 0%), rgba(79, 70, 229, 0.1), rgba(29, 78, 216, 0.06) 45%, transparent 72%);
+}
+@media (hover: hover) {
+  .rd-glow:hover::before {
+    opacity: 1;
+  }
+  .rd-glow.rd-card-hover:hover {
+    transform: translateY(-3px);
+  }
+}
+.rd-glow.rd-card-hover {
+  transition: border-color 0.15s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+/* ---------- Scroll reveal ---------- */
+.rd-reveal[data-rv="hidden"] {
+  opacity: 0;
+  transform: translateY(22px);
+}
+.rd-reveal[data-rv="shown"] {
+  animation: rd-rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+  animation-delay: var(--rv-delay, 0ms);
+}
+@keyframes rd-rise {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---------- Page and tab entrance ---------- */
+.rd-enter {
+  animation: rd-enter 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes rd-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---------- Marquee ---------- */
+.rd-marquee {
+  overflow: hidden;
+  border-block: 1px solid var(--color-base-300);
+  background: var(--color-base-100);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.rd-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: rd-marquee 38s linear infinite;
+}
+.rd-marquee:hover .rd-marquee-track {
+  animation-play-state: paused;
+}
+.rd-marquee-row {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rd-marquee-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1.05rem 1.6rem 1.05rem 0;
+  font-family: var(--font-ledger), ui-monospace, monospace;
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--rd-body);
+  white-space: nowrap;
+}
+.rd-marquee-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #1d4ed8, #6366f1);
+}
+@keyframes rd-marquee {
+  to { transform: translateX(-50%); }
+}
+
+/* ---------- Nav: gains depth once the page scrolls ---------- */
+.rd-nav {
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.rd-nav[data-scrolled="true"] {
+  box-shadow: 0 10px 30px -20px rgba(17, 24, 39, 0.45);
+  background-color: rgba(255, 255, 255, 0.78);
+}
+
+/* ---------- Scroll progress bar (Chromium and Safari; hidden elsewhere) ---------- */
+.rd-progress {
+  display: none;
+}
+@supports (animation-timeline: scroll()) {
+  .rd-progress {
+    display: block;
+    position: fixed;
+    inset: 0 0 auto 0;
+    height: 3px;
+    z-index: 60;
+    pointer-events: none;
+    transform-origin: 0 50%;
+    transform: scaleX(0);
+    background: linear-gradient(90deg, #1d4ed8, #6366f1, #0369a1);
+    animation: rd-progress linear both;
+    animation-timeline: scroll(root);
+  }
+}
+@keyframes rd-progress {
+  to { transform: scaleX(1); }
+}
+
+/* ---------- Reduced motion: everything above stands still ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .rd-aurora::before,
+  .rd-aurora::after,
+  .rd-aurora > i,
+  .rd-chip-shimmer,
+  .rd-enter,
+  .rd-marquee-track {
+    animation: none !important;
+  }
+  .rd-marquee {
+    overflow-x: auto;
+  }
+  .rd-progress {
+    display: none !important;
+  }
+  .rd-reveal,
+  .rd-reveal[data-rv] {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+  .rd-glow.rd-card-hover:hover,
+  .rd-cta-glow:hover {
+    transform: none;
   }
 }

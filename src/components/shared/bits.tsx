@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from "react";
 import { ACTION_META, type ReviewData, type TriageData } from "@/types/reviewdesk";
+import CountUp from "@/components/effects/CountUp";
 
 export function LogoMark({ size = 28 }: { size?: number }) {
   return (
@@ -164,7 +165,7 @@ export function LedgerStat({ label, value, accent }: { label: string; value: str
   return (
     <div className="rd-ledger-row">
       <span className="rd-kicker">{label}</span>
-      <span className="rd-num text-2xl" style={{ color: accent ? "#1D4ED8" : "#111827" }}>{value}</span>
+      <CountUp value={value} className={`rd-num text-2xl ${accent ? "text-[#1D4ED8]" : "text-[#111827]"}`} />
     </div>
   );
 }
