@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -16,6 +16,8 @@ model User {
   onboardedAt     DateTime?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+  organizationId  String?
+  organization    Organization? @relation(fields: [organizationId], references: [id])
 
   business   Business?
   credential Credential?
@@ -24,12 +26,16 @@ model User {
   triages    Triage[]
   audits     AuditEvent[]
   authTokens AuthToken[]
+  members    Member[]
+  templates  Template[]
 }
 
 model Business {
   id            String   @id @default(cuid())
   userId        String   @unique
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String?
+  organization  Organization? @relation(fields: [organizationId], references: [id])
   name          String   @default("Your Business")
   category      String   @default("restaurant")
   ownerName     String   @default("The Owner")
@@ -71,7 +77,9 @@ model Review {
   id         String   @id @default(cuid())
   userId     String
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  source     String   @default("demo") // demo | google | import
+  organizationId String?
+  organization Organization? @relation(fields: [organizationId], references: [id])
+  source     String   @default("demo") // demo | google | yelp | facebook | tripadvisor | imported
   externalId String?
   stars      Int?
   text       String
@@ -93,10 +101,13 @@ model Triage {
   id                String    @id @default(cuid())
   userId            String
   user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String?
+  organization Organization? @relation(fields: [organizationId], references: [id])
   reviewId          String
   review            Review    @relation(fields: [reviewId], references: [id], onDelete: Cascade)
   action            String // reply | reply_needs_owner | hold | report
   sentiment         String // positive | mixed | negative
+  priority          String    @default("normal") // urgent | normal | low
   flags             String    @default("[]")
   reason            String    @default("")
   reviewLanguage    String    @default("unknown")
@@ -120,6 +131,8 @@ model Policy {
   id                  String   @id @default(cuid())
   userId              String   @unique
   user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String?
+  organization Organization? @relation(fields: [organizationId], references: [id])
   enabled             Boolean  @default(false)
   dryRun              Boolean  @default(true)
   minStars            Int      @default(4)
@@ -147,6 +160,8 @@ model AuditEvent {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String?
+  organization Organization? @relation(fields: [organizationId], references: [id])
   timestamp DateTime @default(now())
   reviewRef String   @default("")
   excerpt   String   @default("")
@@ -157,4 +172,52 @@ model AuditEvent {
   error     String   @default("")
 
   @@index([userId, timestamp])
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  plan      String   @default("free") // free | pro | enterprise
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+  businesses Business[]
+  members   Member[]
+  reviews   Review[]
+  triages   Triage[]
+  policies  Policy[]
+  audits    AuditEvent[]
+  templates Template[]
+}
+
+model Member {
+  id            String   @id @default(cuid())
+  organizationId String
+  organization  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role          String   @default("responder") // owner | manager | responder | viewer
+  invitedAt     DateTime @default(now())
+  invitedBy     String? // userId who invited
+  joinedAt      DateTime?
+
+  @@unique([organizationId, userId])
+}
+
+model Template {
+  id            String   @id @default(cuid())
+  organizationId String
+  organization  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  content       String
+  category      String   @default("general")
+  usageCount    Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([organizationId])
 }
