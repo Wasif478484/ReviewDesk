@@ -17,6 +17,11 @@ import SettingsTab from "@/components/dashboard/SettingsTab";
 
 type Tab = "desk" | "autopilot" | "ledger" | "settings";
 
+/** Review sources the desk can hold. Google is the live connection; the rest
+ *  are import channels, so each one is a normal API-backed source, not a
+ *  scraper. */
+const SOURCES = ["demo", "google", "yelp", "facebook", "tripadvisor", "imported"];
+
 interface DashboardProps {
   initial: WorkspaceData;
   initialGoogleStatus?: string;
@@ -35,8 +40,10 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
   const [note, setNote] = useState("");
   const [showImport, setShowImport] = useState(false);
   const [csv, setCsv] = useState("");
+  const [importSource, setImportSource] = useState("imported");
   const [draftEdit, setDraftEdit] = useState("");
   const [filter, setFilter] = useState<"all" | "pending" | "replied">("all");
+  const [sourceFilter, setSourceFilter] = useState<string>("all");
   const [tone, setTone] = useState<"warm" | "formal" | "apologetic">("warm");
   const [draftHistory, setDraftHistory] = useState<Record<string, string[]>>({});
   const [searchQuery, setSearchQuery] = useState("");
@@ -84,6 +91,7 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
     if (filter === "replied") return r.hasReply;
     return true;
   }).filter((r) => {
+    if (sourceFilter !== "all" && r.source !== sourceFilter) return false;
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (r.text ?? "").toLowerCase().includes(q)
@@ -142,10 +150,10 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
     const res = await fetch("/api/reviews", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ csv }),
+      body: JSON.stringify({ csv, source: importSource }),
     });
     const data = await res.json();
-    setNote(res.ok ? `Imported ${data.imported} review${data.imported === 1 ? "" : "s"}.` : data.error);
+    setNote(res.ok ? `Imported ${data.imported} review${data.imported === 1 ? "" : "s"} from ${importSource}.` : data.error);
     if (res.ok) { setCsv(""); setShowImport(false); await refresh(); }
   }
 
@@ -402,6 +410,17 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
                   onChange={(e) => setSearchQuery(e.target.value)}
                   aria-label="Search reviews"
                 />
+                <select
+                  className="select select-sm w-auto min-w-[120px] mt-1 sm:mt-0"
+                  value={sourceFilter}
+                  onChange={(e) => setSourceFilter(e.target.value)}
+                  aria-label="Filter by source"
+                >
+                  <option value="all">All sources</option>
+                  {SOURCES.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
                 <span className="rd-mono text-xs whitespace-nowrap mt-1 sm:mt-0">Tone:</span>
                 <select
                   className="select select-sm w-auto min-w-[120px] mt-1 sm:mt-0"
@@ -453,7 +472,19 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
                     onChange={(e) => setCsv(e.target.value)}
                     aria-label="CSV import"
                   />
-                  <button className="btn btn-neutral btn-sm w-full" onClick={importCsv}>Import reviews</button>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <select
+                      className="select select-sm w-auto min-w-[130px]"
+                      value={importSource}
+                      onChange={(e) => setImportSource(e.target.value)}
+                      aria-label="Import source"
+                    >
+                      {SOURCES.filter((s) => s !== "demo" && s !== "google").map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                    <button className="btn btn-neutral btn-sm flex-1" onClick={importCsv}>Import reviews</button>
+                  </div>
                 </div>
               )}
 

@@ -33,6 +33,15 @@ export function Stamp({ action }: { action: string }) {
   return <span className={meta.stamp}>{meta.label}</span>;
 }
 
+/** Priority badge. Urgent reviews need a human before anything else. */
+export function PriorityBadge({ priority }: { priority: string | null | undefined }) {
+  if (!priority || priority === "normal") return null;
+  if (priority === "urgent") {
+    return <span className="rd-stamp rd-stamp-hold">Urgent</span>;
+  }
+  return <span className="rd-stamp rd-stamp-report">Low</span>;
+}
+
 /** Counts down a veto window. Shows "ready" when past due. */
 export function VetoCountdown({ dueAt }: { dueAt: string | null }) {
   const [now, setNow] = useState(() => Date.now());

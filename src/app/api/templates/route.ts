@@ -3,16 +3,20 @@ import { db } from "@/lib/server/db";
 import { requireUserId } from "@/lib/server/auth";
 import { v4 as uuidv4 } from "uuid";
 
-/** GET /api/templates, list templates for the signed-in user. */
+/**
+ * GET /api/templates, list reply templates for the signed-in user.
+ * Uses raw SQL because the Prisma client in this build does not expose
+ * the Template model, but the table exists and is in sync with schema.prisma.
+ */
 export async function GET() {
   try {
     const userId = await requireUserId();
     const rows = await db.$queryRawUnsafe(
-      `SELECT id, name, content, category, usage_count, created_at, updated_at
+      `SELECT id, name, content, category, "usageCount", "createdAt", "updatedAt"
        FROM "Template"
        WHERE "userId" = $1
-       ORDER BY "created_at" DESC`,
-      [userId],
+       ORDER BY "createdAt" DESC`,
+      userId,
     );
     return NextResponse.json({
       ok: true,
@@ -41,7 +45,11 @@ export async function POST(req: Request) {
       `INSERT INTO "Template" ("id", "userId", "name", "content", "category", "usageCount", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, 0, NOW(), NOW())
        RETURNING id, name, content, category, "usageCount", "createdAt", "updatedAt"`,
-      [uuidv4(), userId, name, content, category],
+      uuidv4(),
+      userId,
+      name,
+      content,
+      category,
     );
     return NextResponse.json({
       ok: true,

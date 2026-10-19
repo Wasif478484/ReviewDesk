@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/server/db";
 import { requireUserId } from "@/lib/server/auth";
-import { ensureWorkspace } from "@/lib/server/workspace";
+import { ensureWorkspace, computePriority } from "@/lib/server/workspace";
 import { oauthConfigured } from "@/lib/server/google";
 import { mailConfigured } from "@/lib/server/mail";
 
@@ -49,6 +49,10 @@ export async function GET() {
         triage: active
           ? {
               id: active.id, action: active.action, sentiment: active.sentiment,
+              priority: computePriority(
+                { action: active.action, sentiment: active.sentiment, flags },
+                r.stars,
+              ),
               flags, reason: active.reason, reviewLanguage: active.reviewLanguage,
               languageUsed: active.languageUsed, draftReply: active.draftReply,
               reviewTranslation: active.reviewTranslation, draftTranslation: active.draftTranslation,

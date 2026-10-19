@@ -12,6 +12,7 @@
 
 import { useState } from "react";
 import { COMMON_LANGUAGES, TONES } from "@/lib/engine/prompts";
+import TemplateLibrary from "@/components/dashboard/TemplateLibrary";
 import type { WorkspaceData } from "@/types/reviewdesk";
 
 interface SettingsTabProps {
@@ -421,6 +422,10 @@ export default function SettingsTab({ ws, refresh, onNote }: SettingsTabProps) {
             <li>· Passwords are hashed with bcrypt; sessions use signed httpOnly cookies; reset and verification links are single-use and expire.</li>
           </ul>
         </section>
+      </div>
+
+      <div className="lg:col-span-2">
+        <TemplateLibrary onNote={onNote} />
       </div>
     </div>
   );

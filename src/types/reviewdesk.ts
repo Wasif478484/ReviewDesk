@@ -4,6 +4,7 @@ export interface TriageData {
   id: string;
   action: string;
   sentiment: string;
+  priority: string;
   flags: string[];
   reason: string;
   reviewLanguage: string;

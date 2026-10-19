@@ -12,6 +12,9 @@ export async function POST(req: Request) {
     const body = await req.json();
     const csv = String(body.csv ?? "");
     if (!csv.trim()) return NextResponse.json({ error: "Paste CSV text first." }, { status: 400 });
+    const requestedSource = String(body.source ?? "imported").trim().toLowerCase();
+    const allowedSources = ["demo", "google", "yelp", "facebook", "tripadvisor", "imported"];
+    const source = allowedSources.includes(requestedSource) ? requestedSource : "imported";
 
     const lines = csv.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
     const existing = await db.review.findMany({ where: { userId }, select: { text: true } });
@@ -39,7 +42,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No new reviews found in that CSV (expected rows like: 5,\"Great food\")." }, { status: 400 });
     }
     const res = await db.review.createMany({
-      data: rows.map((r) => ({ userId, source: "import", stars: r.stars, text: r.text, author: r.author, date: r.date })),
+      data: rows.map((r) => ({ userId, source, stars: r.stars, text: r.text, author: r.author, date: r.date })),
     });
     return NextResponse.json({ ok: true, imported: res.count });
   } catch (err) {

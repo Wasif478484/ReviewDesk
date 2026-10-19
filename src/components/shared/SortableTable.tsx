@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { ArrowUpDown, Check, CheckSquare, Square } from "lucide-react";
-import { Stamp, Stars } from "@/components/shared/bits";
+import { Stamp, Stars, PriorityBadge } from "@/components/shared/bits";
 import type { ReviewData } from "@/types/reviewdesk";
 
 type SortDirection = "asc" | "desc" | null;
@@ -151,6 +151,7 @@ export default function SortableTable({
                 {c.sortable && <ArrowUpDown className="ml-1 h-3 w-3 text-[#9CA3AF]" aria-hidden="true" />}
               </th>
             ))}
+            <th className="text-left w-20">Priority</th>
             <th className="text-left w-24">Decision</th>
             <th className="text-left w-20">Lane</th>
             <th className="text-left w-48">Actions</th>
@@ -190,6 +191,9 @@ export default function SortableTable({
                 <td className="font-mono text-xs text-[#374151]">{r.author || "Reviewer"}</td>
                 <td className="font-mono text-xs text-[#374151]">{r.date || "—"}</td>
                 <td className="font-mono text-xs text-[#6B7280]">{r.source === "demo" ? "demo" : r.source}</td>
+                <td>
+                  <PriorityBadge priority={triage?.priority} />
+                </td>
                 <td>
                   {r.hasReply ? (
                     <span className="badge badge-soft badge-success font-mono text-[10px]">

@@ -93,6 +93,32 @@ export function parseTriageRow(t: Prisma.TriageGetPayload<Record<string, never>>
 }
 
 // ---------------------------------------------------------------------------
+// Priority scoring
+// ---------------------------------------------------------------------------
+
+/**
+ * Priority for the triage queue. Urgent means a human should look at this
+ * before anything else: a hold, a risk flag, or a one-star complaint.
+ * Low means a clean positive that can wait for the autopilot lane.
+ * The model never picks the lane; this is derived from its output only.
+ */
+export function computePriority(
+  result: { action: string; sentiment: string; flags: string[] },
+  stars: number | null,
+): "urgent" | "normal" | "low" {
+  const risky = result.flags.some((f) =>
+    ["health", "legal", "abuse", "spam", "safety", "discrimination", "harassment"].includes(f),
+  );
+  if (result.action === "hold" || risky) return "urgent";
+  if (result.action === "reply_needs_owner") return "normal";
+  if (result.sentiment === "negative" || (stars !== null && stars <= 2)) return "normal";
+  if (result.action === "reply" && result.sentiment === "positive" && (stars === null || stars >= 4)) {
+    return "low";
+  }
+  return "normal";
+}
+
+// ---------------------------------------------------------------------------
 // Workspace bootstrapping
 // ---------------------------------------------------------------------------
 
@@ -267,6 +293,7 @@ export async function triageReview(
       reviewId,
       action: result.action,
       sentiment: result.sentiment,
+      priority: computePriority(result, review.stars),
       flags: JSON.stringify(result.flags),
       reason: result.reason,
       reviewLanguage: result.review_language,
