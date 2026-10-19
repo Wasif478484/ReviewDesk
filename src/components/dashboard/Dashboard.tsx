@@ -37,6 +37,9 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
   const [csv, setCsv] = useState("");
   const [draftEdit, setDraftEdit] = useState("");
   const [filter, setFilter] = useState<"all" | "pending" | "replied">("all");
+  const [tone, setTone] = useState<"warm" | "formal" | "apologetic">("warm");
+  const [draftHistory, setDraftHistory] = useState<Record<string, string[]>>({});
+  const [searchQuery, setSearchQuery] = useState("");
 
   const refresh = useCallback(async () => {
     const res = await fetch("/api/workspace");
@@ -53,10 +56,39 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
     setDraftEdit(selected?.triage?.draftReply ?? "");
   }, [selected?.id, selected?.triage?.draftReply]);
 
+  // Track draft versions when the user edits.
+  useEffect(() => {
+    if (selected && draftEdit && draftEdit !== selected.triage?.draftReply) {
+      addToDraftHistory(selected.id, draftEdit);
+    }
+  }, [draftEdit, selected]);
+
+  // Keyboard shortcuts: A=analyze, R=record, C=copy draft, D=dismiss, V=revert draft
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) return;
+      if (!selected || !selected.triage) return;
+      const key = e.key.toLowerCase();
+      if (key === "a") { e.preventDefault(); analyzeOne(selected); }
+      else if (key === "r") { e.preventDefault(); act({ type: "record", triageId: selected.triage.id, draft: draftEdit }, "Recorded in your workspace."); }
+      else if (key === "c") { e.preventDefault(); navigator.clipboard?.writeText(draftEdit || selected.triage.draftReply || ""); setNote("Draft copied."); }
+      else if (key === "d") { e.preventDefault(); act({ type: "dismiss", triageId: selected.triage.id }, "Draft dismissed."); }
+      else if (key === "v") { e.preventDefault(); const hist = draftHistory[selected.id] ?? []; if (hist.length) revertDraft(selected.id, hist[hist.length - 1]); }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selected, draftEdit, draftHistory]);
+
   const visible = ws.reviews.filter((r) => {
     if (filter === "pending") return !r.hasReply;
     if (filter === "replied") return r.hasReply;
     return true;
+  }).filter((r) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (r.text ?? "").toLowerCase().includes(q)
+      || (r.author ?? "").toLowerCase().includes(q)
+      || (r.stars ?? 0).toString().includes(q);
   });
 
   const pendingIds = ws.reviews.filter((r) => !r.hasReply && !r.triage).map((r) => r.id);
@@ -133,6 +165,106 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     setNote(`Exported ${ws.reviews.length} review${ws.reviews.length === 1 ? "" : "s"} to CSV.`);
+  }
+
+  async function exportTriageCsv() {
+    setNote("");
+    const rows = ws.reviews
+      .filter((r) => r.triage)
+      .map((r) => {
+        const t = r.triage!;
+        return `${r.id},"${(r.text ?? "").replace(/"/g, '""')}",${t.action},${t.sentiment},"${(t.flags ?? []).join(";")}","${(t.reason ?? "").replace(/"/g, '""')}",${t.reviewLanguage},${t.languageUsed}`;
+      });
+    const csvContent = `review_id,text,action,sentiment,flags,reason,review_language,language_used\n${rows.join("\n")}`;
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `reviewdesk-triage-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    setNote(`Exported triage results for ${rows.length} review${rows.length === 1 ? "" : "s"} to CSV.`);
+  }
+
+  async function bulkRecord(triageIds: string[], drafts: string[]) {
+    setNote("");
+    let ok = 0;
+    let failed = 0;
+    for (let i = 0; i < triageIds.length; i++) {
+      const res = await fetch("/api/reviews/actions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "record", triageId: triageIds[i], draft: drafts[i] }),
+      });
+      if (res.ok) ok++;
+      else failed++;
+    }
+    setNote(`Recorded ${ok} review${ok === 1 ? "" : "s"}${failed ? `; ${failed} failed` : ""}.`);
+    await refresh();
+  }
+
+  async function bulkDismiss(triageIds: string[]) {
+    setNote("");
+    let ok = 0;
+    let failed = 0;
+    for (const id of triageIds) {
+      const res = await fetch("/api/reviews/actions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "dismiss", triageId: id }),
+      });
+      if (res.ok) ok++;
+      else failed++;
+    }
+    setNote(`Dismissed ${ok} review${ok === 1 ? "" : "s"}${failed ? `; ${failed} failed` : ""}.`);
+    await refresh();
+  }
+
+  async function bulkCopyDrafts(items: { id: string; draft: string }[]) {
+    const text = items.map(({ id, draft }) => `Review ${id}:\n${draft}\n`).join("\n---\n");
+    await navigator.clipboard?.writeText(text);
+    setNote(`Copied ${items.length} draft${items.length === 1 ? "" : "s"} to clipboard.`);
+  }
+
+  async function reanalyzeWithTone(review: ReviewData, newTone: string) {
+    setNote("");
+    setBusyReview(review.id);
+    try {
+      const res = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviewId: review.id, tone: newTone }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setNote(data.error ?? "Re-analysis failed.");
+        return;
+      }
+      setDraftHistory((prev) => {
+        const cur = prev[review.id] ?? [];
+        return { ...prev, [review.id]: [...cur.slice(-4), draftEdit] };
+      });
+      setDraftEdit(selected?.triage?.draftReply ?? "");
+      setNote(`Re-analyzed with "${newTone}" tone.`);
+    } finally {
+      setBusyReview(null);
+      await refresh();
+    }
+  }
+
+  function addToDraftHistory(reviewId: string, draft: string) {
+    setDraftHistory((prev) => {
+      const cur = prev[reviewId] ?? [];
+      const next = [...cur, draft].slice(-5);
+      return { ...prev, [reviewId]: next };
+    });
+  }
+
+  function revertDraft(reviewId: string, version: string) {
+    setDraftEdit(version);
+    setNote("Reverted to earlier draft version.");
   }
 
   async function fetchGoogle() {
@@ -250,9 +382,8 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
           <section className="grid gap-6 lg:grid-cols-[380px_1fr]">
             {/* Inbox */}
             <div className="card card-border bg-base-100 flex max-h-[72vh] flex-col p-5">
-              <div className="mb-3 flex items-center justify-between gap-2">
-                <span className="rd-kicker">Inbox</span>
-                <div className="tabs tabs-box tabs-xs" role="group" aria-label="Inbox filter">
+              <div className="mb-3 flex flex-wrap gap-2 items-start">
+                <div className="tabs tabs-box tabs-xs flex-1" role="group" aria-label="Inbox filter">
                   {(["all", "pending", "replied"] as const).map((f) => (
                     <button
                       key={f}
@@ -263,11 +394,34 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
                     </button>
                   ))}
                 </div>
-              </div>
-
-              <div className="mb-3 flex flex-wrap gap-2">
+                <input
+                  type="text"
+                  className="input input-sm flex-1 sm:w-[240px] font-mono text-xs"
+                  placeholder="Search reviews by text or author…"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  aria-label="Search reviews"
+                />
+                <span className="rd-mono text-xs whitespace-nowrap mt-1 sm:mt-0">Tone:</span>
+                <select
+                  className="select select-sm w-auto min-w-[120px] mt-1 sm:mt-0"
+                  value={tone}
+                  onChange={(e) => setTone(e.target.value as "warm" | "formal" | "apologetic")}
+                  aria-label="Reply tone"
+                >
+                  <option value="warm">Warm</option>
+                  <option value="formal">Formal</option>
+                  <option value="apologetic">Apologetic</option>
+                </select>
                 <button
-                  className="btn btn-primary btn-sm"
+                  className="btn btn-outline btn-sm mt-1 sm:mt-0"
+                  onClick={() => selected && reanalyzeWithTone(selected, tone)}
+                  disabled={!selected || !selected.triage}
+                >
+                  Re-analyze
+                </button>
+                <button
+                  className="btn btn-primary btn-sm mt-1 sm:mt-0"
                   onClick={() => analyze(pendingIds)}
                   disabled={batchBusy || !pendingIds.length}
                 >
@@ -275,15 +429,18 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
                   {batchBusy ? "Analyzing" : pendingIds.length ? `Analyze all (${pendingIds.length})` : "Inbox analyzed"}
                 </button>
                 {cred?.status === "connected" && (
-                  <button className="btn btn-outline btn-sm" onClick={fetchGoogle}>
+                  <button className="btn btn-outline btn-sm mt-1 sm:mt-0" onClick={fetchGoogle}>
                     Fetch from Google
                   </button>
                 )}
-                <button className="btn btn-outline btn-sm" onClick={() => setShowImport(!showImport)}>
+                <button className="btn btn-outline btn-sm mt-1 sm:mt-0" onClick={() => setShowImport(!showImport)}>
                   Import CSV
                 </button>
-                <button className="btn btn-outline btn-sm rd-mono" onClick={exportCsv}>
-                  Export CSV
+                <button className="btn btn-outline btn-sm rd-mono mt-1 sm:mt-0" onClick={exportCsv}>
+                  Export reviews CSV
+                </button>
+                <button className="btn btn-outline btn-sm rd-mono mt-1 sm:mt-0" onClick={exportTriageCsv}>
+                  Export triage CSV
                 </button>
               </div>
 
@@ -309,6 +466,9 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
                   onRecord={(triageId, draft) => act({ type: "record", triageId, draft }, "Recorded in your workspace (demo; nothing is sent to Google).")}
                   onDismiss={(triageId) => act({ type: "dismiss", triageId }, "Draft dismissed.")}
                   onCopy={(text) => { navigator.clipboard?.writeText(text); setNote("Draft copied to clipboard."); }}
+                  onBulkRecord={bulkRecord}
+                  onBulkDismiss={bulkDismiss}
+                  onBulkCopy={bulkCopyDrafts}
                 />
                 {!visible.length && <p className="rd-mono py-8 text-center">Nothing here under this filter.</p>}
               </div>
@@ -373,6 +533,26 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
                               }}
                             />
                           )}
+                          {selected.id && draftHistory[selected.id]?.length && (
+                            <div className="mt-3 rounded-lg border border-base-300 bg-base-200 p-3">
+                              <div className="flex items-center justify-between gap-2 mb-2">
+                                <span className="rd-kicker text-xs">Draft versions</span>
+                                <span className="rd-mono text-xs">{draftHistory[selected.id]!.length} saved</span>
+                              </div>
+                              <div className="flex flex-wrap gap-2">
+                                {draftHistory[selected.id]!.map((v, i) => (
+                                  <button
+                                    key={i}
+                                    className="btn btn-ghost btn-xs rd-mono"
+                                    onClick={() => revertDraft(selected.id, v)}
+                                    title="Revert to this version"
+                                  >
+                                    v{i + 1}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                           <div className="mt-4 flex flex-wrap items-center gap-3">
                             {!selected.hasReply ? (
                               <>
@@ -435,6 +615,13 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
                           <span className="rd-kicker mb-2 block">For Google&apos;s report form</span>
                           <p className="text-sm text-[#374151]">{selected.triage.reportNote}</p>
                           <p className="rd-mono mt-3">Submit via Google&apos;s own &ldquo;report review&rdquo; option. Copy this note.</p>
+                        </div>
+                      )}
+
+                      {!selected.hasReply && (
+                        <div className="mt-4 p-3 rounded-lg border border-base-300 bg-base-200 text-xs text-[#6B7280]">
+                          <span className="rd-kicker block mb-1">Keyboard shortcuts</span>
+                          <span className="font-mono">A</span> Analyze · <span className="font-mono">R</span> Record · <span className="font-mono">C</span> Copy draft · <span className="font-mono">D</span> Dismiss · <span className="font-mono">V</span> Revert draft
                         </div>
                       )}
                     </>

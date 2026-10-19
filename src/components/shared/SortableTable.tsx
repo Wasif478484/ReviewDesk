@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from "react";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, Check, CheckSquare, Square } from "lucide-react";
 import { Stamp, Stars } from "@/components/shared/bits";
 import type { ReviewData } from "@/types/reviewdesk";
 
@@ -15,6 +15,9 @@ interface SortableTableProps {
   onRecord: (triageId: string, draft: string) => void;
   onDismiss: (triageId: string) => void;
   onCopy: (text: string) => void;
+  onBulkRecord: (triageIds: string[], drafts: string[]) => void;
+  onBulkDismiss: (triageIds: string[]) => void;
+  onBulkCopy: (items: { id: string; draft: string }[]) => void;
 }
 
 export default function SortableTable({
@@ -25,8 +28,12 @@ export default function SortableTable({
   onRecord,
   onDismiss,
   onCopy,
+  onBulkRecord,
+  onBulkDismiss,
+  onBulkCopy,
 }: SortableTableProps) {
   const [sort, setSort] = useState<{ key: keyof ReviewData; dir: SortDirection } | null>(null);
+  const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
 
   const sorted = useMemo(() => {
     if (!sort) return reviews;
@@ -57,6 +64,28 @@ export default function SortableTable({
     });
   };
 
+  const toggleRow = (id: string) => {
+    setSelectedRows((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAll = () => {
+    const allAnalyzable = sorted.filter((r) => !r.hasReply && r.triage).map((r) => r.id);
+    if (allAnalyzable.length === selectedRows.size && [...selectedRows].every((id) => allAnalyzable.includes(id))) {
+      setSelectedRows(new Set());
+    } else {
+      setSelectedRows(new Set(allAnalyzable));
+    }
+  };
+
+  const bulkItems = [...selectedRows]
+    .map((id) => sorted.find((r) => r.id === id))
+    .filter((r): r is ReviewData => !!r && !r.hasReply && r.triage != null);
+
   if (sorted.length === 0) {
     return (
       <div className="rd-empty">
@@ -68,9 +97,45 @@ export default function SortableTable({
 
   return (
     <div className="card card-border bg-base-100 p-5">
+      {bulkItems.length > 0 && (
+        <div className="mb-4 flex items-center justify-between gap-3 p-3 rounded-lg border border-base-300 bg-[#F6F7F9]">
+          <span className="font-mono text-xs font-semibold text-[#111827]">
+            {bulkItems.length} selected
+          </span>
+          <div className="flex gap-2">
+            <button
+              className="btn btn-primary btn-xs rd-mono"
+              onClick={() => onBulkRecord(bulkItems.map((r) => r.triage!.id), bulkItems.map((r) => r.triage!.draftReply ?? ""))}
+            >
+              Record all {bulkItems.length}
+            </button>
+            <button
+              className="btn btn-outline btn-xs rd-mono"
+              onClick={() => onBulkDismiss(bulkItems.map((r) => r.triage!.id))}
+            >
+              Dismiss all
+            </button>
+            <button
+              className="btn btn-ghost btn-xs rd-mono"
+              onClick={() => onBulkCopy(bulkItems.map((r) => ({ id: r.id, draft: r.triage!.draftReply ?? "" })))}
+            >
+              Copy all drafts
+            </button>
+          </div>
+        </div>
+      )}
+
       <table className="rd-table rd-scroll">
         <thead className="sticky top-0 z-10">
           <tr>
+            <th className="w-10 text-center">
+              <input
+                type="checkbox"
+                checked={bulkItems.length > 0 && bulkItems.length === selectedRows.size}
+                onChange={toggleAll}
+                className="checkbox checkbox-sm" aria-label="Select all"
+              />
+            </th>
             {headerCells.map((c) => (
               <th
                 key={c.key}
@@ -94,16 +159,28 @@ export default function SortableTable({
         <tbody>
           {sorted.map((r) => {
             const isSel = r.id === selectedId;
+            const rowSel = selectedRows.has(r.id);
             const lane = r.triage?.lane;
             const status = r.triage?.status;
             const triage = r.triage;
             return (
               <tr
                 key={r.id}
-                onClick={() => onSelect(r.id)}
-                className={`group cursor-pointer ${isSel ? "selected" : ""}`}
+                onClick={() => { if (!rowSel) onSelect(r.id); }}
+                onDoubleClick={() => toggleRow(r.id)}
+                className={`group cursor-pointer ${isSel ? "selected" : ""} ${rowSel ? "bg-[#F6F7F9]" : ""}`}
                 aria-current={isSel}
               >
+                <td className="w-10 text-center">
+                  {!r.hasReply && triage ? (
+                    <input
+                      type="checkbox"
+                      checked={rowSel}
+                      onChange={(e) => { e.stopPropagation(); toggleRow(r.id); }}
+                      className="checkbox checkbox-sm" aria-label={`Select review ${r.id}`}
+                    />
+                  ) : null}
+                </td>
                 <td className="font-mono text-xs font-semibold text-[#111827]">
                   {r.stars == null ? "—" : r.stars}
                 </td>
