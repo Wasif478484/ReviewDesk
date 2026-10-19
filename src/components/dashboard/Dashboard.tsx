@@ -303,7 +303,7 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
                   reviews={visible}
                   onSelect={(id) => setSelectedId(id)}
                   selectedId={selectedId}
-                  onAnalyze={analyzeOne}
+                  onAnalyze={(id) => analyzeOne(visible.find((r) => r.id === id)!)}
                   onRecord={(triageId, draft) => act({ type: "record", triageId, draft }, "Recorded in your workspace (demo; nothing is sent to Google).")}
                   onDismiss={(triageId) => act({ type: "dismiss", triageId }, "Draft dismissed.")}
                   onCopy={(text) => { navigator.clipboard?.writeText(text); setNote("Draft copied to clipboard."); }}

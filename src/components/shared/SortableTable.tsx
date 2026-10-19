@@ -96,6 +96,7 @@ export default function SortableTable({
             const isSel = r.id === selectedId;
             const lane = r.triage?.lane;
             const status = r.triage?.status;
+            const triage = r.triage;
             return (
               <tr
                 key={r.id}
@@ -117,8 +118,8 @@ export default function SortableTable({
                     <span className="badge badge-soft badge-success font-mono text-[10px]">
                       {r.replyMode === "sent" ? "sent" : "recorded"}
                     </span>
-                  ) : r.triage ? (
-                    <Stamp action={r.triage.action} />
+                  ) : triage ? (
+                    <Stamp action={triage.action} />
                   ) : (
                     <span className="badge badge-outline font-mono text-[10px]">not analyzed</span>
                   )}
@@ -136,25 +137,25 @@ export default function SortableTable({
                 </td>
                 <td>
                   <div className="rd-action-row">
-                    {!r.hasReply && r.triage ? (
+                    {!r.hasReply && triage ? (
                       <>
                         <button
                           className="btn btn-primary btn-xs rd-mono"
-                          onClick={(e) => { e.stopPropagation(); onRecord(r.triage!.id, r.triage.draftReply ?? ""); }}
+                          onClick={(e) => { e.stopPropagation(); onRecord(triage!.id, triage!.draftReply ?? ""); }}
                           disabled={lane === "auto" && status === "pending"}
                         >
                           Approve
                         </button>
                         <button
                           className="btn btn-outline btn-xs rd-mono"
-                          onClick={(e) => { e.stopPropagation(); onDismiss(r.triage!.id); }}
+                          onClick={(e) => { e.stopPropagation(); onDismiss(triage!.id); }}
                         >
                           Dismiss
                         </button>
                         <button
                           className="btn btn-ghost btn-xs rd-mono"
-                          onClick={(e) => { e.stopPropagation(); onCopy(r.triage!.draftReply ?? ""); }}
-                          disabled={!r.triage.draftReply}
+                          onClick={(e) => { e.stopPropagation(); onCopy(triage!.draftReply ?? ""); }}
+                          disabled={!triage!.draftReply}
                         >
                           Copy
                         </button>
