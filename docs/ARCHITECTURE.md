@@ -48,6 +48,7 @@ workspace and copied by hand, never posted automatically.
 │   │   └── samples.ts       # The demo review inbox
 │   ├── server/              # Server-only
 │   │   ├── db.ts            # Prisma client singleton
+│   │   ├── env.ts           # The one place env vars are read and validated
 │   │   ├── auth.ts          # bcrypt hashing, JWT httpOnly session cookie
 │   │   ├── authtoken.ts     # Verification and reset tokens
 │   │   ├── crypto.ts        # AES-256-GCM for stored credentials
@@ -56,7 +57,10 @@ workspace and copied by hand, never posted automatically.
 │   │   ├── mail.ts          # Verification and reset email
 │   │   └── workspace.ts     # Triage, lanes, recording, seeding
 │   └── utils.ts             # Class-name helper
-└── src/types/               # Shapes shared by the API and the UI
+├── src/types/               # Shapes shared by the API and the UI
+├── scripts/                 # Maintainer utilities (env:check)
+├── tests/                   # Unit suite, plus the ESM resolver hook
+└── docs/                    # Architecture, API, design, decisions
 ```
 
 ## Data flow
@@ -94,6 +98,11 @@ action always sends the review to the approval queue instead of the auto lane.
 3. API routes stay thin: authenticate, validate, call `lib/server`, respond.
 4. `lib/engine/rules.ts` is pure and unit-tested; `lib/server/workspace.ts` is
    the only place that reads rules from the database.
+5. Environment variables are read in `lib/server/env.ts` and nowhere else.
+   Values are validated once, at the boundary, so a missing variable fails
+   with a clear message instead of surfacing as `undefined` three layers
+   deeper. `process.env` appears in `env.ts` and nowhere else, apart from
+   `NODE_ENV` checks that are a build-time concern.
 
 ## Design layer
 

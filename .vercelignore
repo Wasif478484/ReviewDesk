@@ -1,25 +1,54 @@
-# Python files (legacy Streamlit app)
-*.py
-src/reviewdesk/
+# Files that are not needed to build or run the app.
+#
+# Everything here is either a development-only file, a generated artifact, or
+# documentation. The app itself only needs src/, prisma/, public/, and the
+# config files.
+
+# Documentation and assets that are not part of the runtime.
+docs/
+demo-assets/
+*.md
+!README.md
+
+# Tests and maintainer scripts. The app does not import them.
 tests/
 scripts/
-skills/
-devpost/
-docs/
-website/
-.streamlit/
-.sample_cache/
+
+# Local tooling.
+.github/
+.devpost/
+
+# Python leftovers from the original prototype.
+*.py
 __pycache__/
-*.pyc
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+*.egg-info/
+.sample_cache/
 requirements.txt
 pyproject.toml
-policy.py
-prompts.py
-llm.py
-sources.py
-autopilot.py
-ui.py
-samples.csv
-sample_results.json
-.env.example
+
+# Environment files. The platform holds the real values.
 .env
+.env.*
+!.env.example
+
+# Build output and caches.
+.next/
+node_modules/
+out/
+dist/
+coverage/
+*.tsbuildinfo
+.vercel
+
+# Editor and OS.
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
