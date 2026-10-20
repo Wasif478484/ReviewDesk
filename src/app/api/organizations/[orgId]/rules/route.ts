@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/server/db";
 import { requireUserId } from "@/lib/server/auth";
+import { parseKeywords } from "@/lib/engine/rules";
 
 /** GET /api/organizations/[orgId]/rules, list the automation rules. */
 export async function GET(
@@ -24,7 +25,7 @@ export async function GET(
         enabled: r.enabled,
         minStars: r.minStars,
         maxStars: r.maxStars,
-        keywords: r.keywords,
+        keywords: parseKeywords(r.keywords),
         language: r.language,
         forceAction: r.forceAction,
         setPriority: r.setPriority,

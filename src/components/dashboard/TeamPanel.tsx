@@ -34,7 +34,7 @@ interface Rule {
   enabled: boolean;
   minStars: number | null;
   maxStars: number | null;
-  keywords: string[];
+  keywords: string[] | string;
   language: string;
   forceAction: string;
   setPriority: string;
@@ -441,7 +441,9 @@ export default function TeamPanel({
                     ) : null}
                   </div>
                   <p className="rd-mono">
-                    {r.keywords.length ? `keywords: ${r.keywords.join(", ")}` : "matches every review"}
+                    {Array.isArray(r.keywords) && r.keywords.length
+                      ? `keywords: ${r.keywords.join(", ")}`
+                      : "matches every review"}
                   </p>
                 </div>
                 {canManage && (
