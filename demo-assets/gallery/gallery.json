@@ -1,0 +1,80 @@
+{
+  "email": "gallery1792518133877@example.com",
+  "shots": [
+    {
+      "file": "01-title.png",
+      "note": "ReviewDesk: know when not to reply",
+      "kb": 65
+    },
+    {
+      "file": "02-landing-hero.png",
+      "note": "The marketing page: the product promise and the honest scope",
+      "kb": 364
+    },
+    {
+      "file": "03-landing-features.png",
+      "note": "Six things the desk handles on every review",
+      "kb": 153
+    },
+    {
+      "file": "04-landing-control.png",
+      "note": "Nothing goes out without a human decision",
+      "kb": 85
+    },
+    {
+      "file": "05-landing-setup.png",
+      "note": "Four steps from signup to a working desk",
+      "kb": 116
+    },
+    {
+      "file": "06-signup.png",
+      "note": "Sign up with an email and a password. No credit card.",
+      "kb": 226
+    },
+    {
+      "file": "07-desk-overview.png",
+      "note": "The desk at a glance: actions, priority, and sources broken down",
+      "kb": 174
+    },
+    {
+      "file": "08-desk-table.png",
+      "note": "A sortable triage table. Every review, one row.",
+      "kb": 149
+    },
+    {
+      "file": "09-review-roman-urdu.png",
+      "note": "A Roman Urdu complaint. The draft comes back in the same language.",
+      "kb": 135
+    },
+    {
+      "file": "10-review-held.png",
+      "note": "An owner rule forced this to a hold, marked urgent, with the reason attached",
+      "kb": 123
+    },
+    {
+      "file": "11-ledger.png",
+      "note": "Every decision, on the record: approve, veto, dismiss, undo",
+      "kb": 208
+    },
+    {
+      "file": "12-autopilot.png",
+      "note": "Autopilot with a veto window. A clean 5-star reply waits; everything else waits for you.",
+      "kb": 126
+    },
+    {
+      "file": "13-settings.png",
+      "note": "Business profile, tone, and language preferences",
+      "kb": 153
+    },
+    {
+      "file": "14-team.png",
+      "note": "An organization with roles, and the automation rules that sit above the frozen policy",
+      "kb": 127
+    },
+    {
+      "file": "15-templates.png",
+      "note": "The reply template library: save the phrases you reuse",
+      "kb": 127
+    }
+  ]
+}

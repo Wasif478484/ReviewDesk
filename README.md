@@ -32,6 +32,11 @@ A three-minute walkthrough: [demo-assets/reviewdesk-demo.mp4](demo-assets/review
 
 **Live app:** https://reviewdesk-nu.vercel.app
 
+**Screenshots:** [demo-assets/gallery/](demo-assets/gallery/) holds 15 images at
+1600x1067, the 3:2 ratio for a project gallery. The upload order and the
+caption for each one are in
+[gallery/README.md](demo-assets/gallery/README.md).
+
 ## Features
 
 - Single-review and batch analysis, plus bulk record, dismiss, and copy.
