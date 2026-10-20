@@ -3,7 +3,7 @@
 > Know when not to reply.
 
 [![CI](https://github.com/Wasif478484/ReviewDesk/actions/workflows/ci.yml/badge.svg)](https://github.com/Wasif478484/ReviewDesk/actions/workflows/ci.yml)
-[![Release](https://github.com/Wasif478484/ReviewDesk/releases/latest/badge.svg)](https://github.com/Wasif478484/ReviewDesk/releases/latest)
+[![Release](https://img.shields.io/github/v/release/Wasif478484/ReviewDesk?label=release)](https://github.com/Wasif478484/ReviewDesk/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-24%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
