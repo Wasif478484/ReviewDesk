@@ -5,6 +5,20 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    ignore:
+      # TypeScript 7 is the native-port rewrite. typescript-eslint, which
+      # eslint-config-next pulls in, does not support the TS 7 API yet and
+      # hard-fails at startup, so the lint step cannot run.
+      # https://github.com/typescript-eslint/typescript-eslint/issues/10940
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      # These were removed as unused dependencies. Their major bumps are moot.
+      - dependency-name: "@mdxeditor/editor"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-syntax-highlighter"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-resizable-panels"
+        update-types: ["version-update:semver-major"]
     groups:
       # One pull request for the whole dependency tree, not twenty.
       dependencies:
