@@ -37,12 +37,15 @@ function optionalBoolean(name: string, fallback: boolean): boolean {
   return ["1", "true", "yes", "on"].includes(raw.trim().toLowerCase());
 }
 
-/** The model provider. `mock` runs offline with canned responses. */
-export type Provider = "mock" | "openai" | "anthropic";
+/**
+ * The model provider. `mock` runs offline with canned responses. Any other
+ * value means a live provider, reached through the Z.ai SDK, which speaks
+ * the OpenAI chat completions shape.
+ */
+export type Provider = "mock" | "live";
 
 export function provider(): Provider {
-  const raw = optional("REVIEWDESK_PROVIDER", "mock").toLowerCase();
-  return raw === "openai" || raw === "anthropic" ? raw : "mock";
+  return optional("REVIEWDESK_PROVIDER", "mock").toLowerCase() === "mock" ? "mock" : "live";
 }
 
 /** True when the provider makes paid, outbound model calls. */

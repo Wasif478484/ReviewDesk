@@ -76,7 +76,7 @@ caption for each one are in
 | Styling   | Tailwind CSS 4, DaisyUI 5, one custom theme                                      |
 | Database  | PostgreSQL on Neon, Prisma ORM                                                   |
 | Auth      | bcrypt plus a signed httpOnly session cookie, email verification, password reset |
-| Model     | OpenAI or Anthropic, with a mock provider for demos                              |
+| Model     | Z.ai SDK (OpenAI-compatible), with a mock provider for offline demos            |
 | Motion    | OriginKit and local effects, reduced-motion aware                                |
 | Tests     | `node:test` with native TypeScript stripping                                     |
 

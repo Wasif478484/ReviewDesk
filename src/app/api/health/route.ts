@@ -39,7 +39,9 @@ export async function GET() {
     name: "model_provider",
     ok: true,
     detail:
-      active === "mock" ? "mock (offline canned responses)" : `${active} (live calls cost money)`,
+      active === "mock"
+        ? "mock (offline canned responses)"
+        : "z.ai SDK (live calls cost money)",
   });
 
   // Optional integrations

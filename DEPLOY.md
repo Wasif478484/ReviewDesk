@@ -61,8 +61,11 @@ npm run start               # serves .next/standalone on :3000
   Register `{origin}/api/auth/google/callback` in Google Cloud Console.
 - `SMTP_*` / `MAIL_FROM` — enables real verification + reset emails. Without
   them, one-time dev links are shown in the UI.
-- `REVIEWDESK_PROVIDER` — `mock` (default, offline), `openai`, or `anthropic`.
-- `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` — required for live model calls.
+- `REVIEWDESK_PROVIDER` — `mock` (the default, offline) or any other value for
+  live calls. Live calls go through the Z.ai SDK, which speaks the OpenAI chat
+  completions shape.
+- `ZAI_API_KEY` — required for live model calls. With `mock`, no key is needed
+  and no request leaves the machine.
 
 ## Project layout
 
