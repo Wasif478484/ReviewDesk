@@ -33,7 +33,7 @@ workspace and copied by hand, never posted automatically.
 │   ├── auth/                # Sign in, sign up, reset password
 │   ├── onboarding/          # First-run business and Google setup
 │   ├── dashboard/           # Desk shell + Ledger, Autopilot, Settings tabs
-│   │                        # + TemplateLibrary
+│   │                        # + TemplateLibrary and TeamPanel
 │   ├── legal/               # Shared shell for privacy and terms
 │   ├── shared/              # Primitives used across screens
 │   ├── originkit/           # Motion and type effects
@@ -43,6 +43,7 @@ workspace and copied by hand, never posted automatically.
 │   ├── engine/              # Pure, client-safe
 │   │   ├── prompts.ts       # Frozen triage prompts, parser, draft checks
 │   │   ├── policy.ts        # Frozen safety decision rules
+│   │   ├── priority.ts      # Queue priority scoring
 │   │   ├── rules.ts         # Owner-configured automation rules
 │   │   └── samples.ts       # The demo review inbox
 │   ├── server/              # Server-only

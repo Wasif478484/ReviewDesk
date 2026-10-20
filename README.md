@@ -18,6 +18,15 @@ ReviewDesk drafts text for the owner to edit and copy by hand. It does **not**
 log in to Google, post replies, report reviews, scrape websites, or send
 anything automatically.
 
+## Demo
+
+[![ReviewDesk demo](demo-assets/reviewdesk-demo.mp4)](demo-assets/reviewdesk-demo.mp4)
+
+A three-minute walkthrough: [demo-assets/reviewdesk-demo.mp4](demo-assets/reviewdesk-demo.mp4)
+(1920x1080, 2m 56s, silent track so narration can be added later).
+
+**Live app:** https://reviewdesk-nu.vercel.app
+
 ## Features
 
 - Single-review and batch analysis, plus bulk record/dismiss/copy.
@@ -30,8 +39,12 @@ anything automatically.
 - Owner-in-the-loop workflow with veto windows, approval queue, audit log,
   CSV export (reviews + triage results).
 - Priority scoring (urgent / normal / low) so holds and risk flags surface first.
+- Automation rules: owner-configured rules can force the triage action or
+  raise the priority. A rule never posts to Google.
+- Teams: organizations with owner, manager, responder, and viewer roles.
 - Reply template library: save the phrases you reuse, insert them into any draft.
 - Review source filtering (Google, Yelp, Facebook, TripAdvisor, imported CSV).
+- Analytics breakdown by action, priority, and source.
 - Google Business Profile API integration (optional, with honest status).
 - Encrypted credential storage (AES-256-GCM).
 - Email verification and password reset.
@@ -39,6 +52,7 @@ anything automatically.
 - Draft version history with revert.
 - Keyboard shortcuts (A = analyze, R = record, C = copy, D = dismiss,
   V = revert draft).
+- Health endpoint at `/api/health` for liveness and readiness.
 - Dark slate theme with paper-white cards and action-colored badges.
 
 ## Tech stack
@@ -66,13 +80,11 @@ cd ReviewDesk
 npm install --legacy-peer-deps
 cp .env.example .env
 # Edit .env: set DATABASE_URL and APP_SECRET (openssl rand -hex 32)
-npx prisma db push
+npx prisma migrate deploy
 npm run dev
 ```
 
 Open http://localhost:3000.
-
-**Live demo:** https://reviewdesk-nu.vercel.app
 
 ### Mock mode (no API key)
 
@@ -186,18 +198,33 @@ See CONTRIBUTING.md for development rules.
 Run the same checks used by CI:
 
 ```bash
-npm run build
+npx tsc --noEmit
 npm run lint
+npm test
+npm run build
 git diff --check
 ```
 
 Expected results:
 
-- Build: success (all routes compiled)
+- Type check: no errors
 - Lint: no errors
+- Tests: 28 passed
+- Build: success (all routes compiled)
 - Whitespace: clean
 
-GitHub Actions runs these checks on pushes and pull requests.
+GitHub Actions runs these checks on pushes and pull requests. The unit suite in
+`tests/` covers the frozen policy, the prompt parser, the priority scoring,
+and the automation rules.
+
+## Database
+
+PostgreSQL, via Prisma. `prisma/migrations/` holds the checked-in migration
+history, so a fresh environment is set up with:
+
+```bash
+npx prisma migrate deploy
+```
 
 ## Privacy and safety
 
