@@ -100,16 +100,22 @@ export function parseTriageRow(t: Prisma.TriageGetPayload<Record<string, never>>
 
 /** Ensure policy row + demo inbox exist for a user. */
 export async function ensureWorkspace(userId: string): Promise<void> {
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: { organizationId: true },
+  });
+  const orgId = user?.organizationId ?? null;
   await db.policy.upsert({
     where: { userId },
     update: {},
-    create: { userId },
+    create: { userId, organizationId: orgId },
   });
   const count = await db.review.count({ where: { userId, source: "demo" } });
   if (count === 0) {
     await db.review.createMany({
       data: SAMPLE_REVIEWS.map((s) => ({
         userId,
+        organizationId: orgId,
         source: "demo",
         stars: s.stars,
         text: s.text,
@@ -133,9 +139,14 @@ export async function audit(userId: string, event: {
   actor?: string;
   error?: string;
 }): Promise<void> {
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: { organizationId: true },
+  });
   await db.auditEvent.create({
     data: {
       userId,
+      organizationId: user?.organizationId ?? null,
       reviewRef: event.reviewRef ?? "",
       excerpt: (event.excerpt ?? "").slice(0, 80),
       action: event.action,
@@ -263,7 +274,7 @@ export async function triageReview(
 
   // Owner-configured rules. A rule can force the action or raise the
   // priority. It never posts anything; the owner still copies by hand.
-  const orgId = user.organizationId;
+  const orgId = user.organizationId ?? null;
   let priority = computePriority(result, review.stars);
   let ruleMatches: RuleMatch[] = [];
   let finalAction = result.action;
