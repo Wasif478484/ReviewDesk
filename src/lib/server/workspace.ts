@@ -8,8 +8,12 @@
 import { db } from "@/lib/server/db";
 import { Prisma } from "@prisma/client";
 import {
-  buildSystemPrompt, buildUserMessage, safeParse,
-  type BusinessProfile, type TriageResult, type Tone,
+  buildSystemPrompt,
+  buildUserMessage,
+  safeParse,
+  type BusinessProfile,
+  type TriageResult,
+  type Tone,
 } from "@/lib/engine/prompts";
 import { decide, shouldSend, DEFAULT_POLICY, type AutopilotPolicy } from "@/lib/engine/policy";
 import { applyRules, parseKeywords, type RuleMatch } from "@/lib/engine/rules";
@@ -31,14 +35,15 @@ export type PolicyRow = NonNullable<
 >;
 
 export function profileFor(b: BusinessRow | null): BusinessProfile {
-  if (!b) return {
-    business_name: "Your Business",
-    business_type: "restaurant",
-    owner_name: "The Owner",
-    sign_off: "",
-    contact_line: "",
-    allowed_offers: "none",
-  };
+  if (!b)
+    return {
+      business_name: "Your Business",
+      business_type: "restaurant",
+      owner_name: "The Owner",
+      sign_off: "",
+      contact_line: "",
+      allowed_offers: "none",
+    };
   return {
     business_name: b.name,
     business_type: b.category,
@@ -55,7 +60,9 @@ export function policyFor(p: PolicyRow | null | undefined): AutopilotPolicy {
   try {
     const parsed = JSON.parse(p.trustedLanguages);
     if (Array.isArray(parsed)) trusted = parsed.map(String);
-  } catch { /* keep default */ }
+  } catch {
+    /* keep default */
+  }
   return {
     enabled: p.enabled,
     dryRun: p.dryRun,
@@ -68,12 +75,24 @@ export function policyFor(p: PolicyRow | null | undefined): AutopilotPolicy {
 }
 
 export function parseTriageRow(t: Prisma.TriageGetPayload<Record<string, never>>): TriageResult & {
-  id: string; lane: string; status: string; dueAt: Date | null; reviewId: string;
+  id: string;
+  lane: string;
+  status: string;
+  dueAt: Date | null;
+  reviewId: string;
 } {
   let flags: string[] = [];
   let checklist: string[] = [];
-  try { flags = JSON.parse(t.flags); } catch { /* keep [] */ }
-  try { checklist = JSON.parse(t.ownerChecklist); } catch { /* keep [] */ }
+  try {
+    flags = JSON.parse(t.flags);
+  } catch {
+    /* keep [] */
+  }
+  try {
+    checklist = JSON.parse(t.ownerChecklist);
+  } catch {
+    /* keep [] */
+  }
   return {
     id: t.id,
     reviewId: t.reviewId,
@@ -130,15 +149,18 @@ export async function ensureWorkspace(userId: string): Promise<void> {
 // Audit
 // ---------------------------------------------------------------------------
 
-export async function audit(userId: string, event: {
-  reviewRef?: string;
-  excerpt?: string;
-  action: string;
-  status: string;
-  reasons?: string[];
-  actor?: string;
-  error?: string;
-}): Promise<void> {
+export async function audit(
+  userId: string,
+  event: {
+    reviewRef?: string;
+    excerpt?: string;
+    action: string;
+    status: string;
+    reasons?: string[];
+    actor?: string;
+    error?: string;
+  },
+): Promise<void> {
   const user = await db.user.findUnique({
     where: { id: userId },
     select: { organizationId: true },
@@ -172,19 +194,30 @@ export async function audit(userId: string, event: {
  * the new access token. mode "oauth_token": decrypt the pasted token as-is.
  * Returns null when no usable Google credential exists.
  */
-export async function googleAccessToken(userId: string): Promise<{ token: string; locationId: string; livePosting: boolean; mode: string } | null> {
+export async function googleAccessToken(
+  userId: string,
+): Promise<{ token: string; locationId: string; livePosting: boolean; mode: string } | null> {
   const cred = await db.credential.findUnique({ where: { userId } });
   if (!cred) return null;
   if (cred.mode !== "oauth" && cred.mode !== "oauth_token") return null;
 
   if (cred.mode === "oauth") {
     if (!cred.refreshTokenEnc) return null;
-    const fresh = cred.accessTokenEnc && cred.tokenExpiresAt
-      && cred.tokenExpiresAt.getTime() > Date.now() + 60_000;
+    const fresh =
+      cred.accessTokenEnc &&
+      cred.tokenExpiresAt &&
+      cred.tokenExpiresAt.getTime() > Date.now() + 60_000;
     if (fresh) {
       try {
-        return { token: decrypt(cred.accessTokenEnc!), locationId: cred.locationId, livePosting: cred.livePosting, mode: cred.mode };
-      } catch { /* fall through to refresh */ }
+        return {
+          token: decrypt(cred.accessTokenEnc!),
+          locationId: cred.locationId,
+          livePosting: cred.livePosting,
+          mode: cred.mode,
+        };
+      } catch {
+        /* fall through to refresh */
+      }
     }
     try {
       const refreshToken = decrypt(cred.refreshTokenEnc);
@@ -196,11 +229,19 @@ export async function googleAccessToken(userId: string): Promise<{ token: string
           tokenExpiresAt: new Date(Date.now() + expiresIn * 1000),
         },
       });
-      return { token: accessToken, locationId: cred.locationId, livePosting: cred.livePosting, mode: cred.mode };
+      return {
+        token: accessToken,
+        locationId: cred.locationId,
+        livePosting: cred.livePosting,
+        mode: cred.mode,
+      };
     } catch (err) {
       await db.credential.update({
         where: { userId },
-        data: { status: "error", statusMessage: `Token refresh failed: ${err instanceof Error ? err.message : String(err)}` },
+        data: {
+          status: "error",
+          statusMessage: `Token refresh failed: ${err instanceof Error ? err.message : String(err)}`,
+        },
       });
       return null;
     }
@@ -209,7 +250,12 @@ export async function googleAccessToken(userId: string): Promise<{ token: string
   // pasted access token
   if (!cred.tokenEnc) return null;
   try {
-    return { token: decrypt(cred.tokenEnc), locationId: cred.locationId, livePosting: cred.livePosting, mode: cred.mode };
+    return {
+      token: decrypt(cred.tokenEnc),
+      locationId: cred.locationId,
+      livePosting: cred.livePosting,
+      mode: cred.mode,
+    };
   } catch {
     return null;
   }
@@ -262,7 +308,14 @@ export async function triageReview(
 
   // Lane assignment via the frozen policy (the model never decides this).
   const policy = policyFor(user.policy);
-  const [decision, reasons] = decide(result, review, profileFor(business), policy, 0, review.hasReply);
+  const [decision, reasons] = decide(
+    result,
+    review,
+    profileFor(business),
+    policy,
+    0,
+    review.hasReply,
+  );
   let lane = "queue";
   let dueAt: Date | null = null;
   if (decision === "auto_post") {
@@ -307,12 +360,11 @@ export async function triageReview(
     }
   }
 
-  const ruleNote = ruleMatches.length
-    ? ` ${ruleMatches.map((m) => m.reason).join(" ")}`
-    : "";
-  const reason = finalAction === result.action
-    ? `${result.reason}${ruleNote}`
-    : `${result.reason} Changed to ${finalAction} by an owner rule.${ruleNote}`;
+  const ruleNote = ruleMatches.length ? ` ${ruleMatches.map((m) => m.reason).join(" ")}` : "";
+  const reason =
+    finalAction === result.action
+      ? `${result.reason}${ruleNote}`
+      : `${result.reason} Changed to ${finalAction} by an owner rule.${ruleNote}`;
   const ownerChecklist = ruleMatches.length
     ? [...result.owner_checklist, ...ruleMatches.map((m) => m.reason)]
     : result.owner_checklist;
@@ -371,7 +423,8 @@ export async function recordReply(
     include: { review: true },
   });
   if (!triage) return { ok: false, mode: "recorded", message: "Triage row not found." };
-  if (triage.review.hasReply) return { ok: false, mode: "recorded", message: "Review already has a reply." };
+  if (triage.review.hasReply)
+    return { ok: false, mode: "recorded", message: "Review already has a reply." };
   const draft = (draftOverride ?? triage.draftReply ?? "").trim();
   if (!draft) return { ok: false, mode: "recorded", message: "Reply draft is empty." };
 
@@ -384,8 +437,14 @@ export async function recordReply(
   if (canLive && cred) {
     try {
       const resolved = await googleAccessToken(userId);
-      if (!resolved?.token) throw new Error("No usable Google token (try reconnecting in Settings).");
-      await postGoogleReply(resolved.token, resolved.locationId, triage.review.externalId ?? "", draft);
+      if (!resolved?.token)
+        throw new Error("No usable Google token (try reconnecting in Settings).");
+      await postGoogleReply(
+        resolved.token,
+        resolved.locationId,
+        triage.review.externalId ?? "",
+        draft,
+      );
       await db.$transaction([
         db.review.update({
           where: { id: triage.reviewId },
@@ -434,7 +493,11 @@ export async function recordReply(
     reasons: ["recorded in the workspace; not sent to Google"],
     actor: "owner",
   });
-  return { ok: true, mode: "recorded", message: "Recorded in your workspace (demo; nothing is sent to Google)." };
+  return {
+    ok: true,
+    mode: "recorded",
+    message: "Recorded in your workspace (demo; nothing is sent to Google).",
+  };
 }
 
 export async function undoReply(userId: string, reviewId: string): Promise<boolean> {
@@ -464,7 +527,10 @@ export async function undoReply(userId: string, reviewId: string): Promise<boole
 export async function dismissTriage(userId: string, triageId: string): Promise<boolean> {
   const triage = await db.triage.findFirst({ where: { id: triageId, userId } });
   if (!triage) return false;
-  await db.triage.update({ where: { id: triageId }, data: { status: "dismissed", lane: "skipped" } });
+  await db.triage.update({
+    where: { id: triageId },
+    data: { status: "dismissed", lane: "skipped" },
+  });
   await audit(userId, {
     reviewRef: triage.reviewId,
     excerpt: "",
@@ -499,7 +565,9 @@ export async function cancelVeto(userId: string, triageId: string): Promise<bool
 // ---------------------------------------------------------------------------
 
 export async function runAutopilotCycle(userId: string): Promise<{
-  recorded: number; wouldRecord: number; failed: number;
+  recorded: number;
+  wouldRecord: number;
+  failed: number;
 }> {
   const user = await db.user.findUnique({
     where: { id: userId },
@@ -527,8 +595,12 @@ export async function runAutopilotCycle(userId: string): Promise<{
   for (const t of due) {
     if (recorded >= policy.dailyCap) {
       await audit(userId, {
-        reviewRef: t.reviewId, excerpt: t.review.text, action: "auto_post",
-        status: "deferred", reasons: ["daily cap reached"], actor: "autopilot",
+        reviewRef: t.reviewId,
+        excerpt: t.review.text,
+        action: "auto_post",
+        status: "deferred",
+        reasons: ["daily cap reached"],
+        actor: "autopilot",
       });
       continue;
     }
@@ -537,7 +609,9 @@ export async function runAutopilotCycle(userId: string): Promise<{
       if (res.ok) {
         recorded += 1;
         await audit(userId, {
-          reviewRef: t.reviewId, excerpt: t.review.text, action: "auto_post",
+          reviewRef: t.reviewId,
+          excerpt: t.review.text,
+          action: "auto_post",
           status: res.mode === "sent" ? "sent" : "recorded_demo",
           reasons: ["autopilot veto window passed without a veto"],
           actor: "autopilot",
@@ -546,15 +620,23 @@ export async function runAutopilotCycle(userId: string): Promise<{
         failed += 1;
         await db.triage.update({ where: { id: t.id }, data: { lane: "queue", dueAt: null } });
         await audit(userId, {
-          reviewRef: t.reviewId, excerpt: t.review.text, action: "auto_post",
-          status: "failed", reasons: [res.message], actor: "autopilot",
+          reviewRef: t.reviewId,
+          excerpt: t.review.text,
+          action: "auto_post",
+          status: "failed",
+          reasons: [res.message],
+          actor: "autopilot",
         });
       }
     } else {
       wouldRecord += 1;
       await audit(userId, {
-        reviewRef: t.reviewId, excerpt: t.review.text, action: "auto_post",
-        status: "dry_run", reasons: ["would record"], actor: "autopilot",
+        reviewRef: t.reviewId,
+        excerpt: t.review.text,
+        action: "auto_post",
+        status: "dry_run",
+        reasons: ["would record"],
+        actor: "autopilot",
       });
     }
   }

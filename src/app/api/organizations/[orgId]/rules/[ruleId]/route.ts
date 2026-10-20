@@ -14,7 +14,10 @@ export async function DELETE(
       where: { organizationId_userId: { organizationId: orgId, userId } },
     });
     if (!membership || !["owner", "manager"].includes(membership.role))
-      return NextResponse.json({ error: "Only owners and managers can remove rules." }, { status: 403 });
+      return NextResponse.json(
+        { error: "Only owners and managers can remove rules." },
+        { status: 403 },
+      );
     const rule = await db.rule.findUnique({ where: { id: ruleId } });
     if (!rule || rule.organizationId !== orgId)
       return NextResponse.json({ error: "Rule not found in this organization." }, { status: 404 });

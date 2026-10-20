@@ -6,7 +6,9 @@ import { ensureWorkspace } from "@/lib/server/workspace";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const email = String(body.email ?? "").trim().toLowerCase();
+    const email = String(body.email ?? "")
+      .trim()
+      .toLowerCase();
     const password = String(body.password ?? "");
 
     const user = await db.user.findUnique({ where: { email } });

@@ -10,18 +10,18 @@ Devpost submission.
 
 ## What it shows
 
-| # | Scene |
-|---|-------|
-| 00 | Title |
-| 01-06 | The marketing page: the four lanes, the control section, setup, FAQ |
-| 07-10 | Sign up and the three-step onboarding |
-| 11-12 | The desk: stats, the analytics breakdown, the sortable triage table |
+| #     | Scene                                                                  |
+| ----- | ---------------------------------------------------------------------- |
+| 00    | Title                                                                  |
+| 01-06 | The marketing page: the four lanes, the control section, setup, FAQ    |
+| 07-10 | Sign up and the three-step onboarding                                  |
+| 11-12 | The desk: stats, the analytics breakdown, the sortable triage table    |
 | 13-14 | A Roman Urdu complaint, the draft editor, sign-off, quick insert, copy |
-| 15-16 | An owner rule forcing a hold, marked urgent with the reason attached |
-| 17 | The audit ledger |
-| 18 | Autopilot and the veto window |
-| 19-21 | Business profile, team roles, the reply template library |
-| 22 | Closing card |
+| 15-16 | An owner rule forcing a hold, marked urgent with the reason attached   |
+| 17    | The audit ledger                                                       |
+| 18    | Autopilot and the veto window                                          |
+| 19-21 | Business profile, team roles, the reply template library               |
+| 22    | Closing card                                                           |
 
 ## How it was made
 

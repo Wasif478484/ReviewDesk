@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * LedgerTab.tsx, the audit ledger: every decision, approval, veto and undo
@@ -26,7 +26,9 @@ export default function LedgerTab({ ws }: { ws: WorkspaceData }) {
       </div>
 
       {ws.audits.length === 0 ? (
-        <p className="rd-mono py-8 text-center">No entries yet. Analyze a review to start the ledger.</p>
+        <p className="rd-mono py-8 text-center">
+          No entries yet. Analyze a review to start the ledger.
+        </p>
       ) : (
         <div className="rd-scroll max-h-[64vh] overflow-y-auto pr-1">
           <table className="table table-sm">
@@ -43,18 +45,35 @@ export default function LedgerTab({ ws }: { ws: WorkspaceData }) {
               {ws.audits.map((a) => {
                 const meta = ACTION_META[a.action];
                 const statusBadge =
-                  a.status === "failed" ? "badge-error"
-                  : a.status === "recorded_demo" || a.status === "sent" ? "badge-success"
-                  : a.status === "deferred" || a.status === "dry_run" ? "badge-warning"
-                  : "badge-ghost";
+                  a.status === "failed"
+                    ? "badge-error"
+                    : a.status === "recorded_demo" || a.status === "sent"
+                      ? "badge-success"
+                      : a.status === "deferred" || a.status === "dry_run"
+                        ? "badge-warning"
+                        : "badge-ghost";
                 return (
                   <tr key={a.id} className="align-top">
-                    <td className="whitespace-nowrap font-mono text-xs font-semibold text-[#111827]">{fmt(a.timestamp)}</td>
-                    <td><span className="badge badge-ghost badge-sm font-mono">{meta?.label ?? (a.action || "(none)")}</span></td>
-                    <td><span className={`badge badge-soft badge-sm font-mono ${statusBadge}`}>{a.status.replace(/_/g, " ")}</span></td>
+                    <td className="whitespace-nowrap font-mono text-xs font-semibold text-[#111827]">
+                      {fmt(a.timestamp)}
+                    </td>
+                    <td>
+                      <span className="badge badge-ghost badge-sm font-mono">
+                        {meta?.label ?? (a.action || "(none)")}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`badge badge-soft badge-sm font-mono ${statusBadge}`}>
+                        {a.status.replace(/_/g, " ")}
+                      </span>
+                    </td>
                     <td className="font-mono text-xs text-[#6B7280]">{a.actor}</td>
                     <td className="min-w-0">
-                      {a.excerpt && <p className="line-clamp-1 text-sm text-[#374151]">&ldquo;{a.excerpt}&rdquo;</p>}
+                      {a.excerpt && (
+                        <p className="line-clamp-1 text-sm text-[#374151]">
+                          &ldquo;{a.excerpt}&rdquo;
+                        </p>
+                      )}
                       {a.reasons.length > 0 && (
                         <p className="mt-0.5 text-xs text-[#6B7280]">{a.reasons.join(" · ")}</p>
                       )}

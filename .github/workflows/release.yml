@@ -1,0 +1,64 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release (e.g. v0.3.0)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Publish the release notes
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve the tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Extract the notes for this tag
+        id: notes
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import os, re, sys
+          tag = os.environ["TAG"]
+          text = open("CHANGELOG.md", encoding="utf-8").read()
+          # Find the section whose heading holds this tag, up to the next one.
+          pattern = re.compile(
+              r"^## \[?" + re.escape(tag) + r"\]?.*?$(.*?)(?=^## \[|\Z)",
+              re.M | re.S,
+          )
+          match = pattern.search(text)
+          body = match.group(1).strip() if match else ""
+          print("notes<<NOTES_EOF")
+          print(body or "See CHANGELOG.md.")
+          print("NOTES_EOF")
+          PY
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+
+      - name: Publish the release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ steps.tag.outputs.tag }}
+          tag_name: ${{ steps.tag.outputs.tag }}
+          body: ${{ steps.notes.outputs.notes }}
+          draft: false
+          prerelease: ${{ contains(steps.tag.outputs.tag, '-') }}

@@ -13,7 +13,9 @@ export async function GET() {
     const resolved = await googleAccessToken(userId);
     if (!resolved?.token) {
       return NextResponse.json(
-        { error: "No live Google connection. Connect with Google (or paste an OAuth token) first." },
+        {
+          error: "No live Google connection. Connect with Google (or paste an OAuth token) first.",
+        },
         { status: 400 },
       );
     }
@@ -25,7 +27,9 @@ export async function GET() {
         const locs = await listLocations(resolved.token, account.name);
         for (const l of locs) locations.push({ ...l, account: account.accountName });
       } catch (err) {
-        failures.push(`${account.accountName}: ${err instanceof Error ? err.message : String(err)}`);
+        failures.push(
+          `${account.accountName}: ${err instanceof Error ? err.message : String(err)}`,
+        );
       }
     }
     return NextResponse.json({ ok: true, locations, failures });

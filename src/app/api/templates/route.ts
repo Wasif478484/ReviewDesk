@@ -37,9 +37,12 @@ export async function POST(req: Request) {
     const body = await req.json();
     const name = String(body.name ?? "").trim();
     const content = String(body.content ?? "").trim();
-    const category = String(body.category ?? "general").trim().slice(0, 40);
+    const category = String(body.category ?? "general")
+      .trim()
+      .slice(0, 40);
     if (!name) return NextResponse.json({ error: "Template name is required." }, { status: 400 });
-    if (!content) return NextResponse.json({ error: "Template content is required." }, { status: 400 });
+    if (!content)
+      return NextResponse.json({ error: "Template content is required." }, { status: 400 });
 
     const rows = await db.$queryRawUnsafe(
       `INSERT INTO "Template" ("id", "userId", "name", "content", "category", "usageCount", "createdAt", "updatedAt")

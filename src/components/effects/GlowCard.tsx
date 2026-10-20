@@ -29,7 +29,12 @@ export default function GlowCard({
   }
 
   return (
-    <article ref={ref} className={`rd-glow rd-reveal ${className}`} style={revealStyle(delay)} onPointerMove={onMove}>
+    <article
+      ref={ref}
+      className={`rd-glow rd-reveal ${className}`}
+      style={revealStyle(delay)}
+      onPointerMove={onMove}
+    >
       {children}
     </article>
   );

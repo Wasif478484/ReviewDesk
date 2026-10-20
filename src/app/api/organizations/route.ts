@@ -35,8 +35,13 @@ export async function POST(req: Request) {
     const userId = await requireUserId();
     const body = await req.json();
     const name = String(body.name ?? "").trim();
-    if (!name) return NextResponse.json({ error: "Organization name is required." }, { status: 400 });
-    const base = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "org";
+    if (!name)
+      return NextResponse.json({ error: "Organization name is required." }, { status: 400 });
+    const base =
+      name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "") || "org";
     // Slugs are unique; append a short suffix if taken.
     let slug = base;
     for (let i = 0; i < 20; i++) {
@@ -45,7 +50,9 @@ export async function POST(req: Request) {
       slug = `${base}-${Math.random().toString(36).slice(2, 7)}`;
     }
     const org = await db.organization.create({ data: { name, slug } });
-    await db.member.create({ data: { organizationId: org.id, userId, role: "owner", joinedAt: new Date() } });
+    await db.member.create({
+      data: { organizationId: org.id, userId, role: "owner", joinedAt: new Date() },
+    });
     await db.user.update({ where: { id: userId }, data: { organizationId: org.id } });
     return NextResponse.json({
       ok: true,

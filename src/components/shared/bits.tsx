@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * bits.tsx, shared Owner's Desk UI primitives: logo, stars, stamps,
@@ -13,7 +13,14 @@ export function LogoMark({ size = 28 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
       <rect width="32" height="32" rx="9" fill="#1D4ED8" />
-      <path d="M9 17l5 5 9-12" stroke="#FFFFFF" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M9 17l5 5 9-12"
+        stroke="#FFFFFF"
+        strokeWidth="3"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -64,15 +71,25 @@ export function VetoCountdown({ dueAt }: { dueAt: string | null }) {
 
 /** The check-facts card: draft problems + owner checklist, ledger style. */
 export function CheckFactsCard({ triage }: { triage: TriageData }) {
-  const items = [...triage.flags.map((f) => `risk flag: ${f.replace(/_/g, " ")}`), ...triage.ownerChecklist];
+  const items = [
+    ...triage.flags.map((f) => `risk flag: ${f.replace(/_/g, " ")}`),
+    ...triage.ownerChecklist,
+  ];
   if (!items.length) return null;
   return (
-    <div className="rounded-xl border-[1.5px] border-dashed p-4" style={{ borderColor: "#854D0E", background: "#FBF3D9" }}>
-      <div className="rd-kicker mb-2" style={{ color: "#854D0E" }}>Check facts before posting</div>
+    <div
+      className="rounded-xl border-[1.5px] border-dashed p-4"
+      style={{ borderColor: "#854D0E", background: "#FBF3D9" }}
+    >
+      <div className="rd-kicker mb-2" style={{ color: "#854D0E" }}>
+        Check facts before posting
+      </div>
       <ul className="space-y-1.5">
         {items.map((item, i) => (
           <li key={i} className="flex gap-2 text-sm" style={{ color: "#374151" }}>
-            <span className="rd-mono shrink-0" style={{ color: "#854D0E" }}>{String(i + 1).padStart(2, "0")}</span>
+            <span className="rd-mono shrink-0" style={{ color: "#854D0E" }}>
+              {String(i + 1).padStart(2, "0")}
+            </span>
             <span>{item}</span>
           </li>
         ))}
@@ -83,7 +100,12 @@ export function CheckFactsCard({ triage }: { triage: TriageData }) {
 
 /** Draft reply with translation + word count target indicator. */
 export function DraftCard({
-  draft, translation, languageUsed, value, onChange, editable,
+  draft,
+  translation,
+  languageUsed,
+  value,
+  onChange,
+  editable,
 }: {
   draft: string;
   translation: string | null;
@@ -98,7 +120,11 @@ export function DraftCard({
     <div className="space-y-3">
       <div className="flex items-baseline justify-between gap-3">
         <span className="rd-kicker">Draft reply · {languageUsed || "auto"}</span>
-        <span className="rd-mono" style={{ color: inRange ? "#15803D" : "#854D0E" }} aria-label={`${words} words`}>
+        <span
+          className="rd-mono"
+          style={{ color: inRange ? "#15803D" : "#854D0E" }}
+          aria-label={`${words} words`}
+        >
           {words} words {inRange ? "· on target" : "· aim 30-80"}
         </span>
       </div>
@@ -110,14 +136,20 @@ export function DraftCard({
           aria-label="Edit draft reply"
         />
       ) : (
-        <p className="whitespace-pre-wrap rounded-[10px] p-4 text-[15px]" style={{ background: "#FFFFFF", border: "1.5px solid #D1D5DB", color: "#111827" }}>
+        <p
+          className="whitespace-pre-wrap rounded-[10px] p-4 text-[15px]"
+          style={{ background: "#FFFFFF", border: "1.5px solid #D1D5DB", color: "#111827" }}
+        >
           {draft}
         </p>
       )}
       {translation && (
         <div>
           <div className="rd-kicker mb-1.5">What it says (owner copy)</div>
-          <p className="whitespace-pre-wrap rounded-[10px] p-4 text-sm italic" style={{ background: "#F6F7F9", border: "1px solid #E5E7EB", color: "#374151" }}>
+          <p
+            className="whitespace-pre-wrap rounded-[10px] p-4 text-sm italic"
+            style={{ background: "#F6F7F9", border: "1px solid #E5E7EB", color: "#374151" }}
+          >
             {translation}
           </p>
         </div>
@@ -133,11 +165,22 @@ export function TriageBanner({ triage }: { triage: TriageData }) {
     <div className={meta.banner}>
       <Stamp action={triage.action} />
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium" style={{ color: "#111827" }}>{meta.blurb}</p>
-        {triage.reason && <p className="mt-1 text-sm" style={{ color: "#374151" }}>{triage.reason}</p>}
+        <p className="text-sm font-medium" style={{ color: "#111827" }}>
+          {meta.blurb}
+        </p>
+        {triage.reason && (
+          <p className="mt-1 text-sm" style={{ color: "#374151" }}>
+            {triage.reason}
+          </p>
+        )}
         {triage.reportNote && (
-          <p className="mt-2 rounded-lg p-3 text-sm" style={{ background: "#FFFFFF", border: "1px dashed #57534E", color: "#374151" }}>
-            <span className="rd-kicker block" style={{ color: "#57534E" }}>Report note</span>
+          <p
+            className="mt-2 rounded-lg p-3 text-sm"
+            style={{ background: "#FFFFFF", border: "1px dashed #57534E", color: "#374151" }}
+          >
+            <span className="rd-kicker block" style={{ color: "#57534E" }}>
+              Report note
+            </span>
             {triage.reportNote}
           </p>
         )}
@@ -176,10 +219,12 @@ export function ReplyComposer({
   return (
     <div className="space-y-3">
       <div className="flex items-baseline justify-between gap-3">
-        <span className="rd-kicker">
-          Draft reply {editable ? "· edit before you copy" : ""}
-        </span>
-        <span className="rd-mono" style={{ color: inRange ? "#15803D" : "#854D0E" }} aria-label={`${words} words`}>
+        <span className="rd-kicker">Draft reply {editable ? "· edit before you copy" : ""}</span>
+        <span
+          className="rd-mono"
+          style={{ color: inRange ? "#15803D" : "#854D0E" }}
+          aria-label={`${words} words`}
+        >
           {words} words {inRange ? "· on target" : "· aim 30-80"}
         </span>
       </div>
@@ -198,9 +243,12 @@ export function ReplyComposer({
                 type="checkbox"
                 checked={Boolean(withSignOff)}
                 onChange={() => onChange(withSignOff ? text : `${text}\n\n${signOff}`)}
-                className="toggle toggle-sm shrink-0" aria-label="Add sign-off"
+                className="toggle toggle-sm shrink-0"
+                aria-label="Add sign-off"
               />
-              <label className="text-xs text-[#6B7280] cursor-pointer select-none">Add sign-off (“{signOff}”)</label>
+              <label className="text-xs text-[#6B7280] cursor-pointer select-none">
+                Add sign-off (“{signOff}”)
+              </label>
             </div>
           )}
           {translation && ownerLanguage && (
@@ -220,14 +268,20 @@ export function ReplyComposer({
           )}
         </>
       ) : (
-        <p className="whitespace-pre-wrap rounded-[10px] p-4 text-[15px] font-display" style={{ background: "#FFFFFF", border: "1.5px solid #D1D5DB", color: "#111827" }}>
+        <p
+          className="whitespace-pre-wrap rounded-[10px] p-4 text-[15px] font-display"
+          style={{ background: "#FFFFFF", border: "1.5px solid #D1D5DB", color: "#111827" }}
+        >
           {preview}
         </p>
       )}
       {translation && !editable && (
         <div>
           <div className="rd-kicker mb-1.5">What it says (owner copy)</div>
-          <p className="whitespace-pre-wrap rounded-[10px] p-4 text-sm italic" style={{ background: "#F6F7F9", border: "1px solid #E5E7EB", color: "#374151" }}>
+          <p
+            className="whitespace-pre-wrap rounded-[10px] p-4 text-sm italic"
+            style={{ background: "#F6F7F9", border: "1px solid #E5E7EB", color: "#374151" }}
+          >
             {translation}
           </p>
         </div>
@@ -238,7 +292,10 @@ export function ReplyComposer({
 
 /** One-click copy of reviewer + draft reply, formatted for pasting into Google Business. */
 export function CopyReviewAndReply({
-  review, draft, signOff, onCopied,
+  review,
+  draft,
+  signOff,
+  onCopied,
 }: {
   review: ReviewData;
   draft: string;
@@ -263,7 +320,17 @@ export function CopyReviewAndReply({
       }}
       aria-label="Copy reviewer and reply to clipboard"
     >
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
         <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
         <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
       </svg>
@@ -286,11 +353,7 @@ export function ReplyTemplates({ onInsert }: { onInsert: (phrase: string) => voi
       <div className="rd-kicker mb-2">Quick insert</div>
       <div className="flex flex-wrap gap-2">
         {templates.map((t) => (
-          <button
-            key={t}
-            className="btn btn-outline btn-xs rd-mono"
-            onClick={() => onInsert(t)}
-          >
+          <button key={t} className="btn btn-outline btn-xs rd-mono" onClick={() => onInsert(t)}>
             {t}
           </button>
         ))}
@@ -301,21 +364,25 @@ export function ReplyTemplates({ onInsert }: { onInsert: (phrase: string) => voi
 
 /** Rating distribution bar. */
 export function Distribution({ reviews }: { reviews: ReviewData[] }) {
-  const buckets = [1, 2, 3, 4, 5].map(
-    (s) => reviews.filter((r) => r.stars === s).length,
-  );
+  const buckets = [1, 2, 3, 4, 5].map((s) => reviews.filter((r) => r.stars === s).length);
   const total = buckets.reduce((a, b) => a + b, 0) || 1;
   const colors = ["#EF4444", "#F97316", "#EAB308", "#4ADE80", "#22C55E"];
   return (
     <div>
       <div className="rd-dist" role="img" aria-label="Rating distribution">
         {buckets.map((n, i) => (
-          <div key={i} style={{ width: `${(n / total) * 100}%`, background: colors[i] }} title={`${i + 1}★: ${n}`} />
+          <div
+            key={i}
+            style={{ width: `${(n / total) * 100}%`, background: colors[i] }}
+            title={`${i + 1}★: ${n}`}
+          />
         ))}
       </div>
       <div className="rd-mono mt-1.5 flex justify-between">
         {[1, 2, 3, 4, 5].map((s, i) => (
-          <span key={s}>{s}★ {buckets[i]}</span>
+          <span key={s}>
+            {s}★ {buckets[i]}
+          </span>
         ))}
       </div>
     </div>
@@ -384,11 +451,22 @@ export function Breakdown({
 }
 
 /** Small metric in ledger style. */
-export function LedgerStat({ label, value, accent }: { label: string; value: string | number; accent?: boolean }) {
+export function LedgerStat({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: string | number;
+  accent?: boolean;
+}) {
   return (
     <div className="rd-ledger-row">
       <span className="rd-kicker">{label}</span>
-      <CountUp value={value} className={`rd-num text-2xl ${accent ? "text-[#1D4ED8]" : "text-[#111827]"}`} />
+      <CountUp
+        value={value}
+        className={`rd-num text-2xl ${accent ? "text-[#1D4ED8]" : "text-[#111827]"}`}
+      />
     </div>
   );
 }

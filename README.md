@@ -3,16 +3,21 @@
 > Know when not to reply.
 
 [![CI](https://github.com/Wasif478484/ReviewDesk/actions/workflows/ci.yml/badge.svg)](https://github.com/Wasif478484/ReviewDesk/actions/workflows/ci.yml)
-[![Node](https://img.shields.io/badge/node-20%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
-[![Next.js](https://img.shields.io/badge/built%20with-Next.js-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
+[![Release](https://github.com/Wasif478484/ReviewDesk/releases/latest/badge.svg)](https://github.com/Wasif478484/ReviewDesk/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Node](https://img.shields.io/badge/node-24%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
-ReviewDesk is an owner-in-the-loop review triage assistant for local businesses.
-It analyzes a customer review and recommends one of four actions:
+ReviewDesk is an owner-in-the-loop review triage assistant for local
+businesses. It analyzes a customer review and recommends one of four actions:
 
-- **Reply** — a low-risk public response can be drafted.
-- **Check facts** — an owner should verify details before replying.
-- **Hold** — the review needs careful handling before any public response.
-- **Report** — the content may be spam, abuse, or an inappropriate review.
+| Action          | Meaning                                                       |
+| --------------- | ------------------------------------------------------------- |
+| **Reply**       | A low-risk public response can be drafted.                    |
+| **Check facts** | An owner should verify details before replying.               |
+| **Hold**        | The review needs careful handling before any public response. |
+| **Report**      | The content may be spam, abuse, or an inappropriate review.   |
 
 ReviewDesk drafts text for the owner to edit and copy by hand. It does **not**
 log in to Google, post replies, report reviews, scrape websites, or send
@@ -29,48 +34,53 @@ A three-minute walkthrough: [demo-assets/reviewdesk-demo.mp4](demo-assets/review
 
 ## Features
 
-- Single-review and batch analysis, plus bulk record/dismiss/copy.
+- Single-review and batch analysis, plus bulk record, dismiss, and copy.
 - English, Urdu script, Roman Urdu, French, Arabic, and other language support.
 - Per-review tone switching (warm, formal, apologetic) with re-analysis.
 - Draft safety checks for unapproved offers, phone numbers, stock phrases, and
   oversized responses.
 - Safety policy that keeps holds, reports, negative sentiment, risk flags, and
   untrusted languages out of the automatic lane.
-- Owner-in-the-loop workflow with veto windows, approval queue, audit log,
-  CSV export (reviews + triage results).
-- Priority scoring (urgent / normal / low) so holds and risk flags surface first.
+- Owner-in-the-loop workflow with veto windows, approval queue, audit log, and
+  CSV export for both the reviews and the triage results.
+- Priority scoring (urgent, normal, low) so holds and risk flags surface
+  first.
 - Automation rules: owner-configured rules can force the triage action or
   raise the priority. A rule never posts to Google.
 - Teams: organizations with owner, manager, responder, and viewer roles.
-- Reply template library: save the phrases you reuse, insert them into any draft.
-- Review source filtering (Google, Yelp, Facebook, TripAdvisor, imported CSV).
+- Reply template library: save the phrases you reuse and insert them into any
+  draft.
+- Review source filtering across Google, Yelp, Facebook, TripAdvisor, and
+  imported CSV.
 - Analytics breakdown by action, priority, and source.
-- Google Business Profile API integration (optional, with honest status).
+- Google Business Profile API integration (optional, with an honest status).
 - Encrypted credential storage (AES-256-GCM).
 - Email verification and password reset.
 - Mock provider mode for offline demos without an API key.
 - Draft version history with revert.
-- Keyboard shortcuts (A = analyze, R = record, C = copy, D = dismiss,
-  V = revert draft).
+- Keyboard shortcuts: `A` analyze, `R` record, `C` copy, `D` dismiss,
+  `V` revert draft.
 - Health endpoint at `/api/health` for liveness and readiness.
-- Dark slate theme with paper-white cards and action-colored badges.
 
 ## Tech stack
 
-- **Frontend:** Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, DaisyUI
-- **Backend:** Next.js API Routes, Prisma ORM
-- **Database:** PostgreSQL (Neon)
-- **Auth:** bcrypt + JWT httpOnly sessions, email verification, password reset
-- **LLM:** OpenAI / Anthropic (optional), mock provider for demos
-- **UI:** OriginKit components (SkewInText, LabelSlideButton, SpotlightText)
-  + motion effects (Reveal, CountUp, GlowCard, Marquee)
+| Layer     | Choice                                                                           |
+| --------- | -------------------------------------------------------------------------------- |
+| Framework | Next.js 16 (App Router), React 19                                                |
+| Language  | TypeScript 5, strict                                                             |
+| Styling   | Tailwind CSS 4, DaisyUI 5, one custom theme                                      |
+| Database  | PostgreSQL on Neon, Prisma ORM                                                   |
+| Auth      | bcrypt plus a signed httpOnly session cookie, email verification, password reset |
+| Model     | OpenAI or Anthropic, with a mock provider for demos                              |
+| Motion    | OriginKit and local effects, reduced-motion aware                                |
+| Tests     | `node:test` with native TypeScript stripping                                     |
 
 ## Quick start
 
 ### Prerequisites
 
-- Node.js 20+ and npm (or Bun)
-- PostgreSQL database (Neon recommended)
+- Node.js 24 or newer (see [.nvmrc](.nvmrc))
+- A PostgreSQL database. [Neon](https://neon.tech) has a free tier.
 
 ### Setup
 
@@ -79,183 +89,148 @@ git clone https://github.com/Wasif478484/ReviewDesk.git
 cd ReviewDesk
 npm install --legacy-peer-deps
 cp .env.example .env
-# Edit .env: set DATABASE_URL and APP_SECRET (openssl rand -hex 32)
+```
+
+Fill in `.env`:
+
+```bash
+# Required
+DATABASE_URL="postgresql://user:password@host:5432/reviewdesk?sslmode=require"
+APP_SECRET="$(openssl rand -hex 32)"
+
+# Optional. Set to "mock" for offline demos with no API key.
+REVIEWDESK_PROVIDER="mock"
+```
+
+Check the environment, then set the database up and run it:
+
+```bash
+npm run env:check
 npx prisma migrate deploy
 npm run dev
 ```
 
 Open http://localhost:3000.
 
-### Mock mode (no API key)
+## Scripts
 
-Set `REVIEWDESK_PROVIDER=mock` in `.env` to run with canned responses.
-No API key needed.
+| Command                     | What it does                                    |
+| --------------------------- | ----------------------------------------------- |
+| `npm run dev`               | Start the dev server on port 3000               |
+| `npm run build`             | Clean the Prisma client, generate it, and build |
+| `npm run start`             | Serve the production build                      |
+| `npm run check`             | Type check, lint, and test in one go            |
+| `npm run typecheck`         | `tsc --noEmit`                                  |
+| `npm run lint`              | ESLint over the whole tree                      |
+| `npm run format`            | Prettier over the whole tree                    |
+| `npm test`                  | The unit suite in `tests/`                      |
+| `npm run env:check`         | Report what is configured and what is missing   |
+| `npm run db:migrate:deploy` | Apply the checked-in migrations                 |
 
-## Deploy to Vercel (recommended)
+## Project structure
 
-The repository is ready to deploy as a Vercel app:
-
-1. Sign in at https://vercel.com/ with GitHub.
-2. Import `Wasif478484/ReviewDesk`, branch `master`.
-3. Vercel auto-detects Next.js. Build command: `npm run build`.
-4. In **Environment Variables**, add:
-   - `DATABASE_URL` — your PostgreSQL connection string (e.g., Neon)
-   - `APP_SECRET` — a 64-hex-character secret (`openssl rand -hex 32`)
-   - `REVIEWDESK_PROVIDER` — `mock` or `openai`
-   - `OPENAI_API_KEY` — your OpenAI API key (if using openai)
-   - `OPENAI_MODEL` — `gpt-4o-mini`
-5. Deploy the app and open the generated public URL.
-
-For production database, use Neon PostgreSQL:
-- Create a Neon project at https://neon.tech
-- Copy the connection string
-- Set `DATABASE_URL` in Vercel environment variables
-- Run `npx prisma migrate deploy` on first deploy
-
-Secrets are read from Vercel encrypted environment variables. Never put
-the API key in Git, `.env` files committed to the repository, screenshots,
-or logs. Live calls use OpenAI and may incur costs; the app remains
-owner-in-the-loop and never posts replies automatically.
-
-## Using a live model provider
-
-Copy `.env.example` to `.env`, then configure one provider.
-The `.env` file is ignored by Git and must never be committed.
-
-```powershell
-Copy-Item .env.example .env
-```
-
-Supported providers:
-
-| Provider | Environment variable | Default model |
-| --- | --- | --- |
-| `mock` | None | Canned offline responses |
-| `anthropic` | `ANTHROPIC_API_KEY` | `claude-3-haiku-20240307` |
-| `openai` | `OPENAI_API_KEY` | `gpt-4o-mini` |
-
-Set the provider with `REVIEWDESK_PROVIDER`. Live model calls cost money and
-review text is sent to the selected provider. Use mock mode for demos and tests.
-
-## How the workflow works
-
-1. The owner signs up and completes onboarding (business details, tone,
-   language preferences).
-2. The desk loads with a demo inbox of 15 sample reviews.
-3. The owner analyzes reviews (single or batch). The app builds a constrained
-   model request and calls the configured provider, with one retry.
-4. The response is parsed and validated. Invalid output falls back to owner
-   review.
-5. The safety policy applies the frozen safety rules.
-6. The owner edits the draft, optionally adds a sign-off, then approves,
-   dismisses, or copies the draft to paste into Google Business manually.
-7. Every decision is recorded in the audit ledger.
-
-The Autopilot tab is a simulated, opt-in workflow for demonstrating veto windows
-and approval handling. It records local demo outcomes only; it never sends a
-reply to Google.
-
-## Repository structure
-
-```
+```text
 .
-├── src/app/                  # Next.js App Router pages and API routes
-│   ├── api/                  # API endpoints (auth, workspace, analyze, etc.)
-│   ├── page.tsx              # Single-route shell (landing/auth/onboarding/dashboard)
-│   ├── layout.tsx            # Root layout
-│   └── globals.css           # Design system (daisyUI theme + rd-* utilities)
-├── src/components/           # React components
-│   ├── auth/                 # Authentication views
-│   ├── dashboard/            # Dashboard shell + Ledger, Autopilot, Settings tabs
-│   │                         # + TemplateLibrary (saved reply snippets)
-│   ├── landing/              # Public marketing page
-│   ├── legal/                # Privacy and Terms
-│   ├── onboarding/           # First-run business and Google setup
-│   ├── originkit/            # Motion/type effects (SkewInText, SpotlightText, LabelSlideButton)
-│   ├── shared/               # Primitives used across screens (logo, stamps, banners,
-│   │                         # draft composer, sortable table, priority badge)
-│   └── ui/                   # shadcn/ui primitives
-├── src/hooks/                # React hooks (toast, mobile breakpoint)
-├── src/lib/                  # Core libraries
-│   ├── engine/               # Pure logic: prompts, policy rules, sample inbox
-│   ├── server/               # Server-only: auth, crypto, db, google, llm, mail, workspace
-│   └── utils.ts              # Client-side utilities
-├── src/types/                # Types shared by API and UI
-├── prisma/                   # Database schema
-├── public/                   # Static assets
-├── website/                  # Static landing page (marketing site)
-├── docs/                     # Architecture documentation
-├── .github/workflows/        # CI checks
-├── .env.example              # Environment template
-├── vercel.json               # Vercel deployment config
-└── README.md
+├── src/
+│   ├── app/                    # Routes only
+│   │   ├── api/                # Every server endpoint
+│   │   ├── error.tsx           # Route-level error boundary
+│   │   ├── global-error.tsx    # Last-resort error boundary
+│   │   ├── globals.css         # The design system
+│   │   ├── layout.tsx          # Root layout
+│   │   ├── page.tsx            # The single-route shell
+│   │   ├── privacy/            # Legal pages
+│   │   └── terms/
+│   ├── components/             # UI, by screen
+│   │   ├── auth/               # Sign in, sign up, reset
+│   │   ├── dashboard/          # Desk, Ledger, Autopilot, Settings tabs
+│   │   ├── effects/            # Motion: Reveal, CountUp, GlowCard, Marquee
+│   │   ├── landing/            # The marketing page
+│   │   ├── legal/              # Shared legal shell
+│   │   ├── onboarding/         # First-run setup
+│   │   ├── originkit/          # Motion and type effects
+│   │   ├── shared/             # Primitives used across screens
+│   │   └── ui/                 # shadcn/ui primitives
+│   ├── hooks/                  # React hooks
+│   ├── lib/
+│   │   ├── engine/             # Pure, client-safe
+│   │   │   ├── policy.ts       # Frozen safety decision rules
+│   │   │   ├── priority.ts     # Queue priority scoring
+│   │   │   ├── prompts.ts      # Frozen prompts, parser, draft checks
+│   │   │   ├── rules.ts        # Owner-configured automation rules
+│   │   │   └── samples.ts      # The demo review inbox
+│   │   ├── server/             # Server-only
+│   │   │   ├── auth.ts         # Hashing, sessions, cookies
+│   │   │   ├── crypto.ts       # AES-256-GCM for stored credentials
+│   │   │   ├── db.ts           # The Prisma client
+│   │   │   ├── env.ts          # The one place env vars are read
+│   │   │   ├── google.ts       # Google Business Profile boundary
+│   │   │   ├── llm.ts          # Model gateway and mock provider
+│   │   │   ├── mail.ts         # Verification and reset email
+│   │   │   └── workspace.ts    # Triage, lanes, recording, seeding
+│   │   └── utils.ts            # Class-name helper
+│   └── types/                  # Shapes shared by the API and the UI
+├── tests/                      # Unit suite
+├── prisma/
+│   ├── schema.prisma           # The data model
+│   └── migrations/             # Checked-in migration history
+├── scripts/                    # Maintainer utilities
+├── docs/                       # Architecture, API, design, decisions
+├── public/                     # Static assets
+├── demo-assets/                # The demo video
+├── .github/                    # Workflows, issue and PR templates
 ```
 
-See CONTRIBUTING.md for development rules.
+Full details in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-## Verification
+## Documentation
 
-Run the same checks used by CI:
+| Document                                     | What is in it                                       |
+| -------------------------------------------- | --------------------------------------------------- |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | The module map, the data flow, the dependency rules |
+| [docs/API.md](docs/API.md)                   | Every endpoint, the error conventions, the limits   |
+| [docs/DESIGN.md](docs/DESIGN.md)             | The design system, and what is deliberately absent  |
+| [docs/decisions/](docs/decisions/)           | Architecture decision records                       |
+| [CONTRIBUTING.md](CONTRIBUTING.md)           | How to contribute, and the rules                    |
+| [SECURITY.md](SECURITY.md)                   | The threat model, and how to report a problem       |
+| [CHANGELOG.md](CHANGELOG.md)                 | What changed, and when                              |
+| [DEPLOY.md](DEPLOY.md)                       | Deploying to Vercel, and the admin settings         |
+| [LEARNINGS.md](LEARNINGS.md)                 | Notes from the build                                |
+| [AGENTS.md](AGENTS.md)                       | The build contract                                  |
 
-```bash
-npx tsc --noEmit
-npm run lint
-npm test
-npm run build
-git diff --check
-```
+## Deploying to Vercel
 
-Expected results:
+1. Sign in at https://vercel.com with GitHub.
+2. Import `Wasif478484/ReviewDesk`, branch `master`.
+3. The build command is `npm run build`. The install command is
+   `npm install --legacy-peer-deps`.
+4. Add the environment variables from [.env.example](.env.example). At
+   minimum `DATABASE_URL` and `APP_SECRET`.
+5. Deploy.
 
-- Type check: no errors
-- Lint: no errors
-- Tests: 28 passed
-- Build: success (all routes compiled)
-- Whitespace: clean
-
-GitHub Actions runs these checks on pushes and pull requests. The unit suite in
-`tests/` covers the frozen policy, the prompt parser, the priority scoring,
-and the automation rules.
-
-## Database
-
-PostgreSQL, via Prisma. `prisma/migrations/` holds the checked-in migration
-history, so a fresh environment is set up with:
-
-```bash
-npx prisma migrate deploy
-```
+`npx prisma migrate deploy` sets the database up on a fresh environment.
+Full details in [DEPLOY.md](DEPLOY.md).
 
 ## Privacy and safety
 
-- Reviews remain in the database unless sent to the selected model
-  provider for analysis.
-- Local model results are cached temporarily.
-- No secrets, personal review data, cache files, or bytecode belong in Git.
-- User and model-produced text is HTML-escaped before custom rendering.
-- The app never posts replies automatically — the owner copies by hand.
-
-## Project scope
-
-### In scope
-
-- Review triage.
-- Safe draft generation.
-- Owner review and manual copy workflow.
-- Mock provider and simulated source.
-- Audit and export for the local demo.
-- Google Business Profile API integration (stub until approved access).
-
-### Deferred
-
-- Background workers and scheduled processing.
-- Payments, scraping, and automatic posting.
+- Review text is sent to the configured model provider for analysis. That is
+  the only outbound AI call, and the app says so in the interface.
+- The Google credential is encrypted with AES-256-GCM before storage and is
+  never returned to the browser. Only a masked hint is shown.
+- Passwords are hashed with bcrypt. Sessions use signed httpOnly cookies.
+  Verification and reset links are single-use and expire.
+- Every query that touches tenant data filters on the caller's organization
+  or their own user id.
+- The interface never claims something was posted, sent, or reported unless
+  the Google API call actually succeeded.
+- The app never posts replies automatically. The owner copies by hand.
 
 ## Contributing
 
-Read CONTRIBUTING.md before changing the code.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) first. The short version: run
+`npm run check` before you open a pull request, and do not touch the frozen
+engine without raising it first.
 
 ## License
 
-No license has been selected for this repository yet. Do not reuse or
-redistribute the project until a license is added.
+MIT. See [LICENSE](LICENSE).

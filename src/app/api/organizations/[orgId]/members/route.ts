@@ -3,10 +3,7 @@ import { db } from "@/lib/server/db";
 import { requireUserId } from "@/lib/server/auth";
 
 /** GET /api/organizations/[orgId]/members, list members. */
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ orgId: string }> },
-) {
+export async function GET(req: Request, { params }: { params: Promise<{ orgId: string }> }) {
   try {
     const userId = await requireUserId();
     const { orgId } = await params;
@@ -40,10 +37,7 @@ export async function GET(
 }
 
 /** POST /api/organizations/[orgId]/members, add an existing user as a member. */
-export async function POST(
-  req: Request,
-  { params }: { params: Promise<{ orgId: string }> },
-) {
+export async function POST(req: Request, { params }: { params: Promise<{ orgId: string }> }) {
   try {
     const userId = await requireUserId();
     const { orgId } = await params;
@@ -51,9 +45,14 @@ export async function POST(
       where: { organizationId_userId: { organizationId: orgId, userId } },
     });
     if (!caller || !["owner", "manager"].includes(caller.role))
-      return NextResponse.json({ error: "Only owners and managers can add members." }, { status: 403 });
+      return NextResponse.json(
+        { error: "Only owners and managers can add members." },
+        { status: 403 },
+      );
     const body = await req.json();
-    const email = String(body.email ?? "").trim().toLowerCase();
+    const email = String(body.email ?? "")
+      .trim()
+      .toLowerCase();
     const role = String(body.role ?? "responder");
     if (!email) return NextResponse.json({ error: "Email is required." }, { status: 400 });
     if (!["owner", "manager", "responder", "viewer"].includes(role))
@@ -72,11 +71,23 @@ export async function POST(
     if (existing)
       return NextResponse.json({ error: "That person is already a member." }, { status: 409 });
     const member = await db.member.create({
-      data: { organizationId: orgId, userId: user.id, role, invitedBy: userId, joinedAt: new Date() },
+      data: {
+        organizationId: orgId,
+        userId: user.id,
+        role,
+        invitedBy: userId,
+        joinedAt: new Date(),
+      },
     });
     return NextResponse.json({
       ok: true,
-      member: { id: member.id, userId: member.userId, name: user.name, email: user.email, role: member.role },
+      member: {
+        id: member.id,
+        userId: member.userId,
+        name: user.name,
+        email: user.email,
+        role: member.role,
+      },
     });
   } catch (err) {
     const status = (err as { status?: number }).status ?? 500;

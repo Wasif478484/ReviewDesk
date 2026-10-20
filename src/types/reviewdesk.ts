@@ -117,7 +117,10 @@ export interface WorkspaceData {
 }
 
 /** One dict keyed by the frozen ACTIONS values, labels + colors live here. */
-export const ACTION_META: Record<string, { label: string; stamp: string; banner: string; blurb: string }> = {
+export const ACTION_META: Record<
+  string,
+  { label: string; stamp: string; banner: string; blurb: string }
+> = {
   reply: {
     label: "Reply",
     stamp: "rd-stamp rd-stamp-reply",

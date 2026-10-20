@@ -1,0 +1,16 @@
+# Keep the engine, the security rules, and the deploy config under review.
+* @Wasif478484
+
+# The triage contract is frozen. A change here needs a product decision.
+src/lib/engine/prompts.ts @Wasif478484
+src/lib/engine/policy.ts @Wasif478484
+
+# Credentials, auth, and tenant isolation.
+src/lib/server/auth.ts @Wasif478484
+src/lib/server/crypto.ts @Wasif478484
+src/app/api/auth/ @Wasif478484
+src/app/api/organizations/ @Wasif478484
+
+# Deploy and secrets.
+vercel.json @Wasif478484
+prisma/schema.prisma @Wasif478484

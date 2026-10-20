@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * TeamPanel.tsx, organization, members and automation rules.
@@ -122,7 +122,11 @@ export default function TeamPanel({
         body: JSON.stringify({ email, role: newRole }),
       });
       const data = await res.json();
-      onNote(res.ok ? `${data.member.name} added as ${data.member.role}.` : (data.error ?? "Could not add member."));
+      onNote(
+        res.ok
+          ? `${data.member.name} added as ${data.member.role}.`
+          : (data.error ?? "Could not add member."),
+      );
       if (res.ok) {
         setEmail("");
         setShowMemberForm(false);
@@ -154,7 +158,9 @@ export default function TeamPanel({
     if (!org) return;
     setBusy(true);
     try {
-      const res = await fetch(`/api/organizations/${org.id}/members/${memberId}`, { method: "DELETE" });
+      const res = await fetch(`/api/organizations/${org.id}/members/${memberId}`, {
+        method: "DELETE",
+      });
       const data = await res.json();
       onNote(res.ok ? `${name} removed.` : (data.error ?? "Could not remove member."));
       await load();
@@ -177,7 +183,10 @@ export default function TeamPanel({
           name: ruleName,
           forceAction: ruleAction,
           setPriority: rulePriority,
-          keywords: ruleKeywords.split(",").map((k) => k.trim()).filter(Boolean),
+          keywords: ruleKeywords
+            .split(",")
+            .map((k) => k.trim())
+            .filter(Boolean),
         }),
       });
       const data = await res.json();
@@ -222,8 +231,8 @@ export default function TeamPanel({
         <div className="rd-double-rule mb-5" />
         <div className="rd-kicker mb-2">Team</div>
         <p className="text-sm text-[#374151]">
-          This workspace does not belong to an organization yet. Create one to invite people
-          and set automation rules.
+          This workspace does not belong to an organization yet. Create one to invite people and set
+          automation rules.
         </p>
         <button
           className="btn btn-neutral btn-sm mt-4"
@@ -237,7 +246,9 @@ export default function TeamPanel({
                 body: JSON.stringify({ name: "My business" }),
               });
               const data = await res.json();
-              onNote(res.ok ? "Organization created." : (data.error ?? "Could not create organization."));
+              onNote(
+                res.ok ? "Organization created." : (data.error ?? "Could not create organization."),
+              );
               if (res.ok) window.location.reload();
             } finally {
               setBusy(false);
@@ -294,7 +305,9 @@ export default function TeamPanel({
                 aria-label="Member role"
               >
                 {ROLES.filter((r) => r !== "owner" || org.role === "owner").map((r) => (
-                  <option key={r} value={r}>{r}</option>
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
                 ))}
               </select>
               <button className="btn btn-primary btn-sm" onClick={addMember} disabled={busy}>
@@ -323,7 +336,9 @@ export default function TeamPanel({
                     disabled={busy}
                   >
                     {ROLES.filter((r) => r !== "owner" || org.role === "owner").map((r) => (
-                      <option key={r} value={r}>{r}</option>
+                      <option key={r} value={r}>
+                        {r}
+                      </option>
                     ))}
                   </select>
                   <button
@@ -346,7 +361,9 @@ export default function TeamPanel({
           <div className="rd-kicker mb-2">What each role can do</div>
           <ul className="space-y-1 text-xs text-[#6B7280]">
             {ROLES.map((r) => (
-              <li key={r}><span className="font-mono text-[#374151]">{r}</span> — {ROLE_BLURB[r]}</li>
+              <li key={r}>
+                <span className="font-mono text-[#374151]">{r}</span> — {ROLE_BLURB[r]}
+              </li>
             ))}
           </ul>
         </div>
@@ -358,8 +375,8 @@ export default function TeamPanel({
           <div>
             <div className="rd-kicker mb-1">Automation rules</div>
             <p className="max-w-[520px] text-sm text-[#374151]">
-              A rule can force the triage action or raise the priority when a review matches.
-              Rules never post to Google. The owner still copies the reply by hand.
+              A rule can force the triage action or raise the priority when a review matches. Rules
+              never post to Google. The owner still copies the reply by hand.
             </p>
           </div>
           {canManage && (
@@ -398,7 +415,11 @@ export default function TeamPanel({
                 aria-label="Force action"
               >
                 <option value="">do not change the action</option>
-                {ACTIONS.map((a) => <option key={a} value={a}>force: {a}</option>)}
+                {ACTIONS.map((a) => (
+                  <option key={a} value={a}>
+                    force: {a}
+                  </option>
+                ))}
               </select>
               <select
                 className="select select-sm w-auto"
@@ -407,7 +428,11 @@ export default function TeamPanel({
                 aria-label="Set priority"
               >
                 <option value="">leave the priority</option>
-                {PRIORITIES.map((p) => <option key={p} value={p}>priority: {p}</option>)}
+                {PRIORITIES.map((p) => (
+                  <option key={p} value={p}>
+                    priority: {p}
+                  </option>
+                ))}
               </select>
               <button className="btn btn-primary btn-sm" onClick={addRule} disabled={busy}>
                 {busy ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : null}
@@ -419,8 +444,8 @@ export default function TeamPanel({
 
         {rules.length === 0 ? (
           <p className="rd-mono py-6 text-center">
-            No rules yet. A rule like &ldquo;hold anything mentioning a doctor&rdquo; keeps
-            risky reviews out of the queue.
+            No rules yet. A rule like &ldquo;hold anything mentioning a doctor&rdquo; keeps risky
+            reviews out of the queue.
           </p>
         ) : (
           <ul className="space-y-2">
@@ -432,12 +457,18 @@ export default function TeamPanel({
                 <div className="min-w-0 flex-1">
                   <div className="mb-1 flex flex-wrap items-center gap-2">
                     <span className="text-sm font-semibold text-[#111827]">{r.name}</span>
-                    {!r.enabled ? <span className="badge badge-ghost font-mono text-[10px]">off</span> : null}
+                    {!r.enabled ? (
+                      <span className="badge badge-ghost font-mono text-[10px]">off</span>
+                    ) : null}
                     {r.forceAction ? (
-                      <span className="badge badge-outline font-mono text-[10px]">force {r.forceAction}</span>
+                      <span className="badge badge-outline font-mono text-[10px]">
+                        force {r.forceAction}
+                      </span>
                     ) : null}
                     {r.setPriority ? (
-                      <span className="badge badge-outline font-mono text-[10px]">{r.setPriority}</span>
+                      <span className="badge badge-outline font-mono text-[10px]">
+                        {r.setPriority}
+                      </span>
                     ) : null}
                   </div>
                   <p className="rd-mono">

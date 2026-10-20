@@ -6,10 +6,7 @@ import { requireUserId } from "@/lib/server/auth";
  * GET /api/templates/[templateId], get a single template.
  * Raw SQL: the Prisma client in this build does not expose the Template model.
  */
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ templateId: string }> },
-) {
+export async function GET(req: Request, { params }: { params: Promise<{ templateId: string }> }) {
   try {
     const userId = await requireUserId();
     const { templateId } = await params;
@@ -33,10 +30,7 @@ export async function GET(
 }
 
 /** PUT /api/templates/[templateId], update a template. */
-export async function PUT(
-  req: Request,
-  { params }: { params: Promise<{ templateId: string }> },
-) {
+export async function PUT(req: Request, { params }: { params: Promise<{ templateId: string }> }) {
   try {
     const userId = await requireUserId();
     const { templateId } = await params;

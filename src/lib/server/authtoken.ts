@@ -16,7 +16,10 @@ function sha256(value: string): string {
 }
 
 /** Create a one-time token; returns the raw token for the link. */
-export async function issueAuthToken(userId: string, type: AuthTokenType): Promise<{ token: string; expiresAt: Date }> {
+export async function issueAuthToken(
+  userId: string,
+  type: AuthTokenType,
+): Promise<{ token: string; expiresAt: Date }> {
   // Invalidate any previous unused tokens of this type.
   await db.authToken.updateMany({
     where: { userId, type, usedAt: null },

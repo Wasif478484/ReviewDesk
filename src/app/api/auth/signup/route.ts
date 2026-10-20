@@ -9,7 +9,9 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const name = String(body.name ?? "").trim();
-    const email = String(body.email ?? "").trim().toLowerCase();
+    const email = String(body.email ?? "")
+      .trim()
+      .toLowerCase();
     const password = String(body.password ?? "");
 
     if (!name || name.length > 80) {
@@ -19,12 +21,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Please enter a valid email address." }, { status: 400 });
     }
     if (password.length < 8) {
-      return NextResponse.json({ error: "Password must be at least 8 characters." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Password must be at least 8 characters." },
+        { status: 400 },
+      );
     }
 
     const existing = await db.user.findUnique({ where: { email } });
     if (existing) {
-      return NextResponse.json({ error: "An account with this email already exists." }, { status: 409 });
+      return NextResponse.json(
+        { error: "An account with this email already exists." },
+        { status: 409 },
+      );
     }
 
     const passwordHash = await hashPassword(password);
@@ -47,7 +55,11 @@ export async function POST(req: Request) {
         text: `Hello ${user.name},\n\nVerify your ReviewDesk email address with this link (valid for 24 hours):\n\n${link}\n\nIf you did not sign up, you can ignore this message.`,
       });
       if (mail.transport === "console") {
-        verify = { devLink: link, devNote: "SMTP is not configured on this deployment, so the link is shown here and logged on the server." };
+        verify = {
+          devLink: link,
+          devNote:
+            "SMTP is not configured on this deployment, so the link is shown here and logged on the server.",
+        };
       }
     } catch (mailErr) {
       console.error("verification mail failed (signup continues):", mailErr);
@@ -56,6 +68,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, userId: user.id, ...verify });
   } catch (err) {
     console.error("signup failed:", err);
-    return NextResponse.json({ error: "Could not create the account. Please try again." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Could not create the account. Please try again." },
+      { status: 500 },
+    );
   }
 }

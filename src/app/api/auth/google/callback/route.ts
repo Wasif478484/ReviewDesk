@@ -28,7 +28,9 @@ export async function GET(req: Request) {
     return NextResponse.redirect(`${origin}/?google=unconfigured`);
   }
   if (!code || !state || !expectedState || state !== expectedState) {
-    return NextResponse.redirect(`${origin}/?google=error&msg=${encodeURIComponent("Invalid or expired OAuth state. Please try again.")}`);
+    return NextResponse.redirect(
+      `${origin}/?google=error&msg=${encodeURIComponent("Invalid or expired OAuth state. Please try again.")}`,
+    );
   }
   const userId = await currentUserId();
   if (!userId) {

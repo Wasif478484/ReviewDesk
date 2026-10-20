@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireUserId } from "@/lib/server/auth";
-import {
-  recordReply, undoReply, dismissTriage, cancelVeto,
-} from "@/lib/server/workspace";
+import { recordReply, undoReply, dismissTriage, cancelVeto } from "@/lib/server/workspace";
 
 /**
  * POST /api/reviews/actions, owner decisions on a triage row.
@@ -23,7 +21,10 @@ export async function POST(req: Request) {
     if (type === "undo") {
       if (!body.reviewId) return NextResponse.json({ error: "Missing reviewId." }, { status: 400 });
       const ok = await undoReply(userId, body.reviewId);
-      return NextResponse.json({ ok, message: ok ? "Reply undone; the review is back in the desk." : "Nothing to undo." });
+      return NextResponse.json({
+        ok,
+        message: ok ? "Reply undone; the review is back in the desk." : "Nothing to undo.",
+      });
     }
     if (type === "dismiss") {
       if (!body.triageId) return NextResponse.json({ error: "Missing triageId." }, { status: 400 });
@@ -33,7 +34,10 @@ export async function POST(req: Request) {
     if (type === "cancel_veto") {
       if (!body.triageId) return NextResponse.json({ error: "Missing triageId." }, { status: 400 });
       const ok = await cancelVeto(userId, body.triageId);
-      return NextResponse.json({ ok, message: ok ? "Moved to the approval queue." : "Row not found." });
+      return NextResponse.json({
+        ok,
+        message: ok ? "Moved to the approval queue." : "Row not found.",
+      });
     }
     return NextResponse.json({ error: "Unknown action type." }, { status: 400 });
   } catch (err) {

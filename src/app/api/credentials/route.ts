@@ -13,16 +13,30 @@ export async function POST(req: Request) {
   try {
     const userId = await requireUserId();
     const body = await req.json();
-    const mode = body.mode === "oauth_token" ? "oauth_token"
-      : body.mode === "oauth" ? "oauth"
-      : body.mode === "none" ? "none"
-      : "api_key";
+    const mode =
+      body.mode === "oauth_token"
+        ? "oauth_token"
+        : body.mode === "oauth"
+          ? "oauth"
+          : body.mode === "none"
+            ? "none"
+            : "api_key";
 
     if (mode === "none") {
       await db.credential.upsert({
         where: { userId },
-        update: { mode: "none", status: "unverified", statusMessage: "Disconnected; demo inbox only.", livePosting: false },
-        create: { userId, mode: "none", status: "unverified", statusMessage: "Disconnected; demo inbox only." },
+        update: {
+          mode: "none",
+          status: "unverified",
+          statusMessage: "Disconnected; demo inbox only.",
+          livePosting: false,
+        },
+        create: {
+          userId,
+          mode: "none",
+          status: "unverified",
+          statusMessage: "Disconnected; demo inbox only.",
+        },
       });
       return NextResponse.json({ ok: true });
     }
@@ -32,12 +46,17 @@ export async function POST(req: Request) {
     if (mode === "oauth") {
       const existing = await db.credential.findUnique({ where: { userId } });
       if (!existing || existing.mode !== "oauth") {
-        return NextResponse.json({ error: "No OAuth connection found. Use the Connect with Google button first." }, { status: 400 });
+        return NextResponse.json(
+          { error: "No OAuth connection found. Use the Connect with Google button first." },
+          { status: 400 },
+        );
       }
       await db.credential.update({
         where: { userId },
         data: {
-          locationId: String(body.locationId ?? "").trim().slice(0, 200),
+          locationId: String(body.locationId ?? "")
+            .trim()
+            .slice(0, 200),
           livePosting: Boolean(body.livePosting),
         },
       });
@@ -48,20 +67,32 @@ export async function POST(req: Request) {
     const token = String(body.token ?? "").trim();
     const secret = mode === "api_key" ? apiKey : token;
     if (!secret) return NextResponse.json({ error: "No key provided." }, { status: 400 });
-    const locationId = String(body.locationId ?? "").trim().slice(0, 200);
+    const locationId = String(body.locationId ?? "")
+      .trim()
+      .slice(0, 200);
 
     // Allow keeping the existing secret when only other fields change.
     let finalSecret = secret;
     if (secret.startsWith("••")) {
       const existing = await db.credential.findUnique({ where: { userId } });
       const enc = mode === "api_key" ? existing?.apiKeyEnc : existing?.tokenEnc;
-      if (!enc) return NextResponse.json({ error: "No stored key to keep; paste the full key." }, { status: 400 });
+      if (!enc)
+        return NextResponse.json(
+          { error: "No stored key to keep; paste the full key." },
+          { status: 400 },
+        );
       finalSecret = decrypt(enc);
     }
 
-    const verdict = body.test === false
-      ? { status: "unverified", message: "Saved without testing." }
-      : await verifyCredentials(mode, mode === "api_key" ? finalSecret : "", mode === "oauth_token" ? finalSecret : "", locationId);
+    const verdict =
+      body.test === false
+        ? { status: "unverified", message: "Saved without testing." }
+        : await verifyCredentials(
+            mode,
+            mode === "api_key" ? finalSecret : "",
+            mode === "oauth_token" ? finalSecret : "",
+            locationId,
+          );
 
     const livePosting = Boolean(body.livePosting);
     await db.credential.upsert({
@@ -78,7 +109,8 @@ export async function POST(req: Request) {
         livePosting,
       },
       create: {
-        userId, mode,
+        userId,
+        mode,
         apiKeyEnc: mode === "api_key" ? encrypt(finalSecret) : null,
         tokenEnc: mode === "oauth_token" ? encrypt(finalSecret) : null,
         locationId,

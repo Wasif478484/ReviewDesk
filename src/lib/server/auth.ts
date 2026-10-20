@@ -6,14 +6,13 @@
 import bcrypt from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { appSecret, isProduction } from "@/lib/server/env";
 
 const COOKIE = "rd_session";
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 14; // 14 days
 
 function secret(): Uint8Array {
-  const hex = process.env.APP_SECRET;
-  if (!hex) throw new Error("APP_SECRET is not set");
-  return new TextEncoder().encode(hex.padStart(64, "0").slice(0, 64));
+  return new TextEncoder().encode(appSecret().padStart(64, "0").slice(0, 64));
 }
 
 export async function hashPassword(password: string): Promise<string> {
@@ -34,7 +33,7 @@ export async function createSession(userId: string): Promise<void> {
   store.set(COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: isProduction(),
     maxAge: MAX_AGE_SECONDS,
     path: "/",
   });

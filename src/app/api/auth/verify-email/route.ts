@@ -9,12 +9,18 @@ export async function POST(req: Request) {
     const token = String(body.token ?? "");
     const userId = await consumeAuthToken(token, "verify_email");
     if (!userId) {
-      return NextResponse.json({ error: "This verification link is invalid, already used, or expired." }, { status: 400 });
+      return NextResponse.json(
+        { error: "This verification link is invalid, already used, or expired." },
+        { status: 400 },
+      );
     }
     await db.user.update({ where: { id: userId }, data: { emailVerifiedAt: new Date() } });
     return NextResponse.json({ ok: true, message: "Email verified. Thank you!" });
   } catch (err) {
     console.error("verify-email failed:", err);
-    return NextResponse.json({ error: "Could not verify the email. Please try again." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Could not verify the email. Please try again." },
+      { status: 500 },
+    );
   }
 }

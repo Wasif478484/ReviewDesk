@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * SpotlightText, Originkit pattern (implemented locally because the
@@ -70,11 +70,16 @@ export default function SpotlightText({
     <span ref={hostRef} className={`ok-spotlight ${className}`}>
       <span className="sr-only">{text}</span>
       <span aria-hidden="true">
-      {text.split("").map((ch, i) => (
-        <span key={i} data-ok-char aria-hidden="true" style={{ whiteSpace: ch === " " ? "pre" : undefined }}>
-          {ch}
-        </span>
-      ))}
+        {text.split("").map((ch, i) => (
+          <span
+            key={i}
+            data-ok-char
+            aria-hidden="true"
+            style={{ whiteSpace: ch === " " ? "pre" : undefined }}
+          >
+            {ch}
+          </span>
+        ))}
       </span>
     </span>
   );

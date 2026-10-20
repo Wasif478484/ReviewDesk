@@ -78,7 +78,7 @@ src/lib/server/             # server-only: auth, authtoken, crypto, db, google,
 src/types/                  # types shared by UI and API
 src/app/api/                # auth/*, workspace, onboarding, analyze, reviews/*,
                             # autopilot, policy, credentials/*, google/*
-(see STRUCTURE.md for the dependency rules)
+(see docs/ARCHITECTURE.md for the dependency rules)
 ```
 
 ## Vercel deployment

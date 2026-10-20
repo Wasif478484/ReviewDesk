@@ -1,43 +1,71 @@
-# Personal learning context - kept out of commits by default.
-# This does NOT keep it out of your AI provider's conversation.
-/devpost/learner-profile.md
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
 
-# Z AI SDK config (contains API keys)
-.z-ai-config
+# Build output
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
 
-# Local credentials. Allow a secret-free template.
+# Testing
+coverage/
+.nyc_output/
+
+# Environment. The template is committed; the real file never is.
 .env
 .env.*
 !.env.example
 
-# Python
+# Platform
+.vercel
+.vercelproj
+.netlify
+
+# Local database files
+db/*.db
+db/*.db-journal
+
+# Generated Prisma client
+node_modules/.prisma
+
+# Editor and OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Caches
+.eslintcache
+.cache/
+.turbo/
+.swc/
+
+# Demo capture intermediates. The finished video is committed.
+demo-assets/shots/
+demo-assets/frames/
+
+# Python leftovers from the original prototype
 __pycache__/
 *.py[cod]
 .pytest_cache/
 .coverage
 htmlcov/
-*.log
 .venv/
 venv/
 *.egg-info/
-build/
-dist/
-
-# ReviewDesk sample-result cache
 .sample_cache/
 
-# Generated demo output
-*.tmp
-
-# JavaScript build artifacts from local tooling
-node_modules/
-.next/
-dist/
-*.tsbuildinfo
-
-# Local workspace tooling
+# Workspace tooling
 .agents/
-
-# Local database files
-db/*.db
-.vercel

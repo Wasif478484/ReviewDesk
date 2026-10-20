@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/Wasif478484/ReviewDesk/security/advisories/new
+    about: Report a security issue privately. Please do not open a public issue.
+  - name: Question or support
+    url: https://github.com/Wasif478484/ReviewDesk/discussions
+    about: Ask a question about using the app.
+  - name: Live app
+    url: https://reviewdesk-nu.vercel.app
+    about: Try the demo inbox. Sign up and 15 sample reviews are already loaded.

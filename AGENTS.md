@@ -54,19 +54,22 @@ read this before acting.
 ## Docs
 
 `docs/ARCHITECTURE.md` holds the module map, the request boundaries, and the
-frozen-file list. `devpost/` holds the product and learning artifacts when
-they exist. Only project artifacts count — never conversation memory.
+frozen-file list. `docs/API.md` holds the endpoint reference. `docs/DESIGN.md`
+holds the design system and what is deliberately absent from it.
+`docs/decisions/` holds the architecture decision records. `CHANGELOG.md`
+records what changed. Only project artifacts count, never conversation memory.
 
 ## Verification before a commit
 
 ```bash
-npx tsc --noEmit
-npm run lint
-npm run build
-npm test
-git diff --check
+npm run check
 ```
 
-`npm test` runs the unit suite in `tests/`. The engine tests in
-`tests/engine.test.ts` cover the frozen policy, the prompt parser, the
-priority scoring, and the automation rules.
+That runs `npx tsc --noEmit`, `npm run lint`, and `npm test`. Add
+`npm run build` before a release, and `npm run format` if the formatter
+reports a difference.
+
+The unit suite in `tests/` covers the frozen policy, the prompt parser, the
+priority scoring, and the automation rules. The engine tests are the
+specification: if one of them fails, the change is wrong until it has been
+raised as a question.

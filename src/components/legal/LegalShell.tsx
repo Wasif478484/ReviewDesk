@@ -44,7 +44,8 @@ export default function LegalShell({
       <footer className="border-t border-base-300 bg-base-100 py-6">
         <div className="mx-auto max-w-[800px] px-5">
           <p className="rd-mono">
-            Questions about this document? Contact the administrator who operates this ReviewDesk deployment.
+            Questions about this document? Contact the administrator who operates this ReviewDesk
+            deployment.
           </p>
         </div>
       </footer>

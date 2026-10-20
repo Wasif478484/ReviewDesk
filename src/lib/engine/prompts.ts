@@ -21,33 +21,40 @@ export type Sentiment = (typeof SENTIMENTS)[number];
 export type Tone = (typeof TONES)[number];
 
 export const COMMON_LANGUAGES = [
-  "auto", "English", "Urdu", "Roman Urdu", "Arabic", "Spanish",
-  "French", "German", "Portuguese", "Hindi", "Turkish", "Indonesian",
+  "auto",
+  "English",
+  "Urdu",
+  "Roman Urdu",
+  "Arabic",
+  "Spanish",
+  "French",
+  "German",
+  "Portuguese",
+  "Hindi",
+  "Turkish",
+  "Indonesian",
 ] as const;
 
 export const TONE_GUIDE: Record<Tone, string> = {
   warm: "Friendly and personal, like an owner talking to a regular. Simple words.",
   formal: "Polite and professional. No slang. Complete sentences.",
-  apologetic: (
+  apologetic:
     "Open with a sincere apology for the experience (not for any disputed " +
-    "fact), then say what the owner will do next."
-  ),
+    "fact), then say what the owner will do next.",
 };
 
 export const LANGUAGE_GUIDE: Record<string, string> = {
-  auto: (
+  auto:
     "Match the reviewer's language and script. If mixed, use the dominant " +
     "one. If the reviewer writes a language in Latin letters that is " +
     "normally written in another script (Roman Urdu, for example), reply " +
-    "the same way."
-  ),
+    "the same way.",
   english: "Plain English.",
   urdu: "Urdu script. Simple, respectful words.",
-  roman_urdu: (
+  roman_urdu:
     "Conversational Roman Urdu with common spellings (aap, shukriya, afsos), " +
     "respectful register, written the way people actually type. Do not " +
-    "translate word for word from English."
-  ),
+    "translate word for word from English.",
 };
 
 export interface BusinessProfile {
@@ -68,8 +75,18 @@ export const DEFAULT_PROFILE: BusinessProfile = {
   allowed_offers: "none",
 };
 
-const TAGS = ["<review>", "</review>", "<business>", "</business>", "<settings>", "</settings>",
-  "<draft>", "</draft>", "<text>", "</text>"];
+const TAGS = [
+  "<review>",
+  "</review>",
+  "<business>",
+  "</business>",
+  "<settings>",
+  "</settings>",
+  "<draft>",
+  "</draft>",
+  "<text>",
+  "</text>",
+];
 
 /** Strip prompt tags so pasted text cannot close or fake a section. */
 export function clean(value: unknown): string {
@@ -79,7 +96,10 @@ export function clean(value: unknown): string {
 }
 
 export function normLang(lang: unknown): string {
-  return String(lang ?? "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+  return String(lang ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
 }
 
 function requireLang(lang: unknown): string {
@@ -246,11 +266,10 @@ const EXAMPLES: Example[] = [
       reason: "Simple praise, safe to answer publicly.",
       review_language: "English",
       language_used: "English",
-      draft_reply: (
+      draft_reply:
         "Thank you for the kind words. We're glad the biryani and the quick " +
         "service worked for you, and we look forward to seeing you again. " +
-        "Imran, Spice Corner"
-      ),
+        "Imran, Spice Corner",
       review_translation: null,
       draft_translation: null,
       report_note: null,
@@ -270,21 +289,20 @@ const EXAMPLES: Example[] = [
       reason: "Genuine complaint about cold food and a long wait, no risky claims.",
       review_language: "Roman Urdu",
       language_used: "Roman Urdu",
-      draft_reply: (
+      draft_reply:
         "Assalam o Alaikum, khana thanda milne aur 40 minute intezar karne par " +
         "jo pareshani hui, uska hamein afsos hai. Yeh hamare mayar ke mutabiq " +
         "nahi. Hum apni team ke saath is par baat kar rahe hain. Agar aap " +
         "WhatsApp 03XX-XXXXXXX par rabta karein to hum masle ko behtar samajh " +
-        "sakein ge. Shukriya. Imran, Spice Corner"
-      ),
-      review_translation: "The food was cold and the order arrived after 40 minutes. Very bad experience.",
-      draft_translation: (
+        "sakein ge. Shukriya. Imran, Spice Corner",
+      review_translation:
+        "The food was cold and the order arrived after 40 minutes. Very bad experience.",
+      draft_translation:
         "Assalam o Alaikum. We are sorry for the trouble caused by the cold " +
         "food and the 40-minute wait. This is not up to our standard. We are " +
         "discussing it with our team. If you contact us on WhatsApp " +
         "03XX-XXXXXXX, we will be able to understand the matter better. " +
-        "Thank you. Imran, Spice Corner"
-      ),
+        "Thank you. Imran, Spice Corner",
       report_note: null,
       owner_checklist: [],
     },
@@ -301,18 +319,16 @@ const EXAMPLES: Example[] = [
       reason: "Mixed feedback: good food, slow service. Reply written in Spanish.",
       review_language: "Spanish",
       language_used: "Spanish",
-      draft_reply: (
+      draft_reply:
         "Gracias por su comentario. Nos alegra que la comida haya sido de su " +
         "agrado y lamentamos la demora en la atención. Lo hablaremos con " +
         "nuestro equipo para mejorar. Esperamos verle de nuevo pronto. " +
-        "Imran, Spice Corner"
-      ),
+        "Imran, Spice Corner",
       review_translation: "The food was good but they took a long time to serve us.",
-      draft_translation: (
+      draft_translation:
         "Thank you for your comment. We're glad you liked the food and we're " +
         "sorry about the delay in service. We'll discuss it with our team to " +
-        "improve. We hope to see you again soon. Imran, Spice Corner"
-      ),
+        "improve. We hope to see you again soon. Imran, Spice Corner",
       report_note: null,
       owner_checklist: [],
     },
@@ -326,11 +342,13 @@ const EXAMPLES: Example[] = [
       action: "hold",
       sentiment: "negative",
       flags: ["health", "legal"],
-      reason: "The review claims illness after eating and threatens legal action, so a public reply could make things worse.",
+      reason:
+        "The review claims illness after eating and threatens legal action, so a public reply could make things worse.",
       review_language: "Roman Urdu",
       language_used: "none",
       draft_reply: null,
-      review_translation: "I fell ill after eating here and had to see a doctor. I will take legal action.",
+      review_translation:
+        "I fell ill after eating here and had to see a doctor. I will take legal action.",
       draft_translation: null,
       report_note: null,
       owner_checklist: [
@@ -356,10 +374,9 @@ const EXAMPLES: Example[] = [
       draft_reply: null,
       review_translation: null,
       draft_translation: null,
-      report_note: (
+      report_note:
         "This review is an advertisement for an unrelated service and does " +
-        "not describe any experience with this business."
-      ),
+        "not describe any experience with this business.",
       owner_checklist: ["Submit the report through Google's own report option"],
     },
   },
@@ -374,9 +391,7 @@ export function buildSystemPrompt(platform: string = DEFAULT_PLATFORM): string {
   const system = SYSTEM_PROMPT.split("{platform}").join(platform);
   const blocks: string[] = [];
   for (const ex of EXAMPLES) {
-    const user = buildUserMessage(
-      EXAMPLE_PROFILE, ex.review, "auto", ex.tone ?? "warm",
-    );
+    const user = buildUserMessage(EXAMPLE_PROFILE, ex.review, "auto", ex.tone ?? "warm");
     const out = JSON.stringify(ex.output, null, 2);
     blocks.push(`Input:\n${user}\n\nOutput:\n${out}`);
   }
@@ -405,7 +420,10 @@ const MAX_MODEL_FIELD_LENGTH = 4000;
 
 export function parseTriageOutput(raw: string): TriageResult {
   if (typeof raw !== "string") throw new Error("model output must be text");
-  const text = raw.trim().replace(/^```(?:json)?\s*/, "").replace(/\s*```$/, "");
+  const text = raw
+    .trim()
+    .replace(/^```(?:json)?\s*/, "")
+    .replace(/\s*```$/, "");
   const start = text.indexOf("{");
   const end = text.lastIndexOf("}");
   if (start === -1 || end === -1) throw new Error("no JSON object found");
@@ -414,7 +432,8 @@ export function parseTriageOutput(raw: string): TriageResult {
     throw new Error("model output must be a JSON object");
   }
   if (!ACTIONS.includes(data.action)) throw new Error(`bad action: ${JSON.stringify(data.action)}`);
-  if (!SENTIMENTS.includes(data.sentiment)) throw new Error(`bad sentiment: ${JSON.stringify(data.sentiment)}`);
+  if (!SENTIMENTS.includes(data.sentiment))
+    throw new Error(`bad sentiment: ${JSON.stringify(data.sentiment)}`);
   const d = data as Partial<TriageResult>;
   const result: TriageResult = {
     action: d.action as Action,
@@ -445,13 +464,22 @@ function validateTriageFields(data: TriageResult): void {
     throw new Error("flags must be a list of strings");
   }
   if (data.flags.some((f) => f.length > 500)) throw new Error("flags contains an oversized item");
-  if (!Array.isArray(data.owner_checklist) || !data.owner_checklist.every((c) => typeof c === "string")) {
+  if (
+    !Array.isArray(data.owner_checklist) ||
+    !data.owner_checklist.every((c) => typeof c === "string")
+  ) {
     throw new Error("owner_checklist must be a list of strings");
   }
-  if (data.owner_checklist.some((c) => c.length > 500)) throw new Error("owner_checklist contains an oversized item");
+  if (data.owner_checklist.some((c) => c.length > 500))
+    throw new Error("owner_checklist contains an oversized item");
   const textFields: (keyof TriageResult)[] = [
-    "reason", "review_language", "language_used", "draft_reply",
-    "review_translation", "draft_translation", "report_note",
+    "reason",
+    "review_language",
+    "language_used",
+    "draft_reply",
+    "review_translation",
+    "draft_translation",
+    "report_note",
   ];
   for (const field of textFields) {
     const value = data[field];
@@ -511,12 +539,11 @@ export function checkDraft(
   for (const phrase of BOILERPLATE) {
     if (low.includes(phrase)) problems.push(`stock phrase or dash: ${JSON.stringify(phrase)}`);
   }
-  const allowed = String(p.allowed_offers ?? "none").trim().toLowerCase();
+  const allowed = String(p.allowed_offers ?? "none")
+    .trim()
+    .toLowerCase();
   if (allowed === "" || allowed === "none") {
-    if (
-      OFFER_WORDS.test(draft) ||
-      (draftTranslation && OFFER_WORDS.test(draftTranslation))
-    ) {
+    if (OFFER_WORDS.test(draft) || (draftTranslation && OFFER_WORDS.test(draftTranslation))) {
       problems.push("promises an offer the owner did not allow");
     }
   }

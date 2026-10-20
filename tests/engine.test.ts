@@ -51,7 +51,14 @@ test("policy: a clean five-star reply can enter the auto lane", () => {
   const [decision] = decide(
     cleanReply as never,
     goodReview as never,
-    { business_name: "B", business_type: "restaurant", owner_name: "O", sign_off: "", contact_line: "", allowed_offers: "none" } as never,
+    {
+      business_name: "B",
+      business_type: "restaurant",
+      owner_name: "O",
+      sign_off: "",
+      contact_line: "",
+      allowed_offers: "none",
+    } as never,
     { ...DEFAULT_POLICY, enabled: true, dryRun: false },
     0,
     false,
@@ -63,7 +70,14 @@ test("policy: autopilot stays off when the policy is disabled", () => {
   const [decision] = decide(
     cleanReply as never,
     goodReview as never,
-    { business_name: "B", business_type: "restaurant", owner_name: "O", sign_off: "", contact_line: "", allowed_offers: "none" } as never,
+    {
+      business_name: "B",
+      business_type: "restaurant",
+      owner_name: "O",
+      sign_off: "",
+      contact_line: "",
+      allowed_offers: "none",
+    } as never,
     { ...DEFAULT_POLICY, enabled: false },
     0,
     false,
@@ -75,7 +89,14 @@ test("policy: a hold never enters the auto lane", () => {
   const [decision] = decide(
     { ...cleanReply, action: "hold", reason: "Health claim." } as never,
     { ...goodReview, stars: 1 } as never,
-    { business_name: "B", business_type: "restaurant", owner_name: "O", sign_off: "", contact_line: "", allowed_offers: "none" } as never,
+    {
+      business_name: "B",
+      business_type: "restaurant",
+      owner_name: "O",
+      sign_off: "",
+      contact_line: "",
+      allowed_offers: "none",
+    } as never,
     { ...DEFAULT_POLICY, enabled: true, dryRun: false },
     0,
     false,
@@ -87,7 +108,14 @@ test("policy: report never enters the auto lane", () => {
   const [decision] = decide(
     { ...cleanReply, action: "report" } as never,
     { ...goodReview, stars: 1 } as never,
-    { business_name: "B", business_type: "restaurant", owner_name: "O", sign_off: "", contact_line: "", allowed_offfers: "none" } as never,
+    {
+      business_name: "B",
+      business_type: "restaurant",
+      owner_name: "O",
+      sign_off: "",
+      contact_line: "",
+      allowed_offfers: "none",
+    } as never,
     { ...DEFAULT_POLICY, enabled: true, dryRun: false },
     0,
     false,
@@ -135,9 +163,7 @@ test("parser: rejects an action outside the frozen set", () => {
 });
 
 test("parser: rejects a sentiment outside the frozen set", () => {
-  assert.throws(() =>
-    parseTriageOutput(JSON.stringify({ action: "reply", sentiment: "furious" })),
-  );
+  assert.throws(() => parseTriageOutput(JSON.stringify({ action: "reply", sentiment: "furious" })));
 });
 
 test("parser: safeParse falls back to owner review on bad output", () => {
@@ -175,17 +201,11 @@ test("priority: check-facts is normal", () => {
 });
 
 test("priority: a clean positive is low", () => {
-  assert.equal(
-    computePriority({ action: "reply", sentiment: "positive", flags: [] }, 5),
-    "low",
-  );
+  assert.equal(computePriority({ action: "reply", sentiment: "positive", flags: [] }, 5), "low");
 });
 
 test("priority: a one-star complaint is at least normal", () => {
-  assert.equal(
-    computePriority({ action: "reply", sentiment: "positive", flags: [] }, 1),
-    "normal",
-  );
+  assert.equal(computePriority({ action: "reply", sentiment: "positive", flags: [] }, 1), "normal");
 });
 
 // ---------------------------------------------------------------------------

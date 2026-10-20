@@ -1,0 +1,75 @@
+name: Bug report
+description: Something in ReviewDesk does not behave the way it should.
+title: "[bug] "
+labels: ["bug", "needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing a bug. The more precise the report, the faster it gets fixed.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you expected, and what you got instead.
+      placeholder: The desk showed "Could not create the account" but the account was created.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Numbered, starting from a fresh page load.
+      placeholder: |
+        1. Sign up with a new email
+        2. Open the desk
+        3. Click Analyze all
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant output
+      description: Console errors, or the response from /api/health. Please redact anything secret.
+      render: text
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: Commit or deployment
+      description: The commit SHA, or the Vercel deployment id.
+      placeholder: 6ec39b0
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which area
+      options:
+        - Desk / triage
+        - Autopilot
+        - Ledger
+        - Settings / team
+        - Templates
+        - Google connection
+        - Authentication
+        - Marketing site
+        - Something else
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched the existing issues for this.
+          required: true
+        - label: This is not a security issue. (Report those privately, see SECURITY.md)
+          required: true

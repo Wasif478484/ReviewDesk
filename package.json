@@ -1,21 +1,27 @@
 {
   "name": "nextjs_tailwind_shadcn_ts",
   "version": "0.2.1",
-  "private": true,
+  "private": false,
   "scripts": {
-    "dev": "next dev -p 3000 2>&1 | tee dev.log",
+    "dev": "next dev -p 3000",
     "build": "node -e \"require('fs').rmSync('node_modules/.prisma',{recursive:true,force:true})\" && prisma generate && next build",
-    "start": "NODE_ENV=production bun .next/standalone/server.js 2>&1 | tee server.log",
+    "start": "NODE_ENV=production node .next/standalone/server.js",
     "lint": "eslint .",
-    "db:push": "prisma db push --accept-data-loss",
-    "db:generate": "node -e \"require('fs').rmSync('node_modules/.prisma',{recursive:true,force:true})\" && prisma generate",
-    "db:migrate": "prisma migrate dev",
-    "db:reset": "prisma migrate reset",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,js,mjs,cjs,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,cjs,json,md,yml,yaml}\"",
+    "typecheck": "tsc --noEmit",
     "test": "node --import ./tests/register.mjs --test --experimental-strip-types \"tests/*.test.ts\"",
     "test:watch": "node --import ./tests/register.mjs --test --watch --experimental-strip-types \"tests/*.test.ts\"",
+    "check": "npm run typecheck && npm run lint && npm test",
+    "env:check": "node scripts/check-env.mjs",
+    "db:generate": "node -e \"require('fs').rmSync('node_modules/.prisma',{recursive:true,force:true})\" && prisma generate",
+    "db:push": "prisma db push --accept-data-loss",
+    "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
-    "db:migrate:dev": "prisma migrate dev",
-    "postinstall": "node -e \"require('fs').rmSync('node_modules/.prisma',{recursive:true,force:true})\""
+    "db:reset": "prisma migrate reset",
+    "db:studio": "prisma studio",
+    "release": "npm run check && npm run build"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -97,11 +103,30 @@
     "daisyui": "^5.7.50",
     "eslint": "^9",
     "eslint-config-next": "^16.1.1",
+    "prettier": "^3.9.10",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.5",
     "typescript": "^5"
   },
   "engines": {
     "node": ">=24"
-  }
+  },
+  "description": "Owner-in-the-loop Google review triage and reply drafting for local businesses.",
+  "license": "MIT",
+  "author": "ReviewDesk contributors",
+  "homepage": "https://reviewdesk-nu.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Wasif478484/ReviewDesk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Wasif478484/ReviewDesk/issues"
+  },
+  "keywords": [
+    "reviews",
+    "triage",
+    "google-business",
+    "nextjs",
+    "reply-drafts"
+  ]
 }

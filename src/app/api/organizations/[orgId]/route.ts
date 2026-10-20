@@ -3,10 +3,7 @@ import { db } from "@/lib/server/db";
 import { requireUserId } from "@/lib/server/auth";
 
 /** GET /api/organizations/[orgId], get one organization with its members. */
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ orgId: string }> },
-) {
+export async function GET(req: Request, { params }: { params: Promise<{ orgId: string }> }) {
   try {
     const userId = await requireUserId();
     const { orgId } = await params;
@@ -43,10 +40,7 @@ export async function GET(
 }
 
 /** PUT /api/organizations/[orgId], rename the organization. Owners only. */
-export async function PUT(
-  req: Request,
-  { params }: { params: Promise<{ orgId: string }> },
-) {
+export async function PUT(req: Request, { params }: { params: Promise<{ orgId: string }> }) {
   try {
     const userId = await requireUserId();
     const { orgId } = await params;
@@ -54,7 +48,10 @@ export async function PUT(
       where: { organizationId_userId: { organizationId: orgId, userId } },
     });
     if (!membership || membership.role !== "owner")
-      return NextResponse.json({ error: "Only the organization owner can update details." }, { status: 403 });
+      return NextResponse.json(
+        { error: "Only the organization owner can update details." },
+        { status: 403 },
+      );
     const body = await req.json();
     const name = String(body.name ?? "").trim();
     if (!name) return NextResponse.json({ error: "Name is required." }, { status: 400 });

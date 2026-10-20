@@ -13,10 +13,15 @@ import { sendMail } from "@/lib/server/mail";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const email = String(body.email ?? "").trim().toLowerCase();
+    const email = String(body.email ?? "")
+      .trim()
+      .toLowerCase();
     const origin = new URL(req.url).origin;
 
-    const generic = { ok: true, message: "If that email has an account, a reset link is on its way." };
+    const generic = {
+      ok: true,
+      message: "If that email has an account, a reset link is on its way.",
+    };
     if (!email) return NextResponse.json(generic);
 
     const user = await db.user.findUnique({ where: { email } });
@@ -32,14 +37,25 @@ export async function POST(req: Request) {
 
     if (result.transport === "console") {
       // Dev/self-hosted without SMTP: hand the link back so the flow works.
-      return NextResponse.json({ ...generic, devLink: link, devNote: "SMTP is not configured on this deployment, so the link is shown here and logged on the server." });
+      return NextResponse.json({
+        ...generic,
+        devLink: link,
+        devNote:
+          "SMTP is not configured on this deployment, so the link is shown here and logged on the server.",
+      });
     }
     if (!result.delivered) {
-      return NextResponse.json({ ok: false, error: `Mail could not be sent: ${result.error ?? "unknown error"}` }, { status: 500 });
+      return NextResponse.json(
+        { ok: false, error: `Mail could not be sent: ${result.error ?? "unknown error"}` },
+        { status: 500 },
+      );
     }
     return NextResponse.json(generic);
   } catch (err) {
     console.error("forgot-password failed:", err);
-    return NextResponse.json({ error: "Could not process the request. Please try again." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Could not process the request. Please try again." },
+      { status: 500 },
+    );
   }
 }

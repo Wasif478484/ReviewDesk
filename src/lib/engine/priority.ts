@@ -36,7 +36,11 @@ export function computePriority(result: PriorityInput, stars: number | null): Pr
   if (result.action === "hold" || risky) return "urgent";
   if (result.action === "reply_needs_owner") return "normal";
   if (result.sentiment === "negative" || (stars !== null && stars <= 2)) return "normal";
-  if (result.action === "reply" && result.sentiment === "positive" && (stars === null || stars >= 4)) {
+  if (
+    result.action === "reply" &&
+    result.sentiment === "positive" &&
+    (stars === null || stars >= 4)
+  ) {
     return "low";
   }
   return "normal";

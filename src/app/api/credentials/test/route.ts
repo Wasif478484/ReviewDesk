@@ -20,13 +20,21 @@ export async function POST(req: Request) {
     if ((mode === "api_key" && !apiKey) || (mode === "oauth_token" && !token)) {
       const stored = await db.credential.findUnique({ where: { userId } });
       if (!stored || stored.mode !== mode) {
-        return NextResponse.json({ ok: false, status: "error", message: "No credential available to test." });
+        return NextResponse.json({
+          ok: false,
+          status: "error",
+          message: "No credential available to test.",
+        });
       }
       try {
         if (mode === "api_key" && stored.apiKeyEnc) apiKey = decrypt(stored.apiKeyEnc);
         if (mode === "oauth_token" && stored.tokenEnc) token = decrypt(stored.tokenEnc);
       } catch {
-        return NextResponse.json({ ok: false, status: "error", message: "Stored credential could not be decrypted (changed APP_SECRET?)." });
+        return NextResponse.json({
+          ok: false,
+          status: "error",
+          message: "Stored credential could not be decrypted (changed APP_SECRET?).",
+        });
       }
     }
 
@@ -45,14 +53,26 @@ export async function POST(req: Request) {
 
     await db.credential.updateMany({
       where: { userId },
-      data: { status: verdict.status, statusMessage: fetchNote ? `${verdict.message} ${fetchNote}` : verdict.message, lastCheckedAt: new Date() },
+      data: {
+        status: verdict.status,
+        statusMessage: fetchNote ? `${verdict.message} ${fetchNote}` : verdict.message,
+        lastCheckedAt: new Date(),
+      },
     });
 
-    return NextResponse.json({ ok: verdict.ok, status: verdict.status, message: verdict.message, fetchNote });
+    return NextResponse.json({
+      ok: verdict.ok,
+      status: verdict.status,
+      message: verdict.message,
+      fetchNote,
+    });
   } catch (err) {
     const status = (err as { status?: number }).status ?? 500;
     if (status === 401) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
     console.error("credential test failed:", err);
-    return NextResponse.json({ ok: false, status: "error", message: "Test failed unexpectedly." }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, status: "error", message: "Test failed unexpectedly." },
+      { status: 500 },
+    );
   }
 }

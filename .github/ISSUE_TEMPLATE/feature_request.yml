@@ -1,0 +1,57 @@
+name: Feature request
+description: Suggest something ReviewDesk should do.
+title: "[feature] "
+labels: ["enhancement", "needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ReviewDesk has one hard rule: the owner stays in control and copies replies by hand.
+        A suggestion that breaks that rule will be declined, so please keep it in mind.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the situation, not the solution.
+      placeholder: I manage two locations and I cannot tell which reviews belong to which.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like to happen?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which area
+      options:
+        - Desk / triage
+        - Autopilot
+        - Ledger and reporting
+        - Settings / team
+        - Templates
+        - Review sources
+        - Marketing site
+        - Something else
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: This keeps the owner in control. Nothing posts automatically.
+          required: true

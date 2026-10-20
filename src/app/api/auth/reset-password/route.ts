@@ -10,17 +10,29 @@ export async function POST(req: Request) {
     const token = String(body.token ?? "");
     const password = String(body.password ?? "");
     if (password.length < 8) {
-      return NextResponse.json({ error: "Password must be at least 8 characters." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Password must be at least 8 characters." },
+        { status: 400 },
+      );
     }
     const userId = await consumeAuthToken(token, "reset_password");
     if (!userId) {
-      return NextResponse.json({ error: "This reset link is invalid, already used, or expired. Request a new one." }, { status: 400 });
+      return NextResponse.json(
+        { error: "This reset link is invalid, already used, or expired. Request a new one." },
+        { status: 400 },
+      );
     }
     const passwordHash = await hashPassword(password);
     await db.user.update({ where: { id: userId }, data: { passwordHash } });
-    return NextResponse.json({ ok: true, message: "Password updated. You can sign in with the new password now." });
+    return NextResponse.json({
+      ok: true,
+      message: "Password updated. You can sign in with the new password now.",
+    });
   } catch (err) {
     console.error("reset-password failed:", err);
-    return NextResponse.json({ error: "Could not reset the password. Please try again." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Could not reset the password. Please try again." },
+      { status: 500 },
+    );
   }
 }

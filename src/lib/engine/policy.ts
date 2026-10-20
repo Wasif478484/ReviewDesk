@@ -17,11 +17,11 @@
 import { checkDraft, normLang, type TriageResult, type BusinessProfile } from "./prompts";
 
 export interface AutopilotPolicy {
-  enabled: boolean;                    // off by default
-  dryRun: boolean;                     // log what would be posted, send nothing
-  minStars: number;                    // lower ratings always wait for the owner
-  trustedLanguages: string[];          // only languages a native reader has checked
-  delayMinutes: number;                // veto window before a post goes out
+  enabled: boolean; // off by default
+  dryRun: boolean; // log what would be posted, send nothing
+  minStars: number; // lower ratings always wait for the owner
+  trustedLanguages: string[]; // only languages a native reader has checked
+  delayMinutes: number; // veto window before a post goes out
   dailyCap: number;
   // A 4-star "good, but..." review can still carry a complaint. Default is
   // the safe side: mixed sentiment waits for owner approval. Owners who have
@@ -78,7 +78,9 @@ export function decide(
   const trusted = new Set(policy.trustedLanguages.map(normLang));
   if (String(review.text ?? "").trim()) {
     if (!trusted.has(normLang(result.review_language))) {
-      reasons.push(`review language ${JSON.stringify(result.review_language)} is not on the trusted list`);
+      reasons.push(
+        `review language ${JSON.stringify(result.review_language)} is not on the trusted list`,
+      );
     }
   }
 
@@ -90,11 +92,12 @@ export function decide(
       reasons.push("draft has an unfilled owner placeholder");
     }
     reasons.push(
-      ...checkDraft(draft, profile, result.draft_translation)
-        .map((p) => `draft check: ${p}`),
+      ...checkDraft(draft, profile, result.draft_translation).map((p) => `draft check: ${p}`),
     );
     if (!trusted.has(normLang(result.language_used))) {
-      reasons.push(`reply language ${JSON.stringify(result.language_used)} is not on the trusted list`);
+      reasons.push(
+        `reply language ${JSON.stringify(result.language_used)} is not on the trusted list`,
+      );
     }
   }
 

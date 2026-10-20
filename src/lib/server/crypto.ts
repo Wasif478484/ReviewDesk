@@ -7,13 +7,10 @@
  */
 
 import crypto from "crypto";
+import { appSecret } from "@/lib/server/env";
 
 function secretKey(): Buffer {
-  const hex = process.env.APP_SECRET;
-  if (!hex) {
-    throw new Error("APP_SECRET is not set. Add a 32-byte hex secret to the environment.");
-  }
-  const key = Buffer.from(hex, "hex");
+  const key = Buffer.from(appSecret(), "hex");
   if (key.length !== 32) {
     throw new Error("APP_SECRET must be 64 hex characters (32 bytes).");
   }

@@ -21,7 +21,10 @@ export async function GET() {
         business: true,
         credential: true,
         policy: true,
-        reviews: { orderBy: { createdAt: "asc" }, include: { triages: { orderBy: { createdAt: "desc" } } } },
+        reviews: {
+          orderBy: { createdAt: "asc" },
+          include: { triages: { orderBy: { createdAt: "desc" } } },
+        },
         audits: { orderBy: { timestamp: "desc" }, take: 200 },
       },
     });
@@ -32,8 +35,16 @@ export async function GET() {
       let flags: string[] = [];
       let checklist: string[] = [];
       if (active) {
-        try { flags = JSON.parse(active.flags); } catch { /* [] */ }
-        try { checklist = JSON.parse(active.ownerChecklist); } catch { /* [] */ }
+        try {
+          flags = JSON.parse(active.flags);
+        } catch {
+          /* [] */
+        }
+        try {
+          checklist = JSON.parse(active.ownerChecklist);
+        } catch {
+          /* [] */
+        }
       }
       return {
         id: r.id,
@@ -49,16 +60,27 @@ export async function GET() {
         repliedAt: r.repliedAt,
         triage: active
           ? {
-              id: active.id, action: active.action, sentiment: active.sentiment,
-              priority: active.priority ?? computePriority(
-                { action: active.action, sentiment: active.sentiment, flags },
-                r.stars,
-              ),
-              flags, reason: active.reason, reviewLanguage: active.reviewLanguage,
-              languageUsed: active.languageUsed, draftReply: active.draftReply,
-              reviewTranslation: active.reviewTranslation, draftTranslation: active.draftTranslation,
-              reportNote: active.reportNote, ownerChecklist: checklist,
-              lane: active.lane, status: active.status, dueAt: active.dueAt,
+              id: active.id,
+              action: active.action,
+              sentiment: active.sentiment,
+              priority:
+                active.priority ??
+                computePriority(
+                  { action: active.action, sentiment: active.sentiment, flags },
+                  r.stars,
+                ),
+              flags,
+              reason: active.reason,
+              reviewLanguage: active.reviewLanguage,
+              languageUsed: active.languageUsed,
+              draftReply: active.draftReply,
+              reviewTranslation: active.reviewTranslation,
+              draftTranslation: active.draftTranslation,
+              reportNote: active.reportNote,
+              ownerChecklist: checklist,
+              lane: active.lane,
+              status: active.status,
+              dueAt: active.dueAt,
             }
           : null,
       };
@@ -68,13 +90,19 @@ export async function GET() {
     startOfDay.setHours(0, 0, 0, 0);
     const stats = {
       total: reviews.length,
-      pending: reviews.filter((r) => r.triage && r.triage.status === "pending" && !r.hasReply).length,
+      pending: reviews.filter((r) => r.triage && r.triage.status === "pending" && !r.hasReply)
+        .length,
       recordedToday: user.reviews.filter((r) => r.repliedAt && r.repliedAt >= startOfDay).length,
       replied: reviews.filter((r) => r.hasReply).length,
     };
 
     // Action, sentiment and priority distribution across every triaged review.
-    const actionCounts: Record<string, number> = { reply: 0, reply_needs_owner: 0, hold: 0, report: 0 };
+    const actionCounts: Record<string, number> = {
+      reply: 0,
+      reply_needs_owner: 0,
+      hold: 0,
+      report: 0,
+    };
     const sentimentCounts: Record<string, number> = { positive: 0, mixed: 0, negative: 0 };
     const priorityCounts: Record<string, number> = { urgent: 0, normal: 0, low: 0 };
     for (const r of reviews) {
@@ -99,16 +127,29 @@ export async function GET() {
 
     const audits = user.audits.map((a) => {
       let reasons: string[] = [];
-      try { reasons = JSON.parse(a.reasons); } catch { /* [] */ }
+      try {
+        reasons = JSON.parse(a.reasons);
+      } catch {
+        /* [] */
+      }
       return {
-        id: a.id, timestamp: a.timestamp, reviewRef: a.reviewRef, excerpt: a.excerpt,
-        action: a.action, status: a.status, reasons, actor: a.actor, error: a.error,
+        id: a.id,
+        timestamp: a.timestamp,
+        reviewRef: a.reviewRef,
+        excerpt: a.excerpt,
+        action: a.action,
+        status: a.status,
+        reasons,
+        actor: a.actor,
+        error: a.error,
       };
     });
 
     return NextResponse.json({
       user: {
-        id: user.id, email: user.email, name: user.name,
+        id: user.id,
+        email: user.email,
+        name: user.name,
         onboarded: Boolean(user.onboardedAt),
         emailVerified: Boolean(user.emailVerifiedAt),
         organizationId: user.organizationId,

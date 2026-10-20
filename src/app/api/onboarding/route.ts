@@ -14,18 +14,46 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     const businessData = {
-      name: String(body.business?.name ?? "").trim().slice(0, 120) || "Your Business",
-      category: String(body.business?.category ?? "restaurant").trim().slice(0, 80) || "restaurant",
-      ownerName: String(body.business?.ownerName ?? "").trim().slice(0, 80) || "The Owner",
-      signOff: String(body.business?.signOff ?? "").trim().slice(0, 120),
-      contactLine: String(body.business?.contactLine ?? "").trim().slice(0, 160),
-      allowedOffers: String(body.business?.allowedOffers ?? "none").trim().slice(0, 200) || "none",
-      description: String(body.business?.description ?? "").trim().slice(0, 600),
-      platform: String(body.business?.platform ?? "Google").trim().slice(0, 40) || "Google",
+      name:
+        String(body.business?.name ?? "")
+          .trim()
+          .slice(0, 120) || "Your Business",
+      category:
+        String(body.business?.category ?? "restaurant")
+          .trim()
+          .slice(0, 80) || "restaurant",
+      ownerName:
+        String(body.business?.ownerName ?? "")
+          .trim()
+          .slice(0, 80) || "The Owner",
+      signOff: String(body.business?.signOff ?? "")
+        .trim()
+        .slice(0, 120),
+      contactLine: String(body.business?.contactLine ?? "")
+        .trim()
+        .slice(0, 160),
+      allowedOffers:
+        String(body.business?.allowedOffers ?? "none")
+          .trim()
+          .slice(0, 200) || "none",
+      description: String(body.business?.description ?? "")
+        .trim()
+        .slice(0, 600),
+      platform:
+        String(body.business?.platform ?? "Google")
+          .trim()
+          .slice(0, 40) || "Google",
       replyTone: ["warm", "formal", "apologetic"].includes(body.business?.replyTone)
-        ? body.business.replyTone : "warm",
-      replyLanguage: String(body.business?.replyLanguage ?? "auto").trim().slice(0, 40) || "auto",
-      ownerLanguage: String(body.business?.ownerLanguage ?? "English").trim().slice(0, 40) || "English",
+        ? body.business.replyTone
+        : "warm",
+      replyLanguage:
+        String(body.business?.replyLanguage ?? "auto")
+          .trim()
+          .slice(0, 40) || "auto",
+      ownerLanguage:
+        String(body.business?.ownerLanguage ?? "English")
+          .trim()
+          .slice(0, 40) || "English",
     };
 
     await db.business.upsert({
@@ -41,9 +69,14 @@ export async function POST(req: Request) {
       const token = String(body.credential.token ?? "").trim();
       const secret = mode === "api_key" ? apiKey : token;
       if (!secret) {
-        return NextResponse.json({ error: "Credential selected but no key was provided." }, { status: 400 });
+        return NextResponse.json(
+          { error: "Credential selected but no key was provided." },
+          { status: 400 },
+        );
       }
-      const locationId = String(body.credential.locationId ?? "").trim().slice(0, 200);
+      const locationId = String(body.credential.locationId ?? "")
+        .trim()
+        .slice(0, 200);
       const verdict = await verifyCredentials(mode, apiKey, token, locationId);
       await db.credential.upsert({
         where: { userId },

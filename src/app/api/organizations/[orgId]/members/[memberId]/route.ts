@@ -14,7 +14,10 @@ export async function PUT(
       where: { organizationId_userId: { organizationId: orgId, userId } },
     });
     if (!caller || !["owner", "manager"].includes(caller.role))
-      return NextResponse.json({ error: "Only owners and managers can change roles." }, { status: 403 });
+      return NextResponse.json(
+        { error: "Only owners and managers can change roles." },
+        { status: 403 },
+      );
     const body = await req.json();
     const role = String(body.role ?? "");
     if (!["owner", "manager", "responder", "viewer"].includes(role))
@@ -23,9 +26,15 @@ export async function PUT(
       return NextResponse.json({ error: "Only an owner can promote to owner." }, { status: 403 });
     const member = await db.member.findUnique({ where: { id: memberId } });
     if (!member || member.organizationId !== orgId)
-      return NextResponse.json({ error: "Member not found in this organization." }, { status: 404 });
+      return NextResponse.json(
+        { error: "Member not found in this organization." },
+        { status: 404 },
+      );
     if (member.role === "owner" && role !== "owner")
-      return NextResponse.json({ error: "The owner role cannot be downgraded here." }, { status: 403 });
+      return NextResponse.json(
+        { error: "The owner role cannot be downgraded here." },
+        { status: 403 },
+      );
     await db.member.update({ where: { id: memberId }, data: { role } });
     return NextResponse.json({ ok: true });
   } catch (err) {
@@ -51,7 +60,10 @@ export async function DELETE(
       return NextResponse.json({ error: "Only the owner can remove members." }, { status: 403 });
     const member = await db.member.findUnique({ where: { id: memberId } });
     if (!member || member.organizationId !== orgId)
-      return NextResponse.json({ error: "Member not found in this organization." }, { status: 404 });
+      return NextResponse.json(
+        { error: "Member not found in this organization." },
+        { status: 404 },
+      );
     if (member.userId === userId)
       return NextResponse.json({ error: "The owner cannot remove themselves." }, { status: 400 });
     if (member.role === "owner")

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * ReviewDesk, single-route application shell.
@@ -88,11 +88,16 @@ export default function Home() {
             body: JSON.stringify({ token: intent.verifyToken }),
           });
           const data = await res.json();
-          setVerifyOutcome(res.ok
-            ? { ok: true, message: data.message ?? "Email verified." }
-            : { ok: false, message: data.error ?? "Verification failed." });
+          setVerifyOutcome(
+            res.ok
+              ? { ok: true, message: data.message ?? "Email verified." }
+              : { ok: false, message: data.error ?? "Verification failed." },
+          );
         } catch {
-          setVerifyOutcome({ ok: false, message: "Network error while verifying. Please try the link again." });
+          setVerifyOutcome({
+            ok: false,
+            message: "Network error while verifying. Please try the link again.",
+          });
         }
       })();
       return;
@@ -128,7 +133,11 @@ export default function Home() {
             <span className="rd-display text-lg">ReviewDesk</span>
           </div>
           <h1 className="rd-display mb-2 text-2xl">
-            {verifyOutcome === null ? "Checking your link…" : verifyOutcome.ok ? "Email verified" : "Link problem"}
+            {verifyOutcome === null
+              ? "Checking your link…"
+              : verifyOutcome.ok
+                ? "Email verified"
+                : "Link problem"}
           </h1>
           <p className="mb-6 text-sm text-[#6B7280]">
             {verifyOutcome === null ? "One moment." : verifyOutcome.message}
@@ -138,7 +147,13 @@ export default function Home() {
             disabled={verifyOutcome === null}
             onClick={async () => {
               const { status, data } = await loadWorkspace();
-              setView(status === 200 && data ? (data.user.onboarded ? "dashboard" : "onboarding") : "landing");
+              setView(
+                status === 200 && data
+                  ? data.user.onboarded
+                    ? "dashboard"
+                    : "onboarding"
+                  : "landing",
+              );
             }}
           >
             Go to my desk
@@ -151,8 +166,14 @@ export default function Home() {
   if (view === "landing") {
     return (
       <Landing
-        onSignup={() => { setAuthMode("signup"); setView("auth"); }}
-        onLogin={() => { setAuthMode("login"); setView("auth"); }}
+        onSignup={() => {
+          setAuthMode("signup");
+          setView("auth");
+        }}
+        onLogin={() => {
+          setAuthMode("login");
+          setView("auth");
+        }}
         initialGoogleStatus={urlIntent.googleStatus}
         initialGoogleMessage={urlIntent.googleMessage}
       />

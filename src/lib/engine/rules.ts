@@ -89,7 +89,9 @@ export function matchRule(
     priority: (RULE_PRIORITIES as readonly string[]).includes(rule.setPriority)
       ? (rule.setPriority as RulePriority)
       : null,
-    reason: bits.length ? `Rule "${rule.name}" matched: ${bits.join(", ")}.` : `Rule "${rule.name}" matched.`,
+    reason: bits.length
+      ? `Rule "${rule.name}" matched: ${bits.join(", ")}.`
+      : `Rule "${rule.name}" matched.`,
   };
 }
 

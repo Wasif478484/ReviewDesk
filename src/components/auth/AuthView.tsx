@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * AuthView.tsx, sign in / create account / forgot password / reset password.
@@ -29,7 +29,9 @@ export default function AuthView({ mode, resetToken, onSwitch, onBack, onDone }:
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [info, setInfo] = useState<{ message: string; devLink?: string; devNote?: string } | null>(null);
+  const [info, setInfo] = useState<{ message: string; devLink?: string; devNote?: string } | null>(
+    null,
+  );
   const [busy, setBusy] = useState(false);
 
   async function submit(e: React.FormEvent) {
@@ -67,7 +69,9 @@ export default function AuthView({ mode, resetToken, onSwitch, onBack, onDone }:
           setError(data.error ?? "The reset link could not be used.");
           return;
         }
-        setInfo({ message: data.message ?? "Password updated. You can sign in with the new password now." });
+        setInfo({
+          message: data.message ?? "Password updated. You can sign in with the new password now.",
+        });
         setTimeout(() => onSwitch("login"), 1600);
         return;
       }
@@ -128,7 +132,11 @@ export default function AuthView({ mode, resetToken, onSwitch, onBack, onDone }:
     <div className="flex min-h-screen flex-col bg-base-200">
       <div className="border-b border-base-300 bg-base-100">
         <div className="mx-auto flex h-16 max-w-[1100px] items-center px-6">
-          <button onClick={onBack} className="flex items-center gap-2.5" aria-label="Back to landing page">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2.5"
+            aria-label="Back to landing page"
+          >
             <LogoMark />
             <span className="rd-display text-lg">ReviewDesk</span>
           </button>
@@ -137,7 +145,9 @@ export default function AuthView({ mode, resetToken, onSwitch, onBack, onDone }:
 
       <main className="relative flex flex-1 items-start justify-center overflow-hidden px-5 py-10 md:items-center">
         <div className="rd-grid pointer-events-none absolute inset-0" aria-hidden="true" />
-        <div className="rd-aurora" aria-hidden="true"><i /></div>
+        <div className="rd-aurora" aria-hidden="true">
+          <i />
+        </div>
         <div className="relative w-full max-w-[440px]">
           <div className="card card-border rd-shadow-float bg-base-100 p-8">
             <span className="rd-chip-outline mb-5">ReviewDesk account</span>
@@ -209,7 +219,9 @@ export default function AuthView({ mode, resetToken, onSwitch, onBack, onDone }:
                     <p>{info.message}</p>
                     {info.devLink && (
                       <p className="mt-2 break-all text-xs">
-                        <a className="link underline" href={info.devLink}>{info.devLink}</a>
+                        <a className="link underline" href={info.devLink}>
+                          {info.devLink}
+                        </a>
                       </p>
                     )}
                     {info.devNote && <p className="mt-1 text-xs opacity-80">{info.devNote}</p>}
@@ -222,28 +234,65 @@ export default function AuthView({ mode, resetToken, onSwitch, onBack, onDone }:
                 disabled={busy}
                 withIcon={!busy}
                 className="btn btn-neutral btn-block min-h-[48px] text-base disabled:opacity-60"
-                label={busy ? (<><span className="loading loading-spinner loading-sm" aria-hidden="true" /> One moment</>) : headings[mode].cta}
+                label={
+                  busy ? (
+                    <>
+                      <span className="loading loading-spinner loading-sm" aria-hidden="true" /> One
+                      moment
+                    </>
+                  ) : (
+                    headings[mode].cta
+                  )
+                }
               />
             </form>
 
             <div className="mt-6 border-t border-base-300 pt-4 text-center">
               {mode === "login" && (
                 <div className="flex flex-col gap-2 text-sm text-[#374151]">
-                  <button onClick={() => { onSwitch("forgot"); setError(""); setInfo(null); }} className="link-hover link">
+                  <button
+                    onClick={() => {
+                      onSwitch("forgot");
+                      setError("");
+                      setInfo(null);
+                    }}
+                    className="link-hover link"
+                  >
                     Forgot your password?
                   </button>
-                  <button onClick={() => { onSwitch("signup"); setError(""); setInfo(null); }} className="link-hover link">
+                  <button
+                    onClick={() => {
+                      onSwitch("signup");
+                      setError("");
+                      setInfo(null);
+                    }}
+                    className="link-hover link"
+                  >
                     New here? Create your account
                   </button>
                 </div>
               )}
               {mode === "signup" && (
-                <button onClick={() => { onSwitch("login"); setError(""); setInfo(null); }} className="link-hover link text-sm text-[#374151]">
+                <button
+                  onClick={() => {
+                    onSwitch("login");
+                    setError("");
+                    setInfo(null);
+                  }}
+                  className="link-hover link text-sm text-[#374151]"
+                >
                   Already have an account? Sign in
                 </button>
               )}
               {(mode === "forgot" || mode === "reset") && (
-                <button onClick={() => { onSwitch("login"); setError(""); setInfo(null); }} className="link-hover link text-sm text-[#374151]">
+                <button
+                  onClick={() => {
+                    onSwitch("login");
+                    setError("");
+                    setInfo(null);
+                  }}
+                  className="link-hover link text-sm text-[#374151]"
+                >
                   Back to sign in
                 </button>
               )}
@@ -255,9 +304,14 @@ export default function AuthView({ mode, resetToken, onSwitch, onBack, onDone }:
           </p>
           <p className="mt-2 text-center text-xs text-[#6B7280]">
             By creating an account you agree to the{" "}
-            <Link href="/terms" className="link text-primary hover:underline">terms</Link>
-            {" "}and{" "}
-            <Link href="/privacy" className="link text-primary hover:underline">privacy policy</Link>.
+            <Link href="/terms" className="link text-primary hover:underline">
+              terms
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy" className="link text-primary hover:underline">
+              privacy policy
+            </Link>
+            .
           </p>
         </div>
       </main>

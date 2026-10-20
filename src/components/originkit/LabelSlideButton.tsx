@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * LabelSlideButton + RollLabel, Originkit pattern (implemented locally

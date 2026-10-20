@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * TemplateLibrary.tsx, the saved reply template panel.
@@ -22,11 +22,7 @@ export interface TemplateItem {
 
 const CATEGORIES = ["general", "positive", "negative", "apologetic", "formal"];
 
-export default function TemplateLibrary({
-  onNote,
-}: {
-  onNote: (note: string) => void;
-}) {
+export default function TemplateLibrary({ onNote }: { onNote: (note: string) => void }) {
   const [templates, setTemplates] = useState<TemplateItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -107,7 +103,13 @@ export default function TemplateLibrary({
           onClick={() => setShowForm(!showForm)}
           aria-expanded={showForm}
         >
-          {showForm ? "Cancel" : <><Plus size={14} aria-hidden="true" /> New template</>}
+          {showForm ? (
+            "Cancel"
+          ) : (
+            <>
+              <Plus size={14} aria-hidden="true" /> New template
+            </>
+          )}
         </button>
       </div>
 
@@ -137,14 +139,12 @@ export default function TemplateLibrary({
               aria-label="Template category"
             >
               {CATEGORIES.map((c) => (
-                <option key={c} value={c}>{c}</option>
+                <option key={c} value={c}>
+                  {c}
+                </option>
               ))}
             </select>
-            <button
-              className="btn btn-primary btn-sm"
-              onClick={create}
-              disabled={saving}
-            >
+            <button className="btn btn-primary btn-sm" onClick={create} disabled={saving}>
               {saving ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : null}
               Save template
             </button>

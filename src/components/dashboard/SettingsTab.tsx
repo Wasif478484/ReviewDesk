@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * SettingsTab.tsx, business profile, Google Business connection manager and
@@ -54,7 +54,11 @@ export default function SettingsTab({ ws, refresh, onNote }: SettingsTabProps) {
   const [token, setToken] = useState("");
   const [locationId, setLocationId] = useState(cred?.locationId ?? "");
   const [livePosting, setLivePosting] = useState(cred?.livePosting ?? false);
-  const [testResult, setTestResult] = useState<{ ok: boolean; message: string; fetchNote?: string } | null>(null);
+  const [testResult, setTestResult] = useState<{
+    ok: boolean;
+    message: string;
+    fetchNote?: string;
+  } | null>(null);
   const [locations, setLocations] = useState<GoogleLocation[] | null>(null);
   const [locBusy, setLocBusy] = useState(false);
 
@@ -67,8 +71,16 @@ export default function SettingsTab({ ws, refresh, onNote }: SettingsTabProps) {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name, category, ownerName, signOff, contactLine, allowedOffers,
-          description, replyTone, replyLanguage, ownerLanguage,
+          name,
+          category,
+          ownerName,
+          signOff,
+          contactLine,
+          allowedOffers,
+          description,
+          replyTone,
+          replyLanguage,
+          ownerLanguage,
         }),
       });
       const data = await res.json();
@@ -99,8 +111,9 @@ export default function SettingsTab({ ws, refresh, onNote }: SettingsTabProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           mode,
-          apiKey: mode === "api_key" ? (apiKey || (cred?.mode === "api_key" ? "••keep" : "")) : "",
-          token: mode === "oauth_token" ? (token || (cred?.mode === "oauth_token" ? "••keep" : "")) : "",
+          apiKey: mode === "api_key" ? apiKey || (cred?.mode === "api_key" ? "••keep" : "") : "",
+          token:
+            mode === "oauth_token" ? token || (cred?.mode === "oauth_token" ? "••keep" : "") : "",
           locationId,
           livePosting,
         }),
@@ -126,13 +139,17 @@ export default function SettingsTab({ ws, refresh, onNote }: SettingsTabProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           mode: mode === "oauth" ? "oauth_token" : mode,
-          apiKey: mode === "api_key" ? (apiKey || (cred?.mode === "api_key" ? "••test" : "")) : "",
-          token: mode !== "api_key" ? (token || (cred?.mode === "oauth_token" ? "••test" : "")) : "",
+          apiKey: mode === "api_key" ? apiKey || (cred?.mode === "api_key" ? "••test" : "") : "",
+          token: mode !== "api_key" ? token || (cred?.mode === "oauth_token" ? "••test" : "") : "",
           locationId,
         }),
       });
       const data = await res.json();
-      setTestResult({ ok: Boolean(data.ok), message: data.message ?? data.error ?? "Unknown result.", fetchNote: data.fetchNote });
+      setTestResult({
+        ok: Boolean(data.ok),
+        message: data.message ?? data.error ?? "Unknown result.",
+        fetchNote: data.fetchNote,
+      });
       await refresh();
     } finally {
       setBusy(false);
@@ -146,9 +163,11 @@ export default function SettingsTab({ ws, refresh, onNote }: SettingsTabProps) {
       const data = await res.json();
       if (res.ok) {
         setLocations(data.locations);
-        onNote(data.locations.length
-          ? `Found ${data.locations.length} location(s) on your Google account.`
-          : "No locations found on this Google account.");
+        onNote(
+          data.locations.length
+            ? `Found ${data.locations.length} location(s) on your Google account.`
+            : "No locations found on this Google account.",
+        );
       } else {
         onNote(data.error);
       }
@@ -171,9 +190,11 @@ export default function SettingsTab({ ws, refresh, onNote }: SettingsTabProps) {
   }
 
   const statusBadge =
-    cred?.status === "connected" ? "badge-success"
-    : cred?.status === "error" ? "badge-error"
-    : "badge-warning";
+    cred?.status === "connected"
+      ? "badge-success"
+      : cred?.status === "error"
+        ? "badge-error"
+        : "badge-warning";
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
@@ -184,62 +205,146 @@ export default function SettingsTab({ ws, refresh, onNote }: SettingsTabProps) {
         <div className="space-y-4">
           <fieldset className="fieldset">
             <legend className="fieldset-legend rd-kicker">Business name</legend>
-            <input id="st-name" className="input w-full" aria-label="Business name" value={name} onChange={(e) => setName(e.target.value)} />
+            <input
+              id="st-name"
+              className="input w-full"
+              aria-label="Business name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </fieldset>
           <div className="grid gap-4 sm:grid-cols-2">
             <fieldset className="fieldset">
               <legend className="fieldset-legend rd-kicker">Category</legend>
-              <select id="st-category" className="select w-full" aria-label="Category" value={category} onChange={(e) => setCategory(e.target.value)}>
-                {["restaurant", "cafe", "bakery", "salon", "clinic", "grocery", "gym", "hotel", "shop", "other"].map((c) => (
-                  <option key={c} value={c}>{c}</option>
+              <select
+                id="st-category"
+                className="select w-full"
+                aria-label="Category"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                {[
+                  "restaurant",
+                  "cafe",
+                  "bakery",
+                  "salon",
+                  "clinic",
+                  "grocery",
+                  "gym",
+                  "hotel",
+                  "shop",
+                  "other",
+                ].map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
                 ))}
               </select>
             </fieldset>
             <fieldset className="fieldset">
               <legend className="fieldset-legend rd-kicker">Owner name</legend>
-              <input id="st-owner" className="input w-full" aria-label="Owner name" value={ownerName} onChange={(e) => setOwnerName(e.target.value)} />
+              <input
+                id="st-owner"
+                className="input w-full"
+                aria-label="Owner name"
+                value={ownerName}
+                onChange={(e) => setOwnerName(e.target.value)}
+              />
             </fieldset>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <fieldset className="fieldset">
               <legend className="fieldset-legend rd-kicker">Sign-off</legend>
-              <input id="st-signoff" className="input w-full" aria-label="Sign-off" value={signOff} onChange={(e) => setSignOff(e.target.value)} />
+              <input
+                id="st-signoff"
+                className="input w-full"
+                aria-label="Sign-off"
+                value={signOff}
+                onChange={(e) => setSignOff(e.target.value)}
+              />
             </fieldset>
             <fieldset className="fieldset">
               <legend className="fieldset-legend rd-kicker">Contact line</legend>
-              <input id="st-contact" className="input w-full" aria-label="Contact line" value={contactLine} onChange={(e) => setContactLine(e.target.value)} />
+              <input
+                id="st-contact"
+                className="input w-full"
+                aria-label="Contact line"
+                value={contactLine}
+                onChange={(e) => setContactLine(e.target.value)}
+              />
             </fieldset>
           </div>
           <fieldset className="fieldset">
             <legend className="fieldset-legend rd-kicker">Offers you allow in replies</legend>
-            <input id="st-offers" className="input w-full" aria-label="Offers you allow in replies" value={allowedOffers} onChange={(e) => setAllowedOffers(e.target.value)} />
+            <input
+              id="st-offers"
+              className="input w-full"
+              aria-label="Offers you allow in replies"
+              value={allowedOffers}
+              onChange={(e) => setAllowedOffers(e.target.value)}
+            />
           </fieldset>
           <fieldset className="fieldset">
             <legend className="fieldset-legend rd-kicker">What the business does</legend>
-            <textarea id="st-desc" className="textarea w-full min-h-[72px]" aria-label="What the business does" value={description} onChange={(e) => setDescription(e.target.value)} />
+            <textarea
+              id="st-desc"
+              className="textarea w-full min-h-[72px]"
+              aria-label="What the business does"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
           </fieldset>
           <div className="grid gap-4 sm:grid-cols-3">
             <fieldset className="fieldset">
               <legend className="fieldset-legend rd-kicker">Tone</legend>
-              <select className="select w-full" value={replyTone} onChange={(e) => setReplyTone(e.target.value)} aria-label="Tone">
-                {TONES.map((t) => <option key={t} value={t}>{t}</option>)}
+              <select
+                className="select w-full"
+                value={replyTone}
+                onChange={(e) => setReplyTone(e.target.value)}
+                aria-label="Tone"
+              >
+                {TONES.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
               </select>
             </fieldset>
             <fieldset className="fieldset">
               <legend className="fieldset-legend rd-kicker">Reply language</legend>
-              <select id="st-lang" className="select w-full" value={replyLanguage} onChange={(e) => setReplyLanguage(e.target.value)}>
-                {COMMON_LANGUAGES.map((l) => <option key={l} value={l}>{l === "auto" ? "auto" : l}</option>)}
+              <select
+                id="st-lang"
+                className="select w-full"
+                value={replyLanguage}
+                onChange={(e) => setReplyLanguage(e.target.value)}
+              >
+                {COMMON_LANGUAGES.map((l) => (
+                  <option key={l} value={l}>
+                    {l === "auto" ? "auto" : l}
+                  </option>
+                ))}
               </select>
             </fieldset>
             <fieldset className="fieldset">
               <legend className="fieldset-legend rd-kicker">Your language</legend>
-              <select id="st-ownerlang" className="select w-full" value={ownerLanguage} onChange={(e) => setOwnerLanguage(e.target.value)}>
-                {COMMON_LANGUAGES.filter((l) => l !== "auto").map((l) => <option key={l} value={l}>{l}</option>)}
+              <select
+                id="st-ownerlang"
+                className="select w-full"
+                value={ownerLanguage}
+                onChange={(e) => setOwnerLanguage(e.target.value)}
+              >
+                {COMMON_LANGUAGES.filter((l) => l !== "auto").map((l) => (
+                  <option key={l} value={l}>
+                    {l}
+                  </option>
+                ))}
               </select>
             </fieldset>
           </div>
           <button className="btn btn-neutral w-full" onClick={saveBusiness} disabled={busy}>
-            {busy ? <span className="loading loading-spinner loading-sm" aria-hidden="true" /> : null}
+            {busy ? (
+              <span className="loading loading-spinner loading-sm" aria-hidden="true" />
+            ) : null}
             Save business profile
           </button>
         </div>
@@ -253,21 +358,41 @@ export default function SettingsTab({ ws, refresh, onNote }: SettingsTabProps) {
             <div className="rd-kicker">Google Business connection</div>
             {cred && cred.mode !== "none" && (
               <span className={`badge badge-soft font-mono ${statusBadge}`}>
-                {cred.status} · {cred.mode === "oauth" ? `OAuth ${cred.keyHint}` : cred.mode === "oauth_token" ? `token ${cred.keyHint}` : `key ${cred.keyHint}`}
+                {cred.status} ·{" "}
+                {cred.mode === "oauth"
+                  ? `OAuth ${cred.keyHint}`
+                  : cred.mode === "oauth_token"
+                    ? `token ${cred.keyHint}`
+                    : `key ${cred.keyHint}`}
               </span>
             )}
           </div>
 
           {cred?.statusMessage && (
-            <p className="mb-4 rounded-[10px] p-3 text-xs text-base-content/70" style={{ background: "#F6F7F9" }}>
+            <p
+              className="mb-4 rounded-[10px] p-3 text-xs text-base-content/70"
+              style={{ background: "#F6F7F9" }}
+            >
               Last check: {cred.statusMessage}
               {cred.lastCheckedAt ? ` (${new Date(cred.lastCheckedAt).toLocaleString()})` : ""}
             </p>
           )}
 
           <div className="tabs tabs-box mb-4 w-full" role="tablist" aria-label="Connection type">
-            {([["oauth", "Connect Google"], ["api_key", "API key"], ["oauth_token", "Paste token"]] as const).map(([v, label]) => (
-              <button key={v} role="tab" aria-selected={mode === v} className={`tab flex-1 ${mode === v ? "tab-active" : ""}`} onClick={() => setMode(v)}>
+            {(
+              [
+                ["oauth", "Connect Google"],
+                ["api_key", "API key"],
+                ["oauth_token", "Paste token"],
+              ] as const
+            ).map(([v, label]) => (
+              <button
+                key={v}
+                role="tab"
+                aria-selected={mode === v}
+                className={`tab flex-1 ${mode === v ? "tab-active" : ""}`}
+                onClick={() => setMode(v)}
+              >
                 {label}
               </button>
             ))}
@@ -281,8 +406,9 @@ export default function SettingsTab({ ws, refresh, onNote }: SettingsTabProps) {
                     <div className="alert alert-warning" role="status">
                       <span className="text-sm">
                         This deployment does not have Google OAuth configured yet. An admin must set
-                        GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET (plus the redirect URI in the Google
-                        Cloud console) before this button will work. You can still paste a token below.
+                        GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET (plus the redirect URI in the
+                        Google Cloud console) before this button will work. You can still paste a
+                        token below.
                       </span>
                     </div>
                   )}
@@ -291,7 +417,12 @@ export default function SettingsTab({ ws, refresh, onNote }: SettingsTabProps) {
                     className={`btn btn-primary w-full min-h-[44px] ${ws.googleOAuthConfigured === false ? "pointer-events-none opacity-55" : ""}`}
                     aria-disabled={ws.googleOAuthConfigured === false}
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27 3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10c5.35 0 9.25-3.67 9.25-9.09c0-1.15-.15-1.81-.15-1.81"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        fill="currentColor"
+                        d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27 3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10c5.35 0 9.25-3.67 9.25-9.09c0-1.15-.15-1.81-.15-1.81"
+                      />
+                    </svg>
                     Connect with Google
                   </a>
                   <p className="rd-mono">
@@ -303,22 +434,36 @@ export default function SettingsTab({ ws, refresh, onNote }: SettingsTabProps) {
                 <>
                   <div className="alert alert-success" role="status">
                     <span className="text-sm">
-                      Connected{cred?.grantedEmail ? ` as ${cred.grantedEmail}` : ""}. Access tokens refresh automatically.
+                      Connected{cred?.grantedEmail ? ` as ${cred.grantedEmail}` : ""}. Access tokens
+                      refresh automatically.
                     </span>
                   </div>
                   <div>
                     <div className="rd-kicker mb-1.5 block">Location</div>
                     <div className="flex flex-wrap gap-2">
-                      <button className="btn btn-outline btn-sm" onClick={discoverLocations} disabled={locBusy}>
-                        {locBusy ? <span className="loading loading-spinner loading-xs" aria-hidden="true" /> : null}
+                      <button
+                        className="btn btn-outline btn-sm"
+                        onClick={discoverLocations}
+                        disabled={locBusy}
+                      >
+                        {locBusy ? (
+                          <span className="loading loading-spinner loading-xs" aria-hidden="true" />
+                        ) : null}
                         {locBusy ? "Looking" : "Find my locations"}
                       </button>
-                      <button className="btn btn-outline btn-sm" onClick={async () => {
-                        const res = await fetch("/api/reviews/fetch-google", { method: "POST" });
-                        const data = await res.json();
-                        onNote(res.ok ? (data.message ?? `Imported ${data.imported} review(s).`) : data.error);
-                        if (res.ok) await refresh();
-                      }}>
+                      <button
+                        className="btn btn-outline btn-sm"
+                        onClick={async () => {
+                          const res = await fetch("/api/reviews/fetch-google", { method: "POST" });
+                          const data = await res.json();
+                          onNote(
+                            res.ok
+                              ? (data.message ?? `Imported ${data.imported} review(s).`)
+                              : data.error,
+                          );
+                          if (res.ok) await refresh();
+                        }}
+                      >
                         Fetch reviews now
                       </button>
                     </div>
@@ -331,22 +476,45 @@ export default function SettingsTab({ ws, refresh, onNote }: SettingsTabProps) {
                       >
                         <option value="">Choose a location...</option>
                         {locations.map((l) => (
-                          <option key={l.name} value={l.name}>{l.title} · {l.address || l.name}</option>
+                          <option key={l.name} value={l.name}>
+                            {l.title} · {l.address || l.name}
+                          </option>
                         ))}
                       </select>
                     )}
                     {!locations && locationId && (
-                      <input className="input mt-2 w-full font-mono text-xs" value={locationId} onChange={(e) => setLocationId(e.target.value)} aria-label="Location resource name" />
+                      <input
+                        className="input mt-2 w-full font-mono text-xs"
+                        value={locationId}
+                        onChange={(e) => setLocationId(e.target.value)}
+                        aria-label="Location resource name"
+                      />
                     )}
                   </div>
-                  <label className="flex items-start justify-between gap-3 rounded-[10px] p-3" style={{ background: "#FBF3D9", border: "1px dashed #854D0E" }}>
+                  <label
+                    className="flex items-start justify-between gap-3 rounded-[10px] p-3"
+                    style={{ background: "#FBF3D9", border: "1px dashed #854D0E" }}
+                  >
                     <span className="text-sm text-[#854D0E]">
                       <strong>Live posting</strong>
-                      <span className="block text-xs">Send approved replies to Google via API. Off = everything stays recorded here.</span>
+                      <span className="block text-xs">
+                        Send approved replies to Google via API. Off = everything stays recorded
+                        here.
+                      </span>
                     </span>
-                    <input type="checkbox" checked={livePosting} onChange={(e) => setLivePosting(e.target.checked)} className="toggle toggle-sm mt-0.5" aria-label="Live posting" />
+                    <input
+                      type="checkbox"
+                      checked={livePosting}
+                      onChange={(e) => setLivePosting(e.target.checked)}
+                      className="toggle toggle-sm mt-0.5"
+                      aria-label="Live posting"
+                    />
                   </label>
-                  <button className="btn btn-neutral w-full" onClick={saveCredential} disabled={busy}>
+                  <button
+                    className="btn btn-neutral w-full"
+                    onClick={saveCredential}
+                    disabled={busy}
+                  >
                     Save location &amp; preferences
                   </button>
                 </>
@@ -358,16 +526,42 @@ export default function SettingsTab({ ws, refresh, onNote }: SettingsTabProps) {
             <div className="space-y-4">
               <fieldset className="fieldset">
                 <legend className="fieldset-legend rd-kicker">
-                  API key {cred?.keyHint && cred.mode === "api_key" ? `(stored: ${cred.keyHint}; leave blank to keep)` : ""}
+                  API key{" "}
+                  {cred?.keyHint && cred.mode === "api_key"
+                    ? `(stored: ${cred.keyHint}; leave blank to keep)`
+                    : ""}
                 </legend>
-                <input id="st-apikey" className="input w-full font-mono text-sm" type="password" aria-label="API key" value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="AIza…" autoComplete="off" />
+                <input
+                  id="st-apikey"
+                  className="input w-full font-mono text-sm"
+                  type="password"
+                  aria-label="API key"
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  placeholder="AIza…"
+                  autoComplete="off"
+                />
               </fieldset>
               <fieldset className="fieldset">
-                <legend className="fieldset-legend rd-kicker">Place or location id (optional)</legend>
-                <input id="st-loc" className="input w-full font-mono text-sm" aria-label="Place or location id" value={locationId} onChange={(e) => setLocationId(e.target.value)} placeholder="places/{place_id}" />
-                <p className="rd-mono mt-1.5">An API key alone cannot read reviews. Google requires OAuth consent for review data. Use Connect Google for the full experience.</p>
+                <legend className="fieldset-legend rd-kicker">
+                  Place or location id (optional)
+                </legend>
+                <input
+                  id="st-loc"
+                  className="input w-full font-mono text-sm"
+                  aria-label="Place or location id"
+                  value={locationId}
+                  onChange={(e) => setLocationId(e.target.value)}
+                  placeholder="places/{place_id}"
+                />
+                <p className="rd-mono mt-1.5">
+                  An API key alone cannot read reviews. Google requires OAuth consent for review
+                  data. Use Connect Google for the full experience.
+                </p>
               </fieldset>
-              <button className="btn btn-neutral w-full" onClick={saveCredential} disabled={busy}>Save</button>
+              <button className="btn btn-neutral w-full" onClick={saveCredential} disabled={busy}>
+                Save
+              </button>
             </div>
           )}
 
@@ -375,52 +569,114 @@ export default function SettingsTab({ ws, refresh, onNote }: SettingsTabProps) {
             <div className="space-y-4">
               <fieldset className="fieldset">
                 <legend className="fieldset-legend rd-kicker">
-                  OAuth access token {cred?.keyHint && cred.mode === "oauth_token" ? `(stored: ${cred.keyHint}; leave blank to keep)` : ""}
+                  OAuth access token{" "}
+                  {cred?.keyHint && cred.mode === "oauth_token"
+                    ? `(stored: ${cred.keyHint}; leave blank to keep)`
+                    : ""}
                 </legend>
-                <input id="st-token" className="input w-full font-mono text-sm" type="password" aria-label="OAuth access token" value={token} onChange={(e) => setToken(e.target.value)} placeholder="ya29.…" autoComplete="off" />
+                <input
+                  id="st-token"
+                  className="input w-full font-mono text-sm"
+                  type="password"
+                  aria-label="OAuth access token"
+                  value={token}
+                  onChange={(e) => setToken(e.target.value)}
+                  placeholder="ya29.…"
+                  autoComplete="off"
+                />
               </fieldset>
               <fieldset className="fieldset">
                 <legend className="fieldset-legend rd-kicker">Location resource name</legend>
-                <input id="st-loc2" className="input w-full font-mono text-sm" aria-label="Location resource name" value={locationId} onChange={(e) => setLocationId(e.target.value)} placeholder="accounts/{id}/locations/{id}" />
-                <p className="rd-mono mt-1.5">Pasted access tokens expire within the hour. Connect Google stores a refresh token instead.</p>
+                <input
+                  id="st-loc2"
+                  className="input w-full font-mono text-sm"
+                  aria-label="Location resource name"
+                  value={locationId}
+                  onChange={(e) => setLocationId(e.target.value)}
+                  placeholder="accounts/{id}/locations/{id}"
+                />
+                <p className="rd-mono mt-1.5">
+                  Pasted access tokens expire within the hour. Connect Google stores a refresh token
+                  instead.
+                </p>
               </fieldset>
-              <label className="flex items-start justify-between gap-3 rounded-[10px] p-3" style={{ background: "#FBF3D9", border: "1px dashed #854D0E" }}>
+              <label
+                className="flex items-start justify-between gap-3 rounded-[10px] p-3"
+                style={{ background: "#FBF3D9", border: "1px dashed #854D0E" }}
+              >
                 <span className="text-sm text-[#854D0E]">
                   <strong>Live posting</strong>
-                  <span className="block text-xs">Send approved replies to Google via API. Off = everything stays recorded here.</span>
+                  <span className="block text-xs">
+                    Send approved replies to Google via API. Off = everything stays recorded here.
+                  </span>
                 </span>
-                <input type="checkbox" checked={livePosting} onChange={(e) => setLivePosting(e.target.checked)} className="toggle toggle-sm mt-0.5" aria-label="Live posting" />
+                <input
+                  type="checkbox"
+                  checked={livePosting}
+                  onChange={(e) => setLivePosting(e.target.checked)}
+                  className="toggle toggle-sm mt-0.5"
+                  aria-label="Live posting"
+                />
               </label>
-              <button className="btn btn-neutral w-full" onClick={saveCredential} disabled={busy}>Save</button>
+              <button className="btn btn-neutral w-full" onClick={saveCredential} disabled={busy}>
+                Save
+              </button>
             </div>
           )}
 
           <div className="mt-4 flex flex-wrap gap-2">
             {mode !== "oauth" && (
-              <button className="btn btn-outline btn-sm" onClick={testCredential} disabled={busy}>Test connection</button>
+              <button className="btn btn-outline btn-sm" onClick={testCredential} disabled={busy}>
+                Test connection
+              </button>
             )}
             {cred && cred.mode !== "none" && (
-              <button className="btn btn-outline btn-sm text-error" onClick={disconnect} disabled={busy}>Disconnect</button>
+              <button
+                className="btn btn-outline btn-sm text-error"
+                onClick={disconnect}
+                disabled={busy}
+              >
+                Disconnect
+              </button>
             )}
           </div>
 
           {testResult && (
-            <div className={`alert mt-4 ${testResult.ok ? "alert-success" : "alert-error"}`} role="status">
+            <div
+              className={`alert mt-4 ${testResult.ok ? "alert-success" : "alert-error"}`}
+              role="status"
+            >
               <div className="text-sm">
                 <span>{testResult.message}</span>
-                {testResult.fetchNote && <span className="mt-1 block text-xs">{testResult.fetchNote}</span>}
+                {testResult.fetchNote && (
+                  <span className="mt-1 block text-xs">{testResult.fetchNote}</span>
+                )}
               </div>
             </div>
           )}
         </section>
 
         <section className="card bg-neutral text-neutral-content border border-neutral p-6">
-          <div className="rd-kicker mb-3 text-[rgba(250,250,252,.72)]">How your data is handled</div>
+          <div className="rd-kicker mb-3 text-[rgba(250,250,252,.72)]">
+            How your data is handled
+          </div>
           <ul className="space-y-2.5 text-sm text-[rgba(250,250,252,.82)]">
-            <li>· Your Google credential is encrypted with AES-256-GCM before storage and never sent back to the browser; only a masked hint.</li>
-            <li>· Review text is sent to the model provider for triage. That is the only outbound AI call.</li>
-            <li>· Approved replies are <strong>recorded in your workspace</strong>. They reach Google only when live posting is on and the API call succeeds.</li>
-            <li>· Passwords are hashed with bcrypt; sessions use signed httpOnly cookies; reset and verification links are single-use and expire.</li>
+            <li>
+              · Your Google credential is encrypted with AES-256-GCM before storage and never sent
+              back to the browser; only a masked hint.
+            </li>
+            <li>
+              · Review text is sent to the model provider for triage. That is the only outbound AI
+              call.
+            </li>
+            <li>
+              · Approved replies are <strong>recorded in your workspace</strong>. They reach Google
+              only when live posting is on and the API call succeeds.
+            </li>
+            <li>
+              · Passwords are hashed with bcrypt; sessions use signed httpOnly cookies; reset and
+              verification links are single-use and expire.
+            </li>
           </ul>
         </section>
       </div>

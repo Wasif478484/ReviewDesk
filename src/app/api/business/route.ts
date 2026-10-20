@@ -8,17 +8,46 @@ export async function PUT(req: Request) {
     const userId = await requireUserId();
     const body = await req.json();
     const data = {
-      name: String(body.name ?? "").trim().slice(0, 120) || "Your Business",
-      category: String(body.category ?? "restaurant").trim().slice(0, 80) || "restaurant",
-      ownerName: String(body.ownerName ?? "").trim().slice(0, 80) || "The Owner",
-      signOff: String(body.signOff ?? "").trim().slice(0, 120),
-      contactLine: String(body.contactLine ?? "").trim().slice(0, 160),
-      allowedOffers: String(body.allowedOffers ?? "none").trim().slice(0, 200) || "none",
-      description: String(body.description ?? "").trim().slice(0, 600),
-      platform: String(body.platform ?? "Google").trim().slice(0, 40) || "Google",
-      replyTone: ["warm", "formal", "apologetic"].includes(body.replyTone) ? body.replyTone : "warm",
-      replyLanguage: String(body.replyLanguage ?? "auto").trim().slice(0, 40) || "auto",
-      ownerLanguage: String(body.ownerLanguage ?? "English").trim().slice(0, 40) || "English",
+      name:
+        String(body.name ?? "")
+          .trim()
+          .slice(0, 120) || "Your Business",
+      category:
+        String(body.category ?? "restaurant")
+          .trim()
+          .slice(0, 80) || "restaurant",
+      ownerName:
+        String(body.ownerName ?? "")
+          .trim()
+          .slice(0, 80) || "The Owner",
+      signOff: String(body.signOff ?? "")
+        .trim()
+        .slice(0, 120),
+      contactLine: String(body.contactLine ?? "")
+        .trim()
+        .slice(0, 160),
+      allowedOffers:
+        String(body.allowedOffers ?? "none")
+          .trim()
+          .slice(0, 200) || "none",
+      description: String(body.description ?? "")
+        .trim()
+        .slice(0, 600),
+      platform:
+        String(body.platform ?? "Google")
+          .trim()
+          .slice(0, 40) || "Google",
+      replyTone: ["warm", "formal", "apologetic"].includes(body.replyTone)
+        ? body.replyTone
+        : "warm",
+      replyLanguage:
+        String(body.replyLanguage ?? "auto")
+          .trim()
+          .slice(0, 40) || "auto",
+      ownerLanguage:
+        String(body.ownerLanguage ?? "English")
+          .trim()
+          .slice(0, 40) || "English",
     };
     await db.business.upsert({ where: { userId }, update: data, create: { userId, ...data } });
     return NextResponse.json({ ok: true });

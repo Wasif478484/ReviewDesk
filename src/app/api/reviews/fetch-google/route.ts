@@ -16,13 +16,19 @@ export async function POST() {
     const cred = await db.credential.findUnique({ where: { userId } });
     if (!cred || (cred.mode !== "oauth" && cred.mode !== "oauth_token")) {
       return NextResponse.json(
-        { error: "Live fetch needs a Google OAuth connection. Connect with Google in Settings, or use the demo inbox." },
+        {
+          error:
+            "Live fetch needs a Google OAuth connection. Connect with Google in Settings, or use the demo inbox.",
+        },
         { status: 400 },
       );
     }
     if (!cred.locationId || !cred.locationId.includes("locations/")) {
       return NextResponse.json(
-        { error: "Pick a location in Settings first (or set the accounts/{account}/locations/{locationId} resource name)." },
+        {
+          error:
+            "Pick a location in Settings first (or set the accounts/{account}/locations/{locationId} resource name).",
+        },
         { status: 400 },
       );
     }
@@ -35,7 +41,11 @@ export async function POST() {
     }
     const { reviews } = await fetchGoogleReviews(resolved.token, cred.locationId);
     if (!reviews.length) {
-      return NextResponse.json({ ok: true, imported: 0, message: "Google returned no unreplied reviews right now." });
+      return NextResponse.json({
+        ok: true,
+        imported: 0,
+        message: "Google returned no unreplied reviews right now.",
+      });
     }
     const existing = await db.review.findMany({
       where: { userId, source: "google" },
@@ -44,12 +54,22 @@ export async function POST() {
     const seen = new Set(existing.map((r) => r.externalId));
     const fresh = reviews.filter((r) => !seen.has(r.externalId));
     if (!fresh.length) {
-      return NextResponse.json({ ok: true, imported: 0, message: "Inbox is already up to date with Google." });
+      return NextResponse.json({
+        ok: true,
+        imported: 0,
+        message: "Inbox is already up to date with Google.",
+      });
     }
     const res = await db.review.createMany({
       data: fresh.map((r) => ({
-        userId, source: "google", externalId: r.externalId,
-        stars: r.stars, text: r.text, author: r.author, date: r.date, hasReply: r.hasReply,
+        userId,
+        source: "google",
+        externalId: r.externalId,
+        stars: r.stars,
+        text: r.text,
+        author: r.author,
+        date: r.date,
+        hasReply: r.hasReply,
       })),
     });
     return NextResponse.json({ ok: true, imported: res.count });

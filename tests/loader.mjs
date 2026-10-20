@@ -23,7 +23,11 @@ export async function resolve(specifier, context, nextResolve) {
     const base = path.join(SRC, specifier.slice(2));
     for (const candidate of [base, `${base}.ts`, `${base}.tsx`, path.join(base, "index.ts")]) {
       if (existsSync(candidate) && path.extname(candidate)) {
-        return { url: pathToFileURL(candidate).href, shortCircuit: true, format: formatFor(candidate) };
+        return {
+          url: pathToFileURL(candidate).href,
+          shortCircuit: true,
+          format: formatFor(candidate),
+        };
       }
     }
   }
@@ -34,7 +38,11 @@ export async function resolve(specifier, context, nextResolve) {
     const base = path.resolve(parent, specifier);
     for (const candidate of [`${base}.ts`, `${base}.tsx`, path.join(base, "index.ts")]) {
       if (existsSync(candidate)) {
-        return { url: pathToFileURL(candidate).href, shortCircuit: true, format: formatFor(candidate) };
+        return {
+          url: pathToFileURL(candidate).href,
+          shortCircuit: true,
+          format: formatFor(candidate),
+        };
       }
     }
   }

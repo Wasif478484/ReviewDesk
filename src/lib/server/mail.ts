@@ -8,6 +8,8 @@
  * deployment runs with SMTP configured.
  */
 
+import { mailFrom, smtpHost, smtpPass, smtpPort, smtpUser } from "@/lib/server/env";
+
 export interface MailResult {
   delivered: boolean;
   transport: "smtp" | "console";
@@ -15,21 +17,26 @@ export interface MailResult {
 }
 
 export function mailConfigured(): boolean {
-  return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+  return Boolean(smtpHost() && smtpUser() && smtpPass());
 }
 
-export async function sendMail(opts: { to: string; subject: string; text: string; html?: string }): Promise<MailResult> {
+export async function sendMail(opts: {
+  to: string;
+  subject: string;
+  text: string;
+  html?: string;
+}): Promise<MailResult> {
   if (mailConfigured()) {
     try {
       const nodemailer = await import("nodemailer");
       const transport = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: Number(process.env.SMTP_PORT ?? 587),
-        secure: Number(process.env.SMTP_PORT ?? 587) === 465,
-        auth: { user: process.env.SMTP_USER!, pass: process.env.SMTP_PASS! },
+        host: smtpHost(),
+        port: smtpPort(),
+        secure: smtpPort() === 465,
+        auth: { user: smtpUser(), pass: smtpPass() },
       });
       await transport.sendMail({
-        from: process.env.MAIL_FROM || process.env.SMTP_USER,
+        from: mailFrom() || smtpUser(),
         to: opts.to,
         subject: opts.subject,
         text: opts.text,
@@ -38,7 +45,11 @@ export async function sendMail(opts: { to: string; subject: string; text: string
       return { delivered: true, transport: "smtp" };
     } catch (err) {
       console.error("[mail] SMTP send failed:", err);
-      return { delivered: false, transport: "smtp", error: err instanceof Error ? err.message : String(err) };
+      return {
+        delivered: false,
+        transport: "smtp",
+        error: err instanceof Error ? err.message : String(err),
+      };
     }
   }
   // No SMTP: log so the operator can hand the link over manually.

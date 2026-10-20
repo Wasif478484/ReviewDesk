@@ -14,7 +14,9 @@ export async function PUT(req: Request) {
     };
     let trusted = ["english"];
     if (Array.isArray(body.trustedLanguages)) {
-      trusted = body.trustedLanguages.map((l: unknown) => String(l).trim().toLowerCase()).filter(Boolean);
+      trusted = body.trustedLanguages
+        .map((l: unknown) => String(l).trim().toLowerCase())
+        .filter(Boolean);
     }
     const data = {
       enabled: Boolean(body.enabled),

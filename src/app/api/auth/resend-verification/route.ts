@@ -22,10 +22,19 @@ export async function POST(req: Request) {
       text: `Hello ${user.name},\n\nVerify your ReviewDesk email address with this link (valid for 24 hours):\n\n${link}\n\nIf you did not sign up, you can ignore this message.`,
     });
     if (result.transport === "console") {
-      return NextResponse.json({ ok: true, message: "Verification link generated.", devLink: link, devNote: "SMTP is not configured on this deployment, so the link is shown here and logged on the server." });
+      return NextResponse.json({
+        ok: true,
+        message: "Verification link generated.",
+        devLink: link,
+        devNote:
+          "SMTP is not configured on this deployment, so the link is shown here and logged on the server.",
+      });
     }
     if (!result.delivered) {
-      return NextResponse.json({ ok: false, error: `Mail could not be sent: ${result.error ?? "unknown error"}` }, { status: 500 });
+      return NextResponse.json(
+        { ok: false, error: `Mail could not be sent: ${result.error ?? "unknown error"}` },
+        { status: 500 },
+      );
     }
     return NextResponse.json({ ok: true, message: "Verification email sent. Check your inbox." });
   } catch (err) {

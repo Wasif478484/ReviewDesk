@@ -1,0 +1,17 @@
+node_modules
+.next
+.vercel
+out
+build
+dist
+coverage
+*.log
+
+bun.lock
+package-lock.json
+
+# Generated demo frames
+demo-assets/shots
+demo-assets/frames
+
+prisma/migrations/**/migration.sql.bak

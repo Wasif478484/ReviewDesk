@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * SkewInText, Originkit pattern (implemented locally because the
@@ -25,18 +25,18 @@ export default function SkewInText({
     <span className={`ok-skewin ${className}`}>
       <span className="sr-only">{text}</span>
       <span aria-hidden="true">
-      {words.map((w, i) => (
-        <span key={i}>
-          <span
-            className="ok-skewin-word"
-            style={{ animationDelay: `${startDelay + i * 70}ms` } as CSSProperties}
-            aria-hidden="true"
-          >
-            {w}
+        {words.map((w, i) => (
+          <span key={i}>
+            <span
+              className="ok-skewin-word"
+              style={{ animationDelay: `${startDelay + i * 70}ms` } as CSSProperties}
+              aria-hidden="true"
+            >
+              {w}
+            </span>
+            {i < words.length - 1 ? " " : ""}
           </span>
-          {i < words.length - 1 ? " " : ""}
-        </span>
-      ))}
+        ))}
       </span>
     </span>
   );

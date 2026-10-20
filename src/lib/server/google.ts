@@ -16,6 +16,13 @@
  * credential type to provide.
  */
 
+import {
+  googleClientId,
+  googleClientSecret,
+  googleRedirectUri,
+  googleOAuthConfigured,
+} from "@/lib/server/env";
+
 export interface GoogleReviewsFetch {
   reviews: Array<{
     externalId: string;
@@ -46,16 +53,16 @@ export const OAUTH_SCOPES = [
 ].join(" ");
 
 export function oauthConfigured(): boolean {
-  return Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+  return googleOAuthConfigured();
 }
 
 export function redirectUri(origin: string): string {
-  return process.env.GOOGLE_REDIRECT_URI || `${origin}/api/auth/google/callback`;
+  return googleRedirectUri() || `${origin}/api/auth/google/callback`;
 }
 
 export function buildAuthUrl(origin: string, state: string): string {
   const params = new URLSearchParams({
-    client_id: process.env.GOOGLE_CLIENT_ID ?? "",
+    client_id: googleClientId(),
     redirect_uri: redirectUri(origin),
     response_type: "code",
     scope: OAUTH_SCOPES,
@@ -81,8 +88,8 @@ export async function exchangeCodeForTokens(code: string, origin: string): Promi
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       code,
-      client_id: process.env.GOOGLE_CLIENT_ID ?? "",
-      client_secret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      client_id: googleClientId(),
+      client_secret: googleClientSecret(),
       redirect_uri: redirectUri(origin),
       grant_type: "authorization_code",
     }),
@@ -98,7 +105,9 @@ export async function exchangeCodeForTokens(code: string, origin: string): Promi
   try {
     const info = await fetch(USERINFO_URL, { headers: { Authorization: `Bearer ${accessToken}` } });
     if (info.ok) email = String((await info.json()).email ?? "");
-  } catch { /* email is best-effort */ }
+  } catch {
+    /* email is best-effort */
+  }
   return {
     accessToken,
     refreshToken: data.refresh_token ? String(data.refresh_token) : null,
@@ -108,14 +117,16 @@ export async function exchangeCodeForTokens(code: string, origin: string): Promi
 }
 
 /** Exchange a refresh token for a fresh access token. */
-export async function refreshAccessToken(refreshToken: string): Promise<{ accessToken: string; expiresIn: number }> {
+export async function refreshAccessToken(
+  refreshToken: string,
+): Promise<{ accessToken: string; expiresIn: number }> {
   const res = await fetch(TOKEN_URL, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       refresh_token: refreshToken,
-      client_id: process.env.GOOGLE_CLIENT_ID ?? "",
-      client_secret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      client_id: googleClientId(),
+      client_secret: googleClientSecret(),
       grant_type: "refresh_token",
     }),
   });
@@ -128,7 +139,9 @@ export async function refreshAccessToken(refreshToken: string): Promise<{ access
 }
 
 /** List the Google Business accounts the user consented to. */
-export async function listAccounts(token: string): Promise<Array<{ name: string; accountName: string }>> {
+export async function listAccounts(
+  token: string,
+): Promise<Array<{ name: string; accountName: string }>> {
   const res = await fetch(ACCOUNTS_URL, { headers: { Authorization: `Bearer ${token}` } });
   if (!res.ok) {
     const body = await res.text();
@@ -142,7 +155,10 @@ export async function listAccounts(token: string): Promise<Array<{ name: string;
 }
 
 /** List locations under one account (Business Information API v1). */
-export async function listLocations(token: string, accountName: string): Promise<Array<{ name: string; title: string; address: string }>> {
+export async function listLocations(
+  token: string,
+  accountName: string,
+): Promise<Array<{ name: string; title: string; address: string }>> {
   const res = await fetch(
     `${LOCATIONS_URL}/${accountName}/locations?readMask=name,title,storefrontAddress`,
     { headers: { Authorization: `Bearer ${token}` } },
@@ -152,11 +168,13 @@ export async function listLocations(token: string, accountName: string): Promise
     throw new Error(`Locations list failed (HTTP ${res.status}). ${body.slice(0, 200)}`);
   }
   const data = await res.json();
-  return (data.locations ?? []).map((l: { name?: string; title?: string; storefrontAddress?: { formattedAddress?: string } }) => ({
-    name: String(l.name ?? ""),
-    title: String(l.title ?? "Untitled location"),
-    address: String(l.storefrontAddress?.formattedAddress ?? ""),
-  }));
+  return (data.locations ?? []).map(
+    (l: { name?: string; title?: string; storefrontAddress?: { formattedAddress?: string } }) => ({
+      name: String(l.name ?? ""),
+      title: String(l.title ?? "Untitled location"),
+      address: String(l.storefrontAddress?.formattedAddress ?? ""),
+    }),
+  );
 }
 
 export interface VerifyOutcome {
@@ -256,7 +274,10 @@ export async function verifyCredentials(
  * accounts/{account}/locations/{locationId} (v4 API), or a bare place id,
  * which this method rejects because reviews need the accounts path.
  */
-export async function fetchGoogleReviews(token: string, locationId: string): Promise<GoogleReviewsFetch> {
+export async function fetchGoogleReviews(
+  token: string,
+  locationId: string,
+): Promise<GoogleReviewsFetch> {
   if (!token) throw new Error("Live fetch needs an OAuth access token, not just an API key.");
   if (!locationId || !locationId.includes("locations/")) {
     throw new Error(
@@ -272,22 +293,33 @@ export async function fetchGoogleReviews(token: string, locationId: string): Pro
     throw new Error(`Google reviews fetch failed (HTTP ${res.status}). ${body.slice(0, 200)}`);
   }
   const data = await res.json();
-  const reviews = (data.reviews ?? []).map((r: {
-    name?: string; reviewId?: string; starRating?: string; comment?: string;
-    reviewer?: { displayName?: string }; createTime?: string; reviewReply?: unknown;
-  }) => {
-    const starMap: Record<string, number> = {
-      ONE: 1, TWO: 2, THREE: 3, FOUR: 4, FIVE: 5,
-    };
-    return {
-      externalId: r.reviewId ?? r.name ?? crypto.randomUUID(),
-      stars: starMap[r.starRating ?? ""] ?? null,
-      text: r.comment ?? "",
-      author: r.reviewer?.displayName ?? "Google user",
-      date: (r.createTime ?? "").slice(0, 10),
-      hasReply: Boolean(r.reviewReply),
-    };
-  });
+  const reviews = (data.reviews ?? []).map(
+    (r: {
+      name?: string;
+      reviewId?: string;
+      starRating?: string;
+      comment?: string;
+      reviewer?: { displayName?: string };
+      createTime?: string;
+      reviewReply?: unknown;
+    }) => {
+      const starMap: Record<string, number> = {
+        ONE: 1,
+        TWO: 2,
+        THREE: 3,
+        FOUR: 4,
+        FIVE: 5,
+      };
+      return {
+        externalId: r.reviewId ?? r.name ?? crypto.randomUUID(),
+        stars: starMap[r.starRating ?? ""] ?? null,
+        text: r.comment ?? "",
+        author: r.reviewer?.displayName ?? "Google user",
+        date: (r.createTime ?? "").slice(0, 10),
+        hasReply: Boolean(r.reviewReply),
+      };
+    },
+  );
   return { reviews };
 }
 

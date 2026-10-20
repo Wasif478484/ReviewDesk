@@ -15,7 +15,8 @@ export async function POST(req: Request) {
     const body = await req.json();
     const ids: string[] = body.reviewIds ?? (body.reviewId ? [body.reviewId] : []);
     if (!ids.length) return NextResponse.json({ error: "No reviews to analyze." }, { status: 400 });
-    if (ids.length > 30) return NextResponse.json({ error: "Batch is capped at 30 reviews." }, { status: 400 });
+    if (ids.length > 30)
+      return NextResponse.json({ error: "Batch is capped at 30 reviews." }, { status: 400 });
 
     const opts = {
       tone: body.tone as Tone | undefined,
@@ -30,7 +31,11 @@ export async function POST(req: Request) {
         results.push({ reviewId: id, ok: true, action: result.action });
       } catch (err) {
         console.error(`triage failed for ${id}:`, err);
-        results.push({ reviewId: id, ok: false, error: err instanceof Error ? err.message : String(err) });
+        results.push({
+          reviewId: id,
+          ok: false,
+          error: err instanceof Error ? err.message : String(err),
+        });
       }
     }
     const failed = results.filter((r) => !r.ok).length;

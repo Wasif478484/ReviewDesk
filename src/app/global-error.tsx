@@ -46,8 +46,7 @@ export default function GlobalError({
             The page could not load.
           </h1>
           <p style={{ fontSize: 15, color: "#374151", lineHeight: 1.6, marginBottom: 24 }}>
-            Nothing was lost. Reload the page, and if it keeps failing, sign
-            out and back in.
+            Nothing was lost. Reload the page, and if it keeps failing, sign out and back in.
           </p>
           <button
             onClick={reset}

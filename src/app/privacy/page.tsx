@@ -11,16 +11,17 @@ export default function PrivacyPage() {
     <LegalShell title="Privacy policy" updated="October 18, 2026">
       <Section heading="Who this applies to">
         <p>
-          This policy covers this ReviewDesk deployment. ReviewDesk is software that the
-          operator of this site runs on their own server; the operator is the administrator
-          who deployed it and is the data controller for accounts created here. This policy
-          describes exactly what the software stores, what leaves the server, and what stays
-          local.
+          This policy covers this ReviewDesk deployment. ReviewDesk is software that the operator of
+          this site runs on their own server; the operator is the administrator who deployed it and
+          is the data controller for accounts created here. This policy describes exactly what the
+          software stores, what leaves the server, and what stays local.
         </p>
       </Section>
 
       <Section heading="What we collect">
-        <p>When you create an account and use the desk, the following is stored in the app database:</p>
+        <p>
+          When you create an account and use the desk, the following is stored in the app database:
+        </p>
         <Bullets
           items={[
             "Account data: your name, email address, and a password. Passwords are hashed with bcrypt and never stored in readable form.",
@@ -45,17 +46,17 @@ export default function PrivacyPage() {
 
       <Section heading="Cookies and tracking">
         <p>
-          The app sets a single httpOnly session cookie containing a signed JWT so you stay
-          signed in. There is no analytics, no advertising, no fingerprinting, and no
-          third-party tracking of any kind.
+          The app sets a single httpOnly session cookie containing a signed JWT so you stay signed
+          in. There is no analytics, no advertising, no fingerprinting, and no third-party tracking
+          of any kind.
         </p>
       </Section>
 
       <Section heading="Where data lives">
         <p>
           Everything is stored in a SQLite database on the server this deployment runs on.
-          Encryption keys for credentials are held in server-side environment variables and
-          are not accessible from the browser.
+          Encryption keys for credentials are held in server-side environment variables and are not
+          accessible from the browser.
         </p>
       </Section>
 
@@ -76,32 +77,32 @@ export default function PrivacyPage() {
 
       <Section heading="Retention and deletion">
         <p>
-          Your data is kept while your account exists. You can delete individual reviews from
-          the desk, disconnect Google at any time from Settings, and keep autopilot off. To
-          delete your account and everything attached to it, contact the operator of this
-          deployment; the administrator can remove your rows from the database.
+          Your data is kept while your account exists. You can delete individual reviews from the
+          desk, disconnect Google at any time from Settings, and keep autopilot off. To delete your
+          account and everything attached to it, contact the operator of this deployment; the
+          administrator can remove your rows from the database.
         </p>
       </Section>
 
       <Section heading="Children">
         <p>
-          ReviewDesk is a business tool and is not directed at children under 16. Accounts
-          created for people under 16 violate these terms.
+          ReviewDesk is a business tool and is not directed at children under 16. Accounts created
+          for people under 16 violate these terms.
         </p>
       </Section>
 
       <Section heading="Changes to this policy">
         <p>
-          If the software or the operator changes what data is handled, the updated policy
-          will be posted on this page with a new date. Material changes will be announced in
-          the app before they take effect.
+          If the software or the operator changes what data is handled, the updated policy will be
+          posted on this page with a new date. Material changes will be announced in the app before
+          they take effect.
         </p>
       </Section>
 
       <Section heading="Contact">
         <p>
-          For privacy questions or deletion requests, contact the administrator who operates
-          this deployment. Their contact details are the ones they publish for this site.
+          For privacy questions or deletion requests, contact the administrator who operates this
+          deployment. Their contact details are the ones they publish for this site.
         </p>
       </Section>
     </LegalShell>

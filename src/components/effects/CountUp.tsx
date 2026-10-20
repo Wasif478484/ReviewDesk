@@ -29,7 +29,10 @@ export default function CountUp({
     const target = Number(match[1]);
     const suffix = match[2];
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
+    if (
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      !("IntersectionObserver" in window)
+    ) {
       shown.current = target;
       return;
     }

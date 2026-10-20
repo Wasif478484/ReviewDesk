@@ -1,5 +1,12 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/server/db";
+import {
+  googleClientId,
+  googleOAuthConfigured,
+  mailConfigured,
+  provider,
+  smtpHost,
+} from "@/lib/server/env";
 
 /**
  * GET /api/health, liveness and readiness for the platform.
@@ -27,26 +34,24 @@ export async function GET() {
   }
 
   // Model provider
-  const provider = (process.env.REVIEWDESK_PROVIDER ?? "mock").toLowerCase();
+  const active = provider();
   checks.push({
     name: "model_provider",
     ok: true,
     detail:
-      provider === "mock"
-        ? "mock (offline canned responses)"
-        : `${provider} (live calls cost money)`,
+      active === "mock" ? "mock (offline canned responses)" : `${active} (live calls cost money)`,
   });
 
   // Optional integrations
   checks.push({
     name: "google_oauth",
-    ok: Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
-    detail: process.env.GOOGLE_CLIENT_ID ? "configured" : "not configured",
+    ok: googleOAuthConfigured(),
+    detail: googleClientId() ? "configured" : "not configured",
   });
   checks.push({
     name: "smtp",
-    ok: Boolean(process.env.SMTP_HOST),
-    detail: process.env.SMTP_HOST ? "configured" : "not configured (dev links shown)",
+    ok: mailConfigured(),
+    detail: smtpHost() ? "configured" : "not configured (dev links shown)",
   });
 
   const ok = checks.every((c) => c.ok || c.name === "google_oauth" || c.name === "smtp");

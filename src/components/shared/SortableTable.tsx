@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState, useMemo } from "react";
 import { ArrowUpDown, Check, CheckSquare, Square } from "lucide-react";
@@ -75,7 +75,10 @@ export default function SortableTable({
 
   const toggleAll = () => {
     const allAnalyzable = sorted.filter((r) => !r.hasReply && r.triage).map((r) => r.id);
-    if (allAnalyzable.length === selectedRows.size && [...selectedRows].every((id) => allAnalyzable.includes(id))) {
+    if (
+      allAnalyzable.length === selectedRows.size &&
+      [...selectedRows].every((id) => allAnalyzable.includes(id))
+    ) {
       setSelectedRows(new Set());
     } else {
       setSelectedRows(new Set(allAnalyzable));
@@ -105,7 +108,12 @@ export default function SortableTable({
           <div className="flex gap-2">
             <button
               className="btn btn-primary btn-xs rd-mono"
-              onClick={() => onBulkRecord(bulkItems.map((r) => r.triage!.id), bulkItems.map((r) => r.triage!.draftReply ?? ""))}
+              onClick={() =>
+                onBulkRecord(
+                  bulkItems.map((r) => r.triage!.id),
+                  bulkItems.map((r) => r.triage!.draftReply ?? ""),
+                )
+              }
             >
               Record all {bulkItems.length}
             </button>
@@ -117,7 +125,9 @@ export default function SortableTable({
             </button>
             <button
               className="btn btn-ghost btn-xs rd-mono"
-              onClick={() => onBulkCopy(bulkItems.map((r) => ({ id: r.id, draft: r.triage!.draftReply ?? "" })))}
+              onClick={() =>
+                onBulkCopy(bulkItems.map((r) => ({ id: r.id, draft: r.triage!.draftReply ?? "" })))
+              }
             >
               Copy all drafts
             </button>
@@ -133,7 +143,8 @@ export default function SortableTable({
                 type="checkbox"
                 checked={bulkItems.length > 0 && bulkItems.length === selectedRows.size}
                 onChange={toggleAll}
-                className="checkbox checkbox-sm" aria-label="Select all"
+                className="checkbox checkbox-sm"
+                aria-label="Select all"
               />
             </th>
             {headerCells.map((c) => (
@@ -144,11 +155,15 @@ export default function SortableTable({
               >
                 {c.label}
                 {c.sortable && sort?.key === c.key ? (
-                  <span className={`sort-indicator ${sort.dir === "asc" ? "sort-asc" : "sort-desc"}`} />
-                ) : c.sortable && sort === null && (
-                  <span className="sort-indicator" />
+                  <span
+                    className={`sort-indicator ${sort.dir === "asc" ? "sort-asc" : "sort-desc"}`}
+                  />
+                ) : (
+                  c.sortable && sort === null && <span className="sort-indicator" />
                 )}
-                {c.sortable && <ArrowUpDown className="ml-1 h-3 w-3 text-[#9CA3AF]" aria-hidden="true" />}
+                {c.sortable && (
+                  <ArrowUpDown className="ml-1 h-3 w-3 text-[#9CA3AF]" aria-hidden="true" />
+                )}
               </th>
             ))}
             <th className="text-left w-20">Priority</th>
@@ -167,7 +182,9 @@ export default function SortableTable({
             return (
               <tr
                 key={r.id}
-                onClick={() => { if (!rowSel) onSelect(r.id); }}
+                onClick={() => {
+                  if (!rowSel) onSelect(r.id);
+                }}
                 onDoubleClick={() => toggleRow(r.id)}
                 className={`group cursor-pointer ${isSel ? "selected" : ""} ${rowSel ? "bg-[#F6F7F9]" : ""}`}
                 aria-current={isSel}
@@ -177,8 +194,12 @@ export default function SortableTable({
                     <input
                       type="checkbox"
                       checked={rowSel}
-                      onChange={(e) => { e.stopPropagation(); toggleRow(r.id); }}
-                      className="checkbox checkbox-sm" aria-label={`Select review ${r.id}`}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        toggleRow(r.id);
+                      }}
+                      className="checkbox checkbox-sm"
+                      aria-label={`Select review ${r.id}`}
                     />
                   ) : null}
                 </td>
@@ -190,7 +211,9 @@ export default function SortableTable({
                 </td>
                 <td className="font-mono text-xs text-[#374151]">{r.author || "Reviewer"}</td>
                 <td className="font-mono text-xs text-[#374151]">{r.date || "—"}</td>
-                <td className="font-mono text-xs text-[#6B7280]">{r.source === "demo" ? "demo" : r.source}</td>
+                <td className="font-mono text-xs text-[#6B7280]">
+                  {r.source === "demo" ? "demo" : r.source}
+                </td>
                 <td>
                   <PriorityBadge priority={triage?.priority} />
                 </td>
@@ -222,20 +245,29 @@ export default function SortableTable({
                       <>
                         <button
                           className="btn btn-primary btn-xs rd-mono"
-                          onClick={(e) => { e.stopPropagation(); onRecord(triage!.id, triage!.draftReply ?? ""); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onRecord(triage!.id, triage!.draftReply ?? "");
+                          }}
                           disabled={lane === "auto" && status === "pending"}
                         >
                           Approve
                         </button>
                         <button
                           className="btn btn-outline btn-xs rd-mono"
-                          onClick={(e) => { e.stopPropagation(); onDismiss(triage!.id); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDismiss(triage!.id);
+                          }}
                         >
                           Dismiss
                         </button>
                         <button
                           className="btn btn-ghost btn-xs rd-mono"
-                          onClick={(e) => { e.stopPropagation(); onCopy(triage!.draftReply ?? ""); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onCopy(triage!.draftReply ?? "");
+                          }}
                           disabled={!triage!.draftReply}
                         >
                           Copy
@@ -244,14 +276,20 @@ export default function SortableTable({
                     ) : !r.hasReply && !r.triage ? (
                       <button
                         className="btn btn-outline btn-xs rd-mono"
-                        onClick={(e) => { e.stopPropagation(); onAnalyze(r.id); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAnalyze(r.id);
+                        }}
                       >
                         Analyze
                       </button>
                     ) : (
                       <button
                         className="btn btn-ghost btn-xs rd-mono"
-                        onClick={(e) => { e.stopPropagation(); onCopy(r.replyText ?? ""); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onCopy(r.replyText ?? "");
+                        }}
                       >
                         Copy reply
                       </button>
