@@ -7,7 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- A professional repository structure: MIT license, code of conduct, security
+  policy, support guide, issue and pull request templates, CODEOWNERS,
+  dependabot, and a release workflow that publishes these notes for a tag.
+- `docs/API.md` with every endpoint, the error conventions, the role matrix,
+  and the limits.
+- `docs/DESIGN.md` with the design system and the rules about what is
+  deliberately absent from it.
+- `docs/decisions/` with seven architecture decision records, including one
+  that records a superseded decision and the one that replaced it.
+- `src/lib/server/env.ts`: one place environment variables are read, with
+  validation at the boundary.
+- `scripts/check-env.mjs`: reports what is configured and what is missing,
+  without printing a secret value.
+- A three-minute demo video and a 15-image gallery in `demo-assets/`.
+
+### Changed
+
+- The repository was restructured. `STRUCTURE.md` was folded into
+  `docs/ARCHITECTURE.md` so there is one source of truth.
+- `LEARNINGS.md` was rewritten for the current stack.
+- Prettier was applied across the tree, and the GitHub About section now
+  points at the live deployment.
 
 ## [0.3.0] - 2026-10-20
 
