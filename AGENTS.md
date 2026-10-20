@@ -1,6 +1,7 @@
 # ReviewDesk — Build Contract (AGENTS.md)
 
-This is the contract for the ReviewDesk build. All three roles (planner, builder, QA) read this before acting.
+This is the contract for the ReviewDesk build. All roles (planner, builder, QA)
+read this before acting.
 
 ## Build order
 
@@ -13,29 +14,59 @@ This is the contract for the ReviewDesk build. All three roles (planner, builder
 
 ## Hard rules (apply to every step)
 
-- **prompts.py is frozen.** Call its functions as-is. Never change prompt rules, schema, or actions. If a plan needs a prompt change, raise it as a question, never as a task.
-- **Action values come from prompts.ACTIONS:** reply, reply_needs_owner, hold, report. Labels and colors live in one dict keyed by those values.
-- **Demo path must be protected:** triage table sorted by urgency (holds first), a Roman Urdu complaint with a tone switch, CSV export, owner copies reply by hand.
-- **No scope creep:** no database, payments, scraping, auto-posting, translating the app's own interface.
-  - **EXCEPTION (user-approved 2026-10-18):** Login/signup is now allowed via Streamlit's native OIDC auth (`st.login`/`st.user`). No custom login page, no password storage. Business profile stored in session state (no database). Google Business Profile API integration is allowed as a stub only (raises clear error until access is approved). Do not claim Google integration works.
-- **HTML escaping:** review text and every model-produced field escaped with html.escape before entering any unsafe_allow_html string.
-- **No secrets printed, logged, or committed.** Keys only from environment or Streamlit secrets. `.gitignore` must exclude `.env` before first commit.
-- **Users never see stack traces.** Plain message + console print.
-- **UI never claims anything was posted/sent/reported.** Owner copies by hand.
-- **Live model calls cost money.** Only when the plan calls for them; state how many.
+- **The engine is frozen.** `src/lib/engine/prompts.ts` and
+  `src/lib/engine/policy.ts` define the triage contract: the four actions
+  (`reply`, `reply_needs_owner`, `hold`, `report`), the prompt text, the
+  parser, and the safety rules. Call them as-is. Never change prompt rules,
+  schema, or actions. If a plan needs a prompt change, raise it as a
+  question, never as a task.
+- **Action values come from the engine.** The four values above are the only
+  ones. Labels and colors live in one dict keyed by those values
+  (`ACTION_META` in `src/types/reviewdesk.ts`).
+- **No auto-posting.** The owner copies replies by hand. The UI must never
+  claim anything was posted, sent, or reported unless the Google API call
+  actually succeeded with the user's own live connection. Otherwise the
+  label is "recorded in your workspace".
+- **Demo path must be protected:** the triage table sorted by urgency (holds
+  first), a Roman Urdu complaint with a tone switch, CSV export, and the owner
+  copying the reply by hand.
+- **No scope creep:** no payments, no scraping, no automatic posting, no
+  translating the app's own interface.
+  - **EXCEPTION (user-approved):** login and signup are allowed. The Next.js
+    app uses bcrypt plus a signed httpOnly session cookie, email verification,
+    and password reset. The business profile is stored in the database, not in
+    session state.
+  - **EXCEPTION (user-approved):** Google Business Profile API integration is
+    allowed. It is a real integration when access is approved, and an honest
+    "needs admin setup" state when it is not. Do not claim Google
+    integration works when it does not.
+- **HTML escaping:** review text and every model-produced field is escaped
+  before it enters any unsafe HTML string.
+- **No secrets printed, logged, or committed.** Keys only from the
+  environment or the platform's secret store. `.gitignore` must exclude `.env`
+  before the first commit.
+- **Users never see stack traces.** Plain message plus a console print.
+- **Live model calls cost money.** Only when the plan calls for them; state
+  how many.
 - **Never push.** Commit only when the user asks.
 - **Stop at the plan's stop point.** Do not start the next step.
 
-## Docs (devpost/)
+## Docs
 
-`learner-profile.md`, `scope.md`, `prd.md`, `spec.md`, `checklist.md` each carry `status: draft | approved` in frontmatter. Only project artifacts count — never conversation memory.
+`docs/ARCHITECTURE.md` holds the module map, the request boundaries, and the
+frozen-file list. `devpost/` holds the product and learning artifacts when
+they exist. Only project artifacts count — never conversation memory.
 
-<!-- BEGIN:nextjs-agent-rules -->
+## Verification before a commit
 
-## This is NOT the Next.js you know
+```bash
+npx tsc --noEmit
+npm run lint
+npm run build
+npm test
+git diff --check
+```
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
-
-<!-- END:nextjs-agent-rules -->
+`npm test` runs the unit suite in `tests/`. The engine tests in
+`tests/engine.test.ts` cover the frozen policy, the prompt parser, the
+priority scoring, and the automation rules.

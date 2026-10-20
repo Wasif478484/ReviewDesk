@@ -322,6 +322,67 @@ export function Distribution({ reviews }: { reviews: ReviewData[] }) {
   );
 }
 
+const BREAKDOWN_COLORS: Record<string, string> = {
+  reply: "#15803D",
+  reply_needs_owner: "#854D0E",
+  hold: "#DC2626",
+  report: "#52525B",
+  urgent: "#DC2626",
+  normal: "#854D0E",
+  low: "#15803D",
+  demo: "#6B7280",
+  google: "#1D4ED8",
+  yelp: "#DC2626",
+  facebook: "#2563EB",
+  tripadvisor: "#0F766E",
+  imported: "#854D0E",
+};
+
+/** A small breakdown list: one row per key with a count and a share bar. */
+export function Breakdown({
+  title,
+  counts,
+  order,
+  labels,
+}: {
+  title: string;
+  counts: Record<string, number>;
+  order: string[];
+  labels: Record<string, string>;
+}) {
+  const keys = order.filter((k) => k in counts);
+  const total = keys.reduce((a, k) => a + (counts[k] ?? 0), 0);
+  return (
+    <div>
+      <p className="rd-kicker mb-2">{title}</p>
+      {total === 0 ? (
+        <p className="rd-mono text-xs">Nothing triaged yet.</p>
+      ) : (
+        <ul className="space-y-1.5">
+          {keys.map((k) => {
+            const n = counts[k] ?? 0;
+            const pct = Math.round((n / total) * 100);
+            return (
+              <li key={k}>
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="text-xs text-[#374151]">{labels[k] ?? k}</span>
+                  <span className="rd-mono text-xs">{n}</span>
+                </div>
+                <div className="mt-1 h-1.5 w-full overflow-hidden rounded bg-base-300">
+                  <div
+                    className="h-full rounded"
+                    style={{ width: `${pct}%`, background: BREAKDOWN_COLORS[k] ?? "#6B7280" }}
+                  />
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 /** Small metric in ledger style. */
 export function LedgerStat({ label, value, accent }: { label: string; value: string | number; accent?: boolean }) {
   return (

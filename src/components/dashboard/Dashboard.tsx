@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { LogoMark, Stars, TriageBanner, CheckFactsCard, Distribution, LedgerStat, ReplyComposer, CopyReviewAndReply, ReplyTemplates } from "@/components/shared/bits";
+import { LogoMark, Stars, TriageBanner, CheckFactsCard, Distribution, Breakdown, LedgerStat, ReplyComposer, CopyReviewAndReply, ReplyTemplates } from "@/components/shared/bits";
 import SortableTable from "@/components/shared/SortableTable";
 import { ACTION_META, type ReviewData, type WorkspaceData } from "@/types/reviewdesk";
 import AutopilotTab from "@/components/dashboard/AutopilotTab";
@@ -345,6 +345,33 @@ export default function Dashboard({ initial, initialGoogleStatus, initialGoogleM
               <LedgerStat label="Replied" value={ws.stats.replied} accent />
               <LedgerStat label="Reply rate" value={`${ws.stats.total ? Math.round((ws.stats.replied / ws.stats.total) * 100) : 0}%`} accent />
             </div>
+            {ws.analytics && (
+              <div className="mt-6 border-t border-base-300 pt-4">
+                <div className="rd-kicker mb-3">Breakdown</div>
+                <div className="grid gap-6 sm:grid-cols-3">
+                  <Breakdown
+                    title="Actions"
+                    counts={ws.analytics.actionCounts}
+                    order={["reply", "reply_needs_owner", "hold", "report"]}
+                    labels={{ reply: "Reply", reply_needs_owner: "Check facts", hold: "Hold", report: "Report" }}
+                  />
+                  <Breakdown
+                    title="Priority"
+                    counts={ws.analytics.priorityCounts}
+                    order={["urgent", "normal", "low"]}
+                    labels={{ urgent: "Urgent", normal: "Normal", low: "Low" }}
+                  />
+                  <Breakdown
+                    title="Sources"
+                    counts={ws.analytics.sourceCounts}
+                    order={Object.keys(ws.analytics.sourceCounts)}
+                    labels={Object.fromEntries(
+                      Object.keys(ws.analytics.sourceCounts).map((k) => [k, k]),
+                    )}
+                  />
+                </div>
+              </div>
+            )}
           </div>
           <div className="card card-border bg-base-100 p-6">
             <span className="rd-kicker mb-3 block">Rating distribution</span>

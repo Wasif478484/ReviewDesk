@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/server/db";
 import { requireUserId } from "@/lib/server/auth";
-import { ensureWorkspace, computePriority } from "@/lib/server/workspace";
+import { ensureWorkspace } from "@/lib/server/workspace";
+import { computePriority } from "@/lib/engine/priority";
 import { oauthConfigured } from "@/lib/server/google";
 import { mailConfigured } from "@/lib/server/mail";
 
@@ -49,7 +50,7 @@ export async function GET() {
         triage: active
           ? {
               id: active.id, action: active.action, sentiment: active.sentiment,
-              priority: computePriority(
+              priority: active.priority ?? computePriority(
                 { action: active.action, sentiment: active.sentiment, flags },
                 r.stars,
               ),
@@ -72,6 +73,30 @@ export async function GET() {
       replied: reviews.filter((r) => r.hasReply).length,
     };
 
+    // Action, sentiment and priority distribution across every triaged review.
+    const actionCounts: Record<string, number> = { reply: 0, reply_needs_owner: 0, hold: 0, report: 0 };
+    const sentimentCounts: Record<string, number> = { positive: 0, mixed: 0, negative: 0 };
+    const priorityCounts: Record<string, number> = { urgent: 0, normal: 0, low: 0 };
+    for (const r of reviews) {
+      const t = r.triage;
+      if (!t) continue;
+      if (t.action in actionCounts) actionCounts[t.action] += 1;
+      if (t.sentiment in sentimentCounts) sentimentCounts[t.sentiment] += 1;
+      if (t.priority in priorityCounts) priorityCounts[t.priority] += 1;
+    }
+    const sourceCounts: Record<string, number> = {};
+    for (const r of reviews) {
+      sourceCounts[r.source] = (sourceCounts[r.source] ?? 0) + 1;
+    }
+    const analytics = {
+      actionCounts,
+      sentimentCounts,
+      priorityCounts,
+      sourceCounts,
+      triaged: reviews.filter((r) => r.triage).length,
+      untriaged: reviews.filter((r) => !r.triage).length,
+    };
+
     const audits = user.audits.map((a) => {
       let reasons: string[] = [];
       try { reasons = JSON.parse(a.reasons); } catch { /* [] */ }
@@ -86,7 +111,14 @@ export async function GET() {
         id: user.id, email: user.email, name: user.name,
         onboarded: Boolean(user.onboardedAt),
         emailVerified: Boolean(user.emailVerifiedAt),
+        organizationId: user.organizationId,
       },
+      organization: user.organizationId
+        ? await db.organization.findUnique({
+            where: { id: user.organizationId },
+            include: { _count: { select: { members: true, rules: true } } },
+          })
+        : null,
       googleOAuthConfigured: oauthConfigured(),
       mailConfigured: mailConfigured(),
       business: user.business,
@@ -105,6 +137,7 @@ export async function GET() {
       policy: user.policy,
       reviews,
       stats,
+      analytics,
       audits,
     });
   } catch (err) {

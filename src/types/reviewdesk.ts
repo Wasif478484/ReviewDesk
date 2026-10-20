@@ -83,7 +83,21 @@ export interface AuditData {
 }
 
 export interface WorkspaceData {
-  user: { id: string; email: string; name: string; onboarded: boolean; emailVerified: boolean };
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    onboarded: boolean;
+    emailVerified: boolean;
+    organizationId?: string | null;
+  };
+  organization?: {
+    id: string;
+    name: string;
+    slug: string;
+    plan: string;
+    _count?: { members: number; rules: number };
+  } | null;
   googleOAuthConfigured?: boolean;
   mailConfigured?: boolean;
   business: BusinessData | null;
@@ -91,6 +105,14 @@ export interface WorkspaceData {
   policy: PolicyData | null;
   reviews: ReviewData[];
   stats: { total: number; pending: number; recordedToday: number; replied: number };
+  analytics?: {
+    actionCounts: Record<string, number>;
+    sentimentCounts: Record<string, number>;
+    priorityCounts: Record<string, number>;
+    sourceCounts: Record<string, number>;
+    triaged: number;
+    untriaged: number;
+  };
   audits: AuditData[];
 }
 

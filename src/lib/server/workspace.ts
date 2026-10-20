@@ -12,6 +12,8 @@ import {
   type BusinessProfile, type TriageResult, type Tone,
 } from "@/lib/engine/prompts";
 import { decide, shouldSend, DEFAULT_POLICY, type AutopilotPolicy } from "@/lib/engine/policy";
+import { applyRules, parseKeywords, type RuleMatch } from "@/lib/engine/rules";
+import { computePriority } from "@/lib/engine/priority";
 import { SAMPLE_REVIEWS } from "@/lib/engine/samples";
 import { callModel, withRetry } from "@/lib/server/llm";
 import { decrypt, encrypt } from "@/lib/server/crypto";
@@ -90,32 +92,6 @@ export function parseTriageRow(t: Prisma.TriageGetPayload<Record<string, never>>
     report_note: t.reportNote,
     owner_checklist: checklist,
   };
-}
-
-// ---------------------------------------------------------------------------
-// Priority scoring
-// ---------------------------------------------------------------------------
-
-/**
- * Priority for the triage queue. Urgent means a human should look at this
- * before anything else: a hold, a risk flag, or a one-star complaint.
- * Low means a clean positive that can wait for the autopilot lane.
- * The model never picks the lane; this is derived from its output only.
- */
-export function computePriority(
-  result: { action: string; sentiment: string; flags: string[] },
-  stars: number | null,
-): "urgent" | "normal" | "low" {
-  const risky = result.flags.some((f) =>
-    ["health", "legal", "abuse", "spam", "safety", "discrimination", "harassment"].includes(f),
-  );
-  if (result.action === "hold" || risky) return "urgent";
-  if (result.action === "reply_needs_owner") return "normal";
-  if (result.sentiment === "negative" || (stars !== null && stars <= 2)) return "normal";
-  if (result.action === "reply" && result.sentiment === "positive" && (stars === null || stars >= 4)) {
-    return "low";
-  }
-  return "normal";
 }
 
 // ---------------------------------------------------------------------------
@@ -285,23 +261,70 @@ export async function triageReview(
     lane = "skipped";
   }
 
+  // Owner-configured rules. A rule can force the action or raise the
+  // priority. It never posts anything; the owner still copies by hand.
+  const orgId = user.organizationId;
+  let priority = computePriority(result, review.stars);
+  let ruleMatches: RuleMatch[] = [];
+  let finalAction = result.action;
+  if (orgId) {
+    const rules = await db.rule.findMany({ where: { organizationId: orgId, enabled: true } });
+    if (rules.length) {
+      const evaluation = applyRules(
+        rules.map((r) => ({
+          id: r.id,
+          name: r.name,
+          enabled: r.enabled,
+          minStars: r.minStars,
+          maxStars: r.maxStars,
+          keywords: parseKeywords(r.keywords),
+          language: r.language,
+          forceAction: r.forceAction,
+          setPriority: r.setPriority,
+        })),
+        { text: review.text, stars: review.stars, language: result.review_language },
+        priority,
+      );
+      ruleMatches = evaluation.matches;
+      if (evaluation.action) finalAction = evaluation.action as TriageResult["action"];
+      priority = evaluation.priority;
+      // A forced action must never land in the auto lane; it waits for a human.
+      if (evaluation.action) {
+        lane = "queue";
+        dueAt = null;
+      }
+    }
+  }
+
+  const ruleNote = ruleMatches.length
+    ? ` ${ruleMatches.map((m) => m.reason).join(" ")}`
+    : "";
+  const reason = finalAction === result.action
+    ? `${result.reason}${ruleNote}`
+    : `${result.reason} Changed to ${finalAction} by an owner rule.${ruleNote}`;
+  const ownerChecklist = ruleMatches.length
+    ? [...result.owner_checklist, ...ruleMatches.map((m) => m.reason)]
+    : result.owner_checklist;
+
   // Replace any previous pending triage for this review.
   await db.triage.deleteMany({ where: { reviewId, status: "pending" } });
   const row = await db.triage.create({
     data: {
       userId,
+      organizationId: orgId,
       reviewId,
-      action: result.action,
+      action: finalAction,
       sentiment: result.sentiment,
+      priority,
       flags: JSON.stringify(result.flags),
-      reason: result.reason,
+      reason,
       reviewLanguage: result.review_language,
       languageUsed: result.language_used,
       draftReply: result.draft_reply,
       reviewTranslation: result.review_translation,
       draftTranslation: result.draft_translation,
       reportNote: result.report_note,
-      ownerChecklist: JSON.stringify(result.owner_checklist),
+      ownerChecklist: JSON.stringify(ownerChecklist),
       lane,
       status: "pending",
       dueAt,
@@ -311,13 +334,16 @@ export async function triageReview(
   await audit(userId, {
     reviewRef: review.id,
     excerpt: review.text,
-    action: result.action,
+    action: finalAction,
     status: `triaged:${lane}`,
-    reasons: decision === "auto_post" ? ["passes all checks"] : reasons,
+    reasons: [
+      ...(decision === "auto_post" ? ["passes all checks"] : reasons),
+      ...ruleMatches.map((m) => m.reason),
+    ],
     actor: "engine",
   });
 
-  return { ...result, id: row.id };
+  return { ...result, action: finalAction, reason, owner_checklist: ownerChecklist, id: row.id };
 }
 
 // ---------------------------------------------------------------------------
