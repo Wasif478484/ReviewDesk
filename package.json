@@ -24,7 +24,7 @@
     "release": "npm run check && npm run build"
   },
   "dependencies": {
-    "@prisma/client": "^6.19.3",
+    "@prisma/client": "^7.10.1",
     "@radix-ui/react-toast": "^1.2.14",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
