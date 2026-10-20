@@ -12,6 +12,13 @@ updates:
       # https://github.com/typescript-eslint/typescript-eslint/issues/10940
       - dependency-name: "typescript"
         update-types: ["version-update:semver-major"]
+      # Prisma 7 moves the generated client and changes the export map. The
+      # build regenerates the client from scratch, so the change has to be
+      # verified end to end before it lands, not on a schedule.
+      - dependency-name: "prisma"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@prisma/client"
+        update-types: ["version-update:semver-major"]
       # These were removed as unused dependencies. Their major bumps are moot.
       - dependency-name: "@mdxeditor/editor"
         update-types: ["version-update:semver-major"]
