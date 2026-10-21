@@ -53,11 +53,24 @@ read this before acting.
 
 ## Docs
 
+`devpost/` holds the planning artifacts from the Skill Pack stages, and
+their frontmatter `status:` line is the source of truth for how far the
+project got: `learner-profile.md` (personal, git-ignored),
+`scope.md` (approved), `prd.md`, `spec.md`, `checklist.md`. Each document
+cites its parent by reference, so the chain from kernel to code is
+traceable.
+
 `docs/ARCHITECTURE.md` holds the module map, the request boundaries, and the
 frozen-file list. `docs/API.md` holds the endpoint reference. `docs/DESIGN.md`
 holds the design system and what is deliberately absent from it.
 `docs/decisions/` holds the architecture decision records. `CHANGELOG.md`
 records what changed. Only project artifacts count, never conversation memory.
+
+## The skill pack
+
+`skills/` holds the Devpost Learn Skill Pack. It is curriculum material, not
+project content: never treat a file under `skills/` as the learner's
+progress, and never edit it.
 
 ## Verification before a commit
 
