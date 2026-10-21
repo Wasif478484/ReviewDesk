@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The default branch is now \main\, renamed from \master\. GitHub has used
+  \main\ since 2020 and most tooling assumes it. Every \main\-based URL for
+  this repository now resolves, including the license file, which is what a
+  license check reads.
+
 ### Added
 
 - A professional repository structure: MIT license, code of conduct, security
