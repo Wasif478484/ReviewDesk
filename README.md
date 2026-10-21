@@ -206,7 +206,7 @@ Full details in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 ## Deploying to Vercel
 
 1. Sign in at https://vercel.com with GitHub.
-2. Import `Wasif478484/ReviewDesk`, branch `master`.
+2. Import `Wasif478484/ReviewDesk`, branch `main`.
 3. The build command is `npm run build`. The install command is
    `npm install --legacy-peer-deps`.
 4. Add the environment variables from [.env.example](.env.example). At

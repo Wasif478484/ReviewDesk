@@ -54,11 +54,11 @@ These are the ones that get a pull request declined.
   the server console.
 - **Live model calls cost money.** Only make them when the plan calls for
   them, and say how many.
-- **Never push to `master`.** Open a pull request.
+- **Never push to `main`.** Open a pull request.
 
 ## Making a change
 
-1. Branch from `master`.
+1. Branch from `main`.
 2. Keep it focused. One concern per pull request.
 3. Add or update the unit test in `tests/` if you touched `src/lib/engine`.
 4. Update `docs/ARCHITECTURE.md` if a module boundary moved.

@@ -4,7 +4,7 @@
 
 | Version       | Supported |
 | ------------- | --------- |
-| `master`      | yes       |
+| `main`       | yes       |
 | older commits | no        |
 
 ## Reporting a vulnerability
